@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:proyecto_panaderia/Controlador/DrawerConfig.dart';
+import 'package:proyecto_panaderia/Controlador/PedidoController.dart';
 import 'package:proyecto_panaderia/Modelo/Pedidos.dart';
 import 'package:proyecto_panaderia/Vista/Administrador/VAgregarPedidoA.dart';
 import 'package:proyecto_panaderia/Vista/Administrador/VDeatallesPedidoA.dart';
@@ -152,6 +153,7 @@ class _VPedidosAState extends State<VPedidosA> {
             }
             return 0;
           });
+          PedidoController pedidoController = PedidoController();
 
           return Padding(
             padding: const EdgeInsets.all(10.0),
@@ -235,27 +237,40 @@ class _VPedidosAState extends State<VPedidosA> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Container(
-                                      height: 90,
                                       padding: const EdgeInsets.all(16.0),
                                       decoration: BoxDecoration(
-                                        color:
-                                            _obtenerColor(pedido.isEntregado),
+                                        color: _obtenerColor(pedido),
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Text(
-                                            pedido.cliente,
-                                            style: GoogleFonts.montserrat(
-                                                fontSize: 25,
-                                                color: Theme.of(context)
-                                                            .brightness ==
-                                                        Brightness.dark
-                                                    ? Colors.white
-                                                    : Colors.black,
-                                                fontWeight: FontWeight.bold),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                pedido.cliente,
+                                                style: GoogleFonts.montserrat(
+                                                  fontSize: 25,
+                                                  color: Theme.of(context)
+                                                              .brightness ==
+                                                          Brightness.dark
+                                                      ? Colors.white
+                                                      : Colors.black,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 5),
+                                              Column(
+                                                children: [
+                                                  pedidoController
+                                                      .estadoPedidoWidget(
+                                                          pedido, context)
+                                                ],
+                                              )
+                                            ],
                                           ),
                                           Column(
                                             crossAxisAlignment:
@@ -275,14 +290,14 @@ class _VPedidosAState extends State<VPedidosA> {
                                               Text(
                                                 pedido.fecha,
                                                 style: GoogleFonts.montserrat(
-                                                    fontSize: 18,
-                                                    color: Theme.of(context)
+                                                  fontSize: 18,
+                                                  color: Theme.of(context)
                                                               .brightness ==
                                                           Brightness.dark
                                                       ? Colors.white
                                                       : Colors.black,
-                                                    fontWeight:
-                                                        FontWeight.bold),
+                                                  fontWeight: FontWeight.bold,
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -300,12 +315,15 @@ class _VPedidosAState extends State<VPedidosA> {
         });
   }
 
-  Color _obtenerColor(bool isEntregado) {
-    if (!isEntregado) {
+  Color _obtenerColor(Pedidos pedido) {
+    if (pedido.isEntregado) {
+      return const Color.fromARGB(146, 148, 184, 152);
+    } else if (pedido.abonos > 0 && pedido.abonos < pedido.precio) {
+      return Colors.orange[200]!;
+    } else {
       return Theme.of(context).brightness == Brightness.dark
           ? const Color(0xFF2C2C2E)
-          : const Color.fromARGB(146, 225, 225, 225);
+          : const Color.fromARGB(255, 217, 217, 218);
     }
-    return Color.fromARGB(146, 165, 190, 169);
   }
 }

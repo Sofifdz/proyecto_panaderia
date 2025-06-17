@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:proyecto_panaderia/Controlador/DetallesPedidoController.dart';
 import 'package:proyecto_panaderia/Modelo/Pedidos.dart';
+import 'package:proyecto_panaderia/Vista/Componentes/ComponentDialogAbono.dart';
 import 'package:proyecto_panaderia/Vista/Empleado/VPedidosE.dart';
 
 class VDetallesPedidoE extends StatefulWidget {
@@ -67,7 +68,7 @@ class _VDetallesPedidoEState extends State<VDetallesPedidoE> {
           ),
         ),
         actions: [
-          ElevatedButton(
+          /*ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).brightness == Brightness.dark
                   ? const Color(0xFF4CAF50)
@@ -77,10 +78,12 @@ class _VDetallesPedidoEState extends State<VDetallesPedidoE> {
               ),
             ),
             onPressed: () {
-              controlador.entregarPedido(
+              /*controlador.entregarPedido(
                 context: context,
                 pedidoId: widget.pedidoId,
-              );
+              );*/
+               ComponentDialogAbono(context, pedido, widget.usuarioId);
+
             },
             child: Text(
               'Entregar',
@@ -90,7 +93,7 @@ class _VDetallesPedidoEState extends State<VDetallesPedidoE> {
                 color: Colors.white,
               ),
             ),
-          )
+          )*/
         ],
       ),
       body: cuerpo(context),
@@ -113,6 +116,7 @@ class _VDetallesPedidoEState extends State<VDetallesPedidoE> {
         }
 
         final pedido = Pedidos.fromFirestore(snapshot.data!);
+        final bool estaLiquidado = pedido.abonos >= pedido.precio;
 
         return Padding(
           padding: const EdgeInsets.all(20.0),
@@ -126,62 +130,62 @@ class _VDetallesPedidoEState extends State<VDetallesPedidoE> {
                       Text(
                         pedido.cliente,
                         style: GoogleFonts.montserrat(
-                            fontSize: 25,
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? Colors.white
-                                    : Colors.black,
-                            fontWeight: FontWeight.bold),
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.black,
+                        ),
                       ),
                       const SizedBox(height: 40),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "Fecha de entrega: ",
+                            "Fecha de entrega:",
                             style: GoogleFonts.montserrat(
-                                fontSize: 18,
-                                color: Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? Colors.white
-                                    : Colors.black,
-                                fontWeight: FontWeight.bold),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black,
+                            ),
                           ),
                           Text(
                             pedido.fecha,
                             style: GoogleFonts.montserrat(
-                                fontSize: 18,
-                                color: Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? Colors.white
-                                    : Colors.black,
-                                fontWeight: FontWeight.bold),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black,
+                            ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 40),
-                      SizedBox(
+                      Container(
                         width: double.infinity,
                         height: 200,
-                        child: Container(
-                          padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? const Color(0xFF2C2C2E)
-                                    : Colors.grey[200],
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: SingleChildScrollView(
-                            child: Text(
-                              pedido.descripcion,
-                              style: GoogleFonts.montserrat(
-                                  fontSize: 18,
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? Colors.white
-                                      : Colors.black,
-                                  fontWeight: FontWeight.bold),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? const Color(0xFF2C2C2E)
+                              : Colors.grey[200],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: SingleChildScrollView(
+                          child: Text(
+                            pedido.descripcion,
+                            style: GoogleFonts.montserrat(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black,
                             ),
                           ),
                         ),
@@ -197,30 +201,114 @@ class _VDetallesPedidoEState extends State<VDetallesPedidoE> {
                     ? const Color(0xFFB0B0B0)
                     : Colors.black,
               ),
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Total",
-                      style: GoogleFonts.montserrat(
+              const SizedBox(height: 10),
+              Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Total",
+                        style: GoogleFonts.montserrat(
                           fontSize: 22,
+                          fontWeight: FontWeight.bold,
                           color: Theme.of(context).brightness == Brightness.dark
                               ? Colors.white
                               : Colors.black,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      "\$${pedido.precio}",
-                      style: GoogleFonts.montserrat(
+                        ),
+                      ),
+                      Text(
+                        "\$${pedido.precio.toStringAsFixed(2)}",
+                        style: GoogleFonts.montserrat(
                           fontSize: 22,
+                          fontWeight: FontWeight.bold,
                           color: Theme.of(context).brightness == Brightness.dark
                               ? Colors.white
                               : Colors.black,
-                          fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Abonado",
+                        style: GoogleFonts.montserrat(
+                          fontSize: 18,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.black,
+                        ),
+                      ),
+                      Text(
+                        "\$${pedido.abonos.toStringAsFixed(2)}",
+                        style: GoogleFonts.montserrat(
+                          fontSize: 18,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Restante",
+                        style: GoogleFonts.montserrat(
+                          fontSize: 18,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.black,
+                        ),
+                      ),
+                      Text(
+                        "\$${(pedido.precio - pedido.abonos).clamp(0, double.infinity).toStringAsFixed(2)}",
+                        style: GoogleFonts.montserrat(
+                          fontSize: 18,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed:
+                       () {
+                          ComponentDialogAbono(widget.pedidoId, context, pedido,
+                              widget.usuarioId);
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:  Theme.of(context).brightness == Brightness.dark
+                            ? const Color(0xFF4CAF50)
+                            : const Color.fromARGB(255, 168, 209, 172),
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  ],
+                  ),
+                  child: Text(
+                    pedido.isEntregado
+                        ? 'Abonar'
+                        : estaLiquidado
+                            ? 'Entregar pedido'
+                            : 'Abonar',
+                    style: GoogleFonts.montserrat(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
             ],

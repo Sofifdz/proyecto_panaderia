@@ -31,7 +31,7 @@ class VTicket extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Theme.of(context).brightness == Brightness.dark
-                ? const Color(0xFF2C2C2E) // fondo dark más neutro
+                ? const Color(0xFF2C2C2E) 
                 : const Color.fromARGB(146, 225, 225, 225),
             borderRadius: BorderRadius.circular(12),
           ),
@@ -90,7 +90,7 @@ class VTicket extends StatelessWidget {
                         : Colors.grey[600],
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 Expanded(
                   child: ListView.builder(
                     itemCount: venta.productos.length,
@@ -111,7 +111,7 @@ class VTicket extends StatelessWidget {
                                       MainAxisAlignment.spaceAround,
                                   children: [
                                     Text(
-                                        'Descripción del pedido: \n$descripcion',
+                                        'Descripción del pedido:\n\n$descripcion',
                                         style: GoogleFonts.roboto(
                                           fontSize: 16,
                                           color: Theme.of(context).brightness ==
@@ -120,7 +120,7 @@ class VTicket extends StatelessWidget {
                                               : Colors.grey[600],
                                         )),
                                     const SizedBox(width: 8),
-                                    Text('Cliente: \n$cliente',
+                                    Text('Cliente: \n\n$cliente',
                                         style: GoogleFonts.roboto(
                                           fontSize: 16,
                                           color: Theme.of(context).brightness ==

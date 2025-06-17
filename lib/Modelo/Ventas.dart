@@ -27,30 +27,27 @@ class Ventas {
   factory Ventas.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 
+    String fechaIso = '';
+    final fechaData = data['fecha'];
+    if (fechaData is Timestamp) {
+      fechaIso = fechaData.toDate().toIso8601String();
+    } else if (fechaData is String) {
+      fechaIso = fechaData;
+    } else {
+      fechaIso = DateTime.now().toIso8601String();
+    }
+
     return Ventas(
-        IDventa: data['ventaId'] ?? 0,
-        productos: data['productos'] ?? [],
-        total: (data['total'] ?? 0).toDouble(),
-        fecha: (data['fecha'] as Timestamp).toDate().toIso8601String(),
-        usuarioId: data['usuarioId'] ?? '',
-        IDcaja: data['IDcaja'] ?? '',
-        desdePedido: data['desdePedido'] ?? false,
-        pedidoId: data['pedidoId'],
-        cliente: data['cliente'],
-        descripcion: data['descripcion']);
-  }
-  Map<String, dynamic> toFirestore() {
-    return {
-      'ventaId': IDventa,
-      'productos': productos,
-      'total': total,
-      'fecha': Timestamp.fromDate(DateTime.parse(fecha)),
-      'usuarioId': usuarioId,
-      'IDcaja': IDcaja,
-      'desdePedido': desdePedido,
-      'pedidoId': pedidoId,
-      'cliente': cliente,
-      'descripcion': descripcion,
-    };
+      IDventa: data['ventaId'] ?? 0,
+      productos: data['productos'] ?? [],
+      total: (data['total'] ?? 0).toDouble(),
+      fecha: fechaIso,
+      usuarioId: data['usuarioId'] ?? '',
+      IDcaja: data['IDcaja'] ?? '',
+      desdePedido: data['desdePedido'] ?? false,
+      pedidoId: data['pedidoId'],
+      cliente: data['cliente'],
+      descripcion: data['descripcion'],
+    );
   }
 }

@@ -1,6 +1,8 @@
 import 'package:board_datetime_picker/board_datetime_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:proyecto_panaderia/Modelo/Pedidos.dart';
 
 class PedidoController {
   Future<void> registrarPedido({
@@ -20,9 +22,7 @@ class PedidoController {
         nuevoId = snapshot.get('ultimoId') + 1;
       }
 
-    
       transaction.set(contadorRef, {'ultimoId': nuevoId});
-
 
       final pedidoRef = FirebaseFirestore.instance
           .collection('pedidos')
@@ -35,6 +35,7 @@ class PedidoController {
         'precio': precio,
         'fecha': BoardDateFormat('dd/MM/yyyy HH:mm').format(fecha),
         'isEntregado': false,
+        'isLiquidado': false,
       });
     });
   }
@@ -64,5 +65,34 @@ class PedidoController {
         SnackBar(content: Text('Error: $e')),
       );
     }
+  }
+
+  Widget estadoPedidoWidget(Pedidos pedido, BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color textoColor =
+        isDark ? const Color(0xFFB0B0B0) : Colors.grey[800]!;
+
+    String texto = "";
+
+    if ((pedido.abonos < pedido.precio) && !pedido.isEntregado) {
+      texto =
+          "Pendiente de pago: \$${(pedido.precio - pedido.abonos).toStringAsFixed(2)}";
+    } else if ((pedido.abonos >= pedido.precio) && !pedido.isEntregado) {
+      texto = "Pagado";
+    } else if ((pedido.abonos < pedido.precio) && pedido.isEntregado) {
+      texto =
+          "Entregado con adeudo:\n\$${(pedido.precio - pedido.abonos).toStringAsFixed(2)}";
+    } else if ((pedido.abonos >= pedido.precio) && pedido.isEntregado) {
+      texto = "Pedido liquidado \ny entregado";
+    }
+
+    return Text(
+      texto,
+      style: GoogleFonts.montserrat(
+        fontSize: 14,
+        color: textoColor,
+        fontWeight: FontWeight.w500,
+      ),
+    );
   }
 }

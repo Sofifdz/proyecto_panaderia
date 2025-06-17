@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:proyecto_panaderia/Controlador/DrawerConfig.dart';
+import 'package:proyecto_panaderia/Controlador/PedidoController.dart';
 import 'package:proyecto_panaderia/Modelo/Pedidos.dart';
 import 'package:proyecto_panaderia/Vista/Empleado/VAgregarPedidoE.dart';
 import 'package:proyecto_panaderia/Vista/Empleado/VDetallesPedidoE.dart';
@@ -105,8 +106,11 @@ class _VPedidosEState extends State<VPedidosE> {
           }
           final pedidosList = snapshot.data!.docs
               .map((doc) => Pedidos.fromFirestore(doc))
-              .where((pedido) => !pedido.isEntregado)
+              .where((pedido) =>
+                  !pedido.isEntregado ||
+                  (pedido.isEntregado && !pedido.isLiquidado))
               .toList();
+          PedidoController pedidoController = PedidoController();
 
           return Padding(
             padding: const EdgeInsets.all(10.0),
@@ -131,6 +135,17 @@ class _VPedidosEState extends State<VPedidosE> {
                           if (index >= pedidosList.length) return SizedBox();
 
                           final pedido = pedidosList[index];
+                          bool estaLiquidado = pedido.abonos >= pedido.precio;
+
+                          Color cardColor;
+                          if (pedido.isEntregado) {
+                            cardColor = Colors.green[200]!;
+                          } else if (pedido.abonos > 0 &&
+                              pedido.abonos < pedido.precio) {
+                            cardColor = Colors.orange[200]!;
+                          } else {
+                            cardColor = Colors.white;
+                          }
 
                           return InkWell(
                             onTap: () {
@@ -147,26 +162,38 @@ class _VPedidosEState extends State<VPedidosE> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Container(
-                                  height: 100,
+                                  height: 120,
                                   padding: const EdgeInsets.all(16.0),
                                   decoration: BoxDecoration(
-                                    color: _obtenerColor(pedido.isEntregado),
+                                    color: _obtenerColor(pedido),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(
-                                        pedido.cliente,
-                                        style: GoogleFonts.roboto(
-                                            fontSize: 25,
-                                            color:
-                                                Theme.of(context).brightness ==
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            pedido.cliente,
+                                            style: GoogleFonts.roboto(
+                                                fontSize: 25,
+                                                color: Theme.of(context)
+                                                            .brightness ==
                                                         Brightness.dark
                                                     ? const Color(0xFFB0B0B0)
                                                     : Colors.black,
-                                            fontWeight: FontWeight.bold),
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          const SizedBox(height: 5),
+                                          Column(
+                                            children: [
+                                              pedidoController.estadoPedidoWidget(pedido, context)
+                                            ],
+                                          )
+                                        ],
                                       ),
                                       Column(
                                         crossAxisAlignment:
@@ -210,12 +237,15 @@ class _VPedidosEState extends State<VPedidosE> {
         });
   }
 
-  Color _obtenerColor(bool isEntregado) {
-    if (!isEntregado) {
+  Color _obtenerColor(Pedidos pedido) {
+    if (pedido.isEntregado) {
+      return const Color.fromARGB(146, 148, 184, 152);
+    } else if (pedido.abonos > 0 && pedido.abonos < pedido.precio) {
+      return Colors.orange[200]!;
+    } else {
       return Theme.of(context).brightness == Brightness.dark
           ? const Color(0xFF2C2C2E)
           : const Color.fromARGB(255, 217, 217, 218);
     }
-    return Color.fromARGB(146, 148, 184, 152);
   }
 }

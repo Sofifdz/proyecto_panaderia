@@ -126,7 +126,7 @@ class _VVentasporTurnoState extends State<VVentasporTurno> {
         return StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('ventas')
-              .where('IDcaja', isEqualTo: IDcaja)
+              //.where('IDcaja', isEqualTo: IDcaja)
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {

@@ -16,7 +16,7 @@ class VDetallesCortes extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(160, 133, 203, 144),
+        backgroundColor: const Color.fromARGB(160, 133, 203, 144),
         title: Center(
           child: Text(
             'Ventas del corte',
@@ -25,7 +25,7 @@ class VDetallesCortes extends StatelessWidget {
               fontWeight: FontWeight.bold,
               color: theme.brightness == Brightness.dark
                   ? Colors.white
-                  : Color.fromARGB(255, 81, 81, 81),
+                  : const Color.fromARGB(255, 81, 81, 81),
             ),
           ),
         ),
@@ -34,7 +34,7 @@ class VDetallesCortes extends StatelessWidget {
             Icons.arrow_back,
             color: theme.brightness == Brightness.dark
                 ? Colors.white
-                : Color.fromARGB(255, 81, 81, 81),
+                : const Color.fromARGB(255, 81, 81, 81),
             size: 30,
           ),
           onPressed: () {
@@ -58,9 +58,6 @@ class VDetallesCortes extends StatelessWidget {
 
           final inicio = dataCaja['inicioCaja'] ?? 0;
           final cierre = dataCaja['cierreCaja'] ?? 0;
-          final fechaApertura =
-              (dataCaja['fechaApertura'] as Timestamp).toDate();
-          final fechaCierre = (dataCaja['fechaCierre'] as Timestamp).toDate();
 
           return Column(
             children: [
@@ -90,10 +87,9 @@ class VDetallesCortes extends StatelessWidget {
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance
+                      .collection('cajas')
+                      .doc(cajaId)
                       .collection('ventas')
-                      .where('usuarioId', isEqualTo: dataCaja['usuarioId'])
-                      .where('fecha', isGreaterThanOrEqualTo: fechaApertura)
-                      .where('fecha', isLessThanOrEqualTo: fechaCierre)
                       .orderBy('fecha')
                       .snapshots(),
                   builder: (context, snapshotVentas) {
@@ -107,95 +103,153 @@ class VDetallesCortes extends StatelessWidget {
                     }
 
                     final ventas = snapshotVentas.data!.docs;
-                    double total = ventas.fold(0.0, (suma, venta) {
+                    double totalVentas = ventas.fold(0.0, (suma, venta) {
                       final data = venta.data() as Map<String, dynamic>;
                       final monto = (data['total'] ?? 0).toDouble();
                       return suma + monto;
                     });
 
-                    return Column(
-                      children: [
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: ventas.length,
-                            itemBuilder: (context, index) {
-                              final venta =
-                                  ventas[index].data() as Map<String, dynamic>;
-                              final monto = (venta['total'] ?? 0).toDouble();
-                              final fecha =
-                                  (venta['fecha'] as Timestamp).toDate();
-                              total += monto;
+                    return StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('cajas')
+                          .doc(cajaId)
+                          .collection('pagos')
+                          .snapshots(),
+                      builder: (context, snapshotPagos) {
+                        if (snapshotPagos.hasError) {
+                          return Center(
+                              child: Text('Error: ${snapshotPagos.error}'));
+                        }
 
-                              return SizedBox(
-                                height: 100,
-                                child: Card(
-                                  color: theme.brightness == Brightness.dark
-                                      ? const Color(0xFF2C2C2E)
-                                      : const Color.fromARGB(
-                                          146, 225, 225, 225),
-                                  margin: const EdgeInsets.all(10.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    children: [
-                                      Text(
-                                        venta['desdePedido'] == true &&
-                                                venta['cliente'] != null
-                                            ? 'Pedido de ${venta['cliente']}'
-                                            : '#${index + 1}',
-                                        style: GoogleFonts.montserrat(
+                        if (!snapshotPagos.hasData) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+
+                        final pagos = snapshotPagos.data!.docs;
+                        double totalPagos = pagos.fold(0.0, (suma, pago) {
+                          final data = pago.data() as Map<String, dynamic>;
+                          final monto = (data['monto'] ?? 0).toDouble();
+                          return suma + monto;
+                        });
+
+                        return Column(
+                          children: [
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: ventas.length,
+                                itemBuilder: (context, index) {
+                                  final venta = ventas[index].data()
+                                      as Map<String, dynamic>;
+                                  final monto =
+                                      (venta['total'] ?? 0).toDouble();
+                                  final fecha =
+                                      (venta['fecha'] as Timestamp).toDate();
+
+                                  return SizedBox(
+                                    height: 100,
+                                    child: Card(
+                                      color: theme.brightness ==
+                                              Brightness.dark
+                                          ? const Color(0xFF2C2C2E)
+                                          : const Color.fromARGB(
+                                              146, 225, 225, 225),
+                                      margin: const EdgeInsets.all(10.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          Text(
+                                            venta['desdePedido'] == true &&
+                                                    venta['cliente'] != null
+                                                ? 'Pedido de ${venta['cliente']}'
+                                                : '#${index + 1}',
+                                            style: GoogleFonts.montserrat(
+                                              fontSize: 20,
+                                              color: theme.brightness ==
+                                                      Brightness.dark
+                                                  ? const Color(0xFFB0B0B0)
+                                                  : Colors.black,
+                                            ),
+                                          ),
+                                          Text(
+                                            '\$${monto.toStringAsFixed(2)}',
+                                            style: GoogleFonts.montserrat(
+                                              fontSize: 24,
+                                              color: theme.brightness ==
+                                                      Brightness.dark
+                                                  ? const Color(0xFFB0B0B0)
+                                                  : Colors.black,
+                                            ),
+                                          ),
+                                          Text(
+                                            format.format(fecha),
+                                            style: GoogleFonts.montserrat(
+                                                fontSize: 14),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            Divider(thickness: 1),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('Pagos',
+                                      style: GoogleFonts.montserrat(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w500)),
+                                  Text('\$${totalPagos.toStringAsFixed(2)}',
+                                      style: GoogleFonts.montserrat(
+                                          fontSize: 18)),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('Total ventas',
+                                      style: GoogleFonts.montserrat(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w500)),
+                                  Text('\$${totalVentas.toStringAsFixed(2)}',
+                                      style: GoogleFonts.montserrat(
+                                          fontSize: 18)),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('Total',
+                                      style: GoogleFonts.montserrat(
                                           fontSize: 20,
-                                          color: theme.brightness ==
-                                                  Brightness.dark
-                                              ? const Color(0xFFB0B0B0)
-                                              : Colors.black,
-                                        ),
-                                      ),
-                                      Text(
-                                        '\$${monto.toStringAsFixed(2)}',
-                                        style: GoogleFonts.montserrat(
-                                          fontSize: 24,
-                                          color: theme.brightness ==
-                                                  Brightness.dark
-                                              ? const Color(0xFFB0B0B0)
-                                              : Colors.black,
-                                        ),
-                                      ),
-                                      Text(
-                                        format.format(fecha),
-                                        style: GoogleFonts.montserrat(
-                                            fontSize: 14),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
-                          decoration: BoxDecoration(
-                              border: Border(
-                                  top: BorderSide(
-                            color: theme.brightness == Brightness.dark
-                                ? const Color(0xFFB0B0B0)
-                                : Colors.black,
-                          ))),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Total',
-                                  style: GoogleFonts.montserrat(fontSize: 20)),
-                              Text('\$${total.toStringAsFixed(2)}',
-                                  style: GoogleFonts.montserrat(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold)),
-                            ],
-                          ),
-                        ),
-                      ],
+                                          fontWeight: FontWeight.bold)),
+                                  Text(
+                                      '\$${(totalPagos - totalVentas).toStringAsFixed(2)}',
+                                      style: GoogleFonts.montserrat(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     );
                   },
                 ),

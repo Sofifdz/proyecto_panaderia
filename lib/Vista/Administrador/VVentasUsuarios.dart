@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:proyecto_panaderia/Controlador/DrawerConfig.dart';
 import 'package:proyecto_panaderia/Vista/Administrador/VCortesUsuarios.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class VVentasUsuarios extends StatefulWidget {
   final String usuarioId;
@@ -53,11 +54,14 @@ class _VVentasUsuariosState extends State<VVentasUsuarios> {
               ),
             ),
           ),
+         
         ),
         drawer: DrawerConfig.administradorDrawer(
             context, widget.usuarioId, widget.username),
         body: cuerpo(context));
   }
+
+
 
   Widget cuerpo(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;

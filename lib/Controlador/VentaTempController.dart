@@ -57,7 +57,6 @@ class VentaTempController {
           ' - ${pc.producto.productoname} x${pc.cantidad} a \$${pc.producto.precio}');
     }
     print('Total: ${calcularTotal()}');
-    if (usuarioId.isEmpty || productosEscaneados.isEmpty) return;
 
     final cajasSnapshot = await FirebaseFirestore.instance
         .collection('cajas')
@@ -73,9 +72,11 @@ class VentaTempController {
 
     final IDcaja = cajasSnapshot.docs.first.id;
 
+    // Obtener el número de ventas actuales en la subcolección
     final ventasSnapshot = await FirebaseFirestore.instance
+        .collection('cajas')
+        .doc(IDcaja)
         .collection('ventas')
-        .where('usuarioId', isEqualTo: usuarioId)
         .get();
     final IDventa = ventasSnapshot.docs.length + 1;
 
@@ -91,14 +92,7 @@ class VentaTempController {
     final venta = {
       'usuarioId': usuarioId,
       'ventaId': IDventa,
-      'productos': productosEscaneados.map((pc) {
-        return {
-          'id': pc.producto.id,
-          'nombre': pc.producto.productoname,
-          'precio': pc.producto.precio,
-          'cantidad': pc.cantidad,
-        };
-      }).toList(),
+      'productos': productosMapeados,
       'total': calcularTotal(),
       'fecha': Timestamp.now(),
       'IDventa': IDventa,
@@ -106,7 +100,11 @@ class VentaTempController {
     };
 
     try {
-      await FirebaseFirestore.instance.collection('ventas').add(venta);
+      await FirebaseFirestore.instance
+          .collection('cajas')
+          .doc(IDcaja)
+          .collection('ventas')
+          .add(venta);
 
       final batch = FirebaseFirestore.instance.batch();
       for (var pc in productosEscaneados) {
@@ -128,10 +126,6 @@ class VentaTempController {
 
           batch.update(docRef, {'existencias': newStock});
         }
-      }
-      for (var pc in productosEscaneados) {
-        print(
-            "Producto: ${pc.producto.productoname}, Cantidad: ${pc.cantidad}");
       }
 
       await batch.commit();

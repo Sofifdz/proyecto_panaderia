@@ -6,12 +6,14 @@ class Pagos {
   String descripcion;
   double monto;
   final String fecha;
+  final String IDcaja;
 
   Pagos({
     required this.id,
     required this.nombre,
     required this.descripcion,
     required this.monto,
+    required this.IDcaja,
     required this.fecha,
   });
 
@@ -33,6 +35,7 @@ class Pagos {
       nombre: data['nombre'] ?? '',
       descripcion: data['descripcion'] ?? '',
       monto: (data['monto'] ?? 0).toDouble(),
+      IDcaja: data['IDcaja'] ?? '',
       fecha: fechaIso,
     );
   }

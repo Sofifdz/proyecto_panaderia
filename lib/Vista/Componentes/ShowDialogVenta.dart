@@ -6,6 +6,7 @@ class DialogPago {
     required BuildContext context,
     required double total,
     required VoidCallback onVentaConfirmada,
+     VoidCallback? onResetCards,
   }) {
     final TextEditingController pagoController = TextEditingController();
     double cambio = 0;

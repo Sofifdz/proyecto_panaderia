@@ -253,7 +253,7 @@ class _VPedidosAState extends State<VPedidosA> {
                                               Text(
                                                 pedido.cliente,
                                                 style: GoogleFonts.montserrat(
-                                                  fontSize: 25,
+                                                  fontSize: 22,
                                                   color: Theme.of(context)
                                                               .brightness ==
                                                           Brightness.dark
@@ -317,13 +317,13 @@ class _VPedidosAState extends State<VPedidosA> {
 
   Color _obtenerColor(Pedidos pedido) {
     if (pedido.isEntregado) {
-      return const Color.fromARGB(146, 148, 184, 152);
-    } else if (pedido.abonos > 0 && pedido.abonos < pedido.precio) {
-      return Colors.orange[200]!;
+      return const Color.fromARGB(
+          146, 148, 184, 152); 
     } else {
       return Theme.of(context).brightness == Brightness.dark
-          ? const Color(0xFF2C2C2E)
-          : const Color.fromARGB(255, 217, 217, 218);
+          ? const Color(0xFF2C2C2E) 
+          : const Color.fromARGB(
+              255, 217, 217, 218); 
     }
   }
 }

@@ -1,17 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:proyecto_panaderia/Controlador/AlmacenController.dart';
 import 'package:proyecto_panaderia/Controlador/EditarProductoController.dart';
 import 'package:proyecto_panaderia/Modelo/Productos.dart';
 
 
-class VEditarProducto extends StatefulWidget {
+class VEditarProductoE extends StatefulWidget {
   final Productos producto;
   final Future<void> Function(Productos) updateProduct;
   final String usuarioId;
   final String username;
 
-  const VEditarProducto({
+  const VEditarProductoE({
     super.key,
     required this.producto,
     required this.updateProduct,
@@ -20,10 +19,10 @@ class VEditarProducto extends StatefulWidget {
   });
 
   @override
-  State<VEditarProducto> createState() => _VEditarProductoState();
+  State<VEditarProductoE> createState() => _VEditarProductoEState();
 }
 
-class _VEditarProductoState extends State<VEditarProducto> {
+class _VEditarProductoEState extends State<VEditarProductoE> {
   var idcontroller;
   var productonameController;
   var existenciaController;
@@ -45,11 +44,13 @@ class _VEditarProductoState extends State<VEditarProducto> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+
 
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: const Color.fromARGB(160, 133, 203, 144),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF1E1E1E)
+            : const Color.fromARGB(255, 209, 219, 250),
           leading: IconButton(
             icon: Icon(
               Icons.arrow_back_rounded,

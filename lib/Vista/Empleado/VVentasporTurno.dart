@@ -123,10 +123,11 @@ class _VVentasporTurnoState extends State<VVentasporTurno> {
         }
         final IDcaja = fechasSnapshot.data!['cajaId'];
 
+
         return StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('ventas')
-              //.where('IDcaja', isEqualTo: IDcaja)
+              .where('IDcaja', isEqualTo: IDcaja) // <- ESTE FILTRO ES CLAVE
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -296,13 +297,12 @@ class _VVentasporTurnoState extends State<VVentasporTurno> {
                       Text(
                         "\$${totalVentas.toStringAsFixed(2)}",
                         style: GoogleFonts.roboto(
-                          fontSize: 23,
-                          fontWeight: FontWeight.bold,
-                          color:
+                            fontSize: 23,
+                            fontWeight: FontWeight.bold,
+                            color:
                                 Theme.of(context).brightness == Brightness.dark
                                     ? Colors.white
-                                    : Colors.black
-                        ),
+                                    : Colors.black),
                       ),
                     ],
                   ),

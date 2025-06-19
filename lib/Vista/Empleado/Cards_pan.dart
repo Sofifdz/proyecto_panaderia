@@ -28,10 +28,18 @@ class CardsPan extends StatefulWidget {
   });
 
   @override
-  State<CardsPan> createState() => _CardspanState();
+  State<CardsPan> createState() => CardspanState();
 }
 
-class _CardspanState extends State<CardsPan> {
+class CardspanState extends State<CardsPan> {
+  void resetearCantidades() {
+    setState(() {
+      for (var pan in categoriasPan) {
+        pan.cantidad = 0;
+      }
+    });
+  }
+
   List<CategoriaPan> categoriasPan = [
     CategoriaPan(
         nombre: "Pan 10",
@@ -52,135 +60,13 @@ class _CardspanState extends State<CardsPan> {
     return 1;
   }
 
-  void editarCardPan(int index) {
-    final pan = categoriasPan[index];
-    TextEditingController nombreController =
-        TextEditingController(text: pan.nombre);
-    TextEditingController precioController =
-        TextEditingController(text: pan.precio.toString());
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-        return AlertDialog(
-          backgroundColor: isDark ? const Color(0xFF2A2A2A) : Colors.white,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          title: Text(
-            "Editar categoría",
-            style: GoogleFonts.montserrat(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-              color: isDark ? Colors.white : Colors.black,
-            ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nombreController,
-                style: TextStyle(color: isDark ? Colors.white : Colors.black),
-                decoration: InputDecoration(
-                  labelText: "Nombre",
-                  labelStyle: GoogleFonts.roboto(
-                    color: isDark ? Colors.white70 : Colors.black87,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: isDark ? Colors.white24 : Colors.grey,
-                    ),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: isDark ? Colors.blue[200]! : Colors.blue,
-                      width: 2,
-                    ),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: precioController,
-                style: TextStyle(color: isDark ? Colors.white : Colors.black),
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(
-                  labelText: "Precio",
-                  labelStyle: GoogleFonts.roboto(
-                    color: isDark ? Colors.white70 : Colors.black87,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: isDark ? Colors.white24 : Colors.grey,
-                    ),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: isDark ? Colors.blue[200]! : Colors.blue,
-                      width: 2,
-                    ),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              child: Text(
-                "Cancelar",
-                style: GoogleFonts.montserrat(
-                  fontSize: 14,
-                  color: isDark ? Colors.white70 : Colors.black,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              onPressed: () => Navigator.pop(context),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isDark
-                    ? const Color.fromARGB(255, 209, 219, 250)
-                    : const Color.fromARGB(255, 209, 219, 250),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              ),
-              onPressed: () {
-                setState(() {
-                  pan.nombre = nombreController.text;
-                  pan.precio =
-                      double.tryParse(precioController.text) ?? pan.precio;
-                });
-                Navigator.pop(context);
-              },
-              child: Text(
-                "Guardar",
-                style: GoogleFonts.montserrat(
-                  fontSize: 14,
-                  color: isDark ? Colors.black : Colors.black,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   Widget buildCardPan(int index, CategoriaPan pan, Color color) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     double screenWidth = MediaQuery.of(context).size.width;
     double cardWidth = screenWidth * 0.3;
 
     return GestureDetector(
-      onTap: () => editarCardPan(index),
+      onTap: () {},
       child: Container(
         width: cardWidth,
         margin: const EdgeInsets.all(8.0),

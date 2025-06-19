@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:proyecto_panaderia/Controlador/CajaController.dart';
 import 'package:proyecto_panaderia/Controlador/LoginController.dart';
-import 'package:proyecto_panaderia/Vista/Administrador/VAlmacen.dart';
+
 import 'package:proyecto_panaderia/Vista/Administrador/VPedidosA.dart';
 import 'package:proyecto_panaderia/Vista/Administrador/VPersonal.dart';
 import 'package:proyecto_panaderia/Vista/Administrador/VVentasUsuarios.dart';
 import 'package:proyecto_panaderia/Vista/Administrador/Valmacen2.0.dart';
 import 'package:proyecto_panaderia/Vista/Componentes/Component_Drawer.dart';
 import 'package:proyecto_panaderia/Vista/Componentes/ShowDialogCaja.dart';
+import 'package:proyecto_panaderia/Vista/Empleado/VPagos.dart';
 import 'package:proyecto_panaderia/Vista/Empleado/VPedidosE.dart';
+import 'package:proyecto_panaderia/Vista/Empleado/VVentaTemp.dart';
 import 'package:proyecto_panaderia/Vista/Empleado/VVentas.dart';
 import 'package:proyecto_panaderia/Vista/Empleado/VVentasporTurno.dart';
 import 'package:proyecto_panaderia/Vista/VLogin.dart';
@@ -85,15 +87,21 @@ class DrawerConfig {
           : const Color.fromARGB(255, 209, 219, 250),
       items: [
         'Nueva Venta',
+        'Venta Temporal',
         'Ventas del turno',
         'Pedidos',
+        'Pagos',
+        'Almacen',
         'Corte de caja',
         'Salir'
       ],
       iconos: [
         Icons.add_shopping_cart,
+        Icons.schedule,
         Icons.shopping_basket_rounded,
         Icons.list_alt,
+        Icons.currency_exchange,
+        Icons.inventory,
         Icons.money_off,
         Icons.exit_to_app
       ],
@@ -112,6 +120,15 @@ class DrawerConfig {
           Navigator.push(
               context,
               MaterialPageRoute(
+                  builder: (context) => Vventatemp(
+                        usuarioId: usuarioId,
+                        username: username,
+                      )));
+        },
+        () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
                   builder: (context) => VVentasporTurno(
                       usuarioId: usuarioId, username: username)));
         },
@@ -123,6 +140,25 @@ class DrawerConfig {
                         username: username,
                         usuarioId: usuarioId,
                       )));
+        },
+        () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      Vpagos(usuarioId: usuarioId, username: username)));
+        },
+        () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => VAlmacenCopia(
+                usuarioId: usuarioId,
+                username: username,
+                esEmpleado: true,
+              ),
+            ),
+          );
         },
         () {
           CajaController.corteDeCaja(context, usuarioId, username);

@@ -2,33 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:proyecto_panaderia/Controlador/DrawerConfig.dart';
-import 'package:proyecto_panaderia/Controlador/VentasController.dart';
+import 'package:proyecto_panaderia/Controlador/VentaTempController.dart';
 import 'package:proyecto_panaderia/Vista/Componentes/DialogBusquedasProductos.dart';
 import 'package:proyecto_panaderia/Vista/Componentes/ShowDialogVenta.dart';
 import 'package:proyecto_panaderia/Vista/Empleado/Cards_pan.dart';
 
-class VVentas extends StatefulWidget {
+class Vventatemp extends StatefulWidget {
   final String usuarioId;
   final String username;
-  const VVentas({
+  const Vventatemp({
     super.key,
     required this.usuarioId,
     required this.username,
   });
 
   @override
-  State<VVentas> createState() => _VVentasState();
+  State<Vventatemp> createState() => _VventatempState();
 }
 
-class _VVentasState extends State<VVentas> {
-  final GlobalKey<CardspanState> _cardsPanKey = GlobalKey<CardspanState>();
-
-  late VentasController _controller;
+class _VventatempState extends State<Vventatemp> {
+  late VentaTempController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = VentasController(
+    _controller = VentaTempController(
       usuarioId: widget.usuarioId,
       context: context,
       refresh: () => setState(() {}),
@@ -42,7 +40,6 @@ class _VVentasState extends State<VVentas> {
       onVentaConfirmada: () async {
         await _controller.guardarVenta();
         _controller.limpiarVenta();
-        _cardsPanKey.currentState?.resetearCantidades();
         setState(() {});
       },
     );
@@ -137,7 +134,6 @@ class _VVentasState extends State<VVentas> {
                           scrollDirection: Axis.vertical,
                           children: [
                             CardsPan(
-                              key: _cardsPanKey,
                               codigoController: _controller.codigoController,
                               onAgregar: _controller.agregarProductoDesdeCard,
                               onEliminar: _controller.eliminarProductoDesdeCard,

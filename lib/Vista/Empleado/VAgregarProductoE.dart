@@ -5,14 +5,14 @@ import 'package:proyecto_panaderia/Controlador/AlmacenController.dart';
 import 'package:proyecto_panaderia/Controlador/UsuarioController.dart';
 
 
-class VAgregarProducto extends StatefulWidget {
-  const VAgregarProducto({super.key});
+class VAgregarProductoE extends StatefulWidget {
+  const VAgregarProductoE({super.key});
 
   @override
-  State<VAgregarProducto> createState() => _VAgregarProductoState();
+  State<VAgregarProductoE> createState() => _VAgregarProductoEState();
 }
 
-class _VAgregarProductoState extends State<VAgregarProducto> {
+class _VAgregarProductoEState extends State<VAgregarProductoE> {
   String usuarioId = '';
   String username = '';
   final formKey = GlobalKey<FormState>();
@@ -68,7 +68,9 @@ class _VAgregarProductoState extends State<VAgregarProducto> {
     final colorScheme = theme.colorScheme;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(160, 133, 203, 144),
+        backgroundColor: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF1E1E1E)
+            : const Color.fromARGB(255, 209, 219, 250),
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_rounded,

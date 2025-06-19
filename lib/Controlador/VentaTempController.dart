@@ -3,20 +3,30 @@ import 'package:flutter/material.dart';
 import 'package:proyecto_panaderia/Modelo/ProductoCantidad.dart';
 import 'package:proyecto_panaderia/Modelo/Productos.dart';
 
-class VentasController {
-  final String usuarioId;
-  final BuildContext context;
-  final VoidCallback refresh;
+class VentaTempController {
+  // Singleton
+  static final VentaTempController _instance = VentaTempController._internal();
+
+  factory VentaTempController({
+    required String usuarioId,
+    required BuildContext context,
+    required VoidCallback refresh,
+  }) {
+    _instance.usuarioId = usuarioId;
+    _instance.context = context;
+    _instance.refresh = refresh;
+    return _instance;
+  }
+
+  VentaTempController._internal();
+
+  late String usuarioId;
+  late BuildContext context;
+  late VoidCallback refresh;
 
   TextEditingController codigoController = TextEditingController();
   FocusNode focusNode = FocusNode();
   List<ProductoConCantidad> productosEscaneados = [];
-
-  VentasController({
-    required this.usuarioId,
-    required this.context,
-    required this.refresh,
-  });
 
   void limpiarVenta() {
     productosEscaneados.clear();

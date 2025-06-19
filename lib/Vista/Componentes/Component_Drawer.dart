@@ -78,7 +78,7 @@ class _ComponentDrawerState extends State<ComponentDrawer> {
                 ListTile(
                   leading: Icon(
                     widget.iconos[i],
-                    size: 30,
+                    size: 20,
                     color: Theme.of(context).brightness == Brightness.dark
                         ? const Color(0xFFB0B0B0)
                         : Colors.black,

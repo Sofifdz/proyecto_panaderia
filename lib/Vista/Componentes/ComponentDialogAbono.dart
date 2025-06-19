@@ -86,6 +86,14 @@ Future<void> ComponentDialogAbono(
                     color: isDark ? Colors.white : Colors.black,
                   ),
                 ),
+                Text(
+                  "Restante: \$${(pedido.precio - pedido.abonos).toStringAsFixed(2)}",
+                  style: GoogleFonts.roboto(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.orange[200] : Colors.orange[800],
+                  ),
+                ),
                 const SizedBox(height: 12),
                 if (!pedido.isLiquidado &&
                     (!modoEntrega || (modoEntrega && !pedido.isLiquidado)))
@@ -149,7 +157,7 @@ Future<void> ComponentDialogAbono(
                         ? null
                         : () async {
                             double nuevoAbono = pedido.abonos;
-                         
+
                             if (cantidadIngresada > 0) {
                               nuevoAbono += cantidadIngresada;
 

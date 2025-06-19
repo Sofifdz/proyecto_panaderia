@@ -28,7 +28,8 @@ class ComponentCardProducto extends StatelessWidget {
         child: const Icon(Icons.delete, color: Colors.white),
       ),
       child: Card(
-        color: obtenerColor(producto.existencias),
+        color: obtenerColor(producto.existencias ?? 0),
+
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),

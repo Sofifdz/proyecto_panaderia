@@ -96,7 +96,8 @@ class VTicket extends StatelessWidget {
                     itemCount: venta.productos.length,
                     itemBuilder: (context, index) {
                       final producto = venta.productos[index];
-                      final nombre = producto['productoname'] ?? 'Producto';
+                      final nombre = producto['nombre'] ?? 'Producto';
+
                       final cantidad = producto['cantidad'] ?? 1;
                       final precio = (producto['precio'] ?? 0).toDouble();
                       final subtotal = cantidad * precio;

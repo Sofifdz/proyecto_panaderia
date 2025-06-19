@@ -9,14 +9,18 @@ import 'package:proyecto_panaderia/Vista/Administrador/VEditarProducto.dart';
 import 'package:proyecto_panaderia/Vista/Componentes/Component_Filtre.dart';
 import 'package:proyecto_panaderia/Vista/Componentes/Componente_busquedas.dart';
 import 'package:proyecto_panaderia/Vista/Componentes/DeleteDialog.dart';
+import 'package:proyecto_panaderia/Vista/Empleado/VAgregarProductoE.dart';
+import 'package:proyecto_panaderia/Vista/Empleado/VEditarProductoE.dart';
 
 class VAlmacenCopia extends StatefulWidget {
   final String usuarioId;
   final String username;
+  final bool esEmpleado;
   const VAlmacenCopia({
     Key? key,
     required this.usuarioId,
     required this.username,
+    this.esEmpleado = false,
   }) : super(key: key);
 
   @override
@@ -99,8 +103,14 @@ class _VAlmacenCopiaState extends State<VAlmacenCopia> {
                     : Color.fromARGB(255, 81, 81, 81),
                 size: 30),
             onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => VAgregarProducto()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => widget.esEmpleado
+                      ? VAgregarProductoE()
+                      : VAgregarProducto(),
+                ),
+              );
             },
           )
         ],
@@ -116,10 +126,17 @@ class _VAlmacenCopiaState extends State<VAlmacenCopia> {
             ),
           ),
         ),
-        backgroundColor: const Color.fromARGB(160, 133, 203, 144),
+        backgroundColor: widget.esEmpleado
+            ? (theme.brightness == Brightness.dark
+                ? const Color(0xFF1E1E1E)
+                : const Color.fromARGB(255, 209, 219, 250))
+            : const Color.fromARGB(160, 133, 203, 144),
       ),
-      drawer: DrawerConfig.administradorDrawer(
-          context, widget.usuarioId, widget.username),
+      drawer: widget.esEmpleado
+          ? DrawerConfig.empleadoDrawer(
+              context, widget.usuarioId, widget.username)
+          : DrawerConfig.administradorDrawer(
+              context, widget.usuarioId, widget.username),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Column(
@@ -130,7 +147,6 @@ class _VAlmacenCopiaState extends State<VAlmacenCopia> {
                   child: ComponentInputSearch(
                     searchController: _searchController,
                     onChanged: _onSearchChanged,
-                    
                     onClear: _clearSearch,
                     showFilterSheet: () {},
                   ),
@@ -197,6 +213,7 @@ class _VAlmacenCopiaState extends State<VAlmacenCopia> {
                     usuarioId: widget.usuarioId,
                     username: widget.username,
                     onUpdate: _actualizar,
+                    esEmpleado: widget.esEmpleado,
                   );
                 },
               ),
@@ -213,6 +230,8 @@ class _ComponentListaProductos extends StatelessWidget {
   final String usuarioId;
   final String username;
   final VoidCallback onUpdate;
+  final bool esEmpleado;
+
 
   const _ComponentListaProductos({
     Key? key,
@@ -220,6 +239,7 @@ class _ComponentListaProductos extends StatelessWidget {
     required this.usuarioId,
     required this.username,
     required this.onUpdate,
+    required this.esEmpleado,
   }) : super(key: key);
 
   @override
@@ -312,12 +332,19 @@ class _ComponentListaProductos extends StatelessWidget {
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => VEditarProducto(
-                        producto: producto,
-                        usuarioId: usuarioId,
-                        username: username,
-                        updateProduct: (p) async => onUpdate(),
-                      ),
+                      builder: (context) => esEmpleado
+                          ? VEditarProductoE(
+                              producto: producto,
+                              usuarioId: usuarioId,
+                              username: username,
+                              updateProduct: (p) async => onUpdate(),
+                            )
+                          : VEditarProducto(
+                              producto: producto,
+                              usuarioId: usuarioId,
+                              username: username,
+                              updateProduct: (p) async => onUpdate(),
+                            ),
                     ),
                   );
                 },
@@ -332,7 +359,7 @@ class _ComponentListaProductos extends StatelessWidget {
   Color _obtenerColor(BuildContext context, int existencia) {
     final brightness = Theme.of(context).brightness;
 
-    if (existencia < 20) {
+    if (existencia < 10) {
       return brightness == Brightness.dark
           ? const Color.fromARGB(151, 255, 76, 63)
           : const Color.fromARGB(

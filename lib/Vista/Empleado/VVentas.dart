@@ -185,7 +185,7 @@ class _VVentasState extends State<VVentas> {
                                 }
                               });
                             },
-                            icon: Icon(Icons.search_sharp),
+                            icon: Icon(Icons.search_sharp,size: 30,),
                           ),
                         ],
                       ),

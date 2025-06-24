@@ -28,7 +28,8 @@ class DialogBusquedaProducto {
 }
 
 class _BusquedaProductoSheet extends StatefulWidget {
-  final VentasController controller;
+  final dynamic controller;
+
   const _BusquedaProductoSheet({Key? key, required this.controller})
       : super(key: key);
 

@@ -62,7 +62,7 @@ class VentasController {
 
     final IDcaja = cajasSnapshot.docs.first.id;
 
-    // Obtener el número de ventas actuales en la subcolección
+   
     final ventasSnapshot = await FirebaseFirestore.instance
         .collection('cajas')
         .doc(IDcaja)

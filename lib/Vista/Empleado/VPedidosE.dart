@@ -190,7 +190,9 @@ class _VPedidosEState extends State<VPedidosE> {
                                           const SizedBox(height: 5),
                                           Column(
                                             children: [
-                                              pedidoController.estadoPedidoWidget(pedido, context)
+                                              pedidoController
+                                                  .estadoPedidoWidget(
+                                                      pedido, context)
                                             ],
                                           )
                                         ],
@@ -241,7 +243,7 @@ class _VPedidosEState extends State<VPedidosE> {
     if (pedido.isEntregado) {
       return const Color.fromARGB(146, 148, 184, 152);
     } else if (pedido.abonos > 0 && pedido.abonos < pedido.precio) {
-      return Colors.orange[200]!;
+      return const Color.fromARGB(255, 217, 217, 218);
     } else {
       return Theme.of(context).brightness == Brightness.dark
           ? const Color(0xFF2C2C2E)

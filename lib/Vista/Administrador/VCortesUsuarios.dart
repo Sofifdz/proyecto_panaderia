@@ -22,16 +22,16 @@ class _VCortesUsuariosState extends State<VCortesUsuarios> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(160, 133, 203, 144),
+        backgroundColor: const Color.fromARGB(160, 133, 203, 144),
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
             color: theme.brightness == Brightness.dark
                 ? Colors.white
-                : Color.fromARGB(255, 81, 81, 81),
+                : const Color.fromARGB(255, 81, 81, 81),
             size: 30,
           ),
           onPressed: () {
@@ -46,7 +46,7 @@ class _VCortesUsuariosState extends State<VCortesUsuarios> {
               fontWeight: FontWeight.bold,
               color: theme.brightness == Brightness.dark
                   ? Colors.white
-                  : Color.fromARGB(255, 81, 81, 81),
+                  : const Color.fromARGB(255, 81, 81, 81),
             ),
           ),
         ),
@@ -55,8 +55,7 @@ class _VCortesUsuariosState extends State<VCortesUsuarios> {
         stream: FirebaseFirestore.instance
             .collection('cajas')
             .where('usuarioId', isEqualTo: widget.userId)
-            .where('estado', isEqualTo: 'cerrada')
-            .orderBy('fechaCierre', descending: true)
+            .orderBy('fechaApertura', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
@@ -64,9 +63,6 @@ class _VCortesUsuariosState extends State<VCortesUsuarios> {
           }
 
           final cajas = snapshot.data!.docs;
-          print('Cajas encontradas: ${cajas.length}');
-
-          print('userId: ${widget.userId}');
 
           if (cajas.isEmpty) {
             return Center(
@@ -82,6 +78,9 @@ class _VCortesUsuariosState extends State<VCortesUsuarios> {
             itemBuilder: (context, index) {
               final data = cajas[index].data() as Map<String, dynamic>;
 
+              final estado = data['estado'] ?? 'abierta';
+              final format = DateFormat('dd/MM/yyyy hh:mm a');
+
               final fechaApertura = data['fechaApertura'] != null
                   ? (data['fechaApertura'] as Timestamp).toDate()
                   : null;
@@ -90,10 +89,9 @@ class _VCortesUsuariosState extends State<VCortesUsuarios> {
                   ? (data['fechaCierre'] as Timestamp).toDate()
                   : null;
 
-              final inicio = data['inicioCaja'] ?? 0;
-              final cierre = data['cierreCaja'] ?? 0;
-
-              final format = DateFormat('dd/MM/yyyy hh:mm a');
+              final textoCierre = estado == 'cerrada'
+                  ? "Cierre: ${format.format(fechaCierre!)}"
+                  : "📦 Caja abierta: ${fechaApertura != null ? format.format(fechaApertura) : 'Sin fecha'}";
 
               return InkWell(
                 onTap: () {
@@ -111,19 +109,15 @@ class _VCortesUsuariosState extends State<VCortesUsuarios> {
                         ? const Color(0xFF2C2C2E)
                         : const Color.fromARGB(146, 225, 225, 225),
                     margin: const EdgeInsets.all(10.0),
-                    child: ListTile(
-                      title: Center(
-                        child: Text(
-                          fechaCierre != null
-                              ? "Cierre: ${format.format(fechaCierre)}"
-                              : "Sin fecha de cierre",
-                          style: GoogleFonts.montserrat(
-                            fontWeight: FontWeight.w500,
-                            fontSize: 16,
-                            color: theme.brightness == Brightness.dark
-                                ? const Color.fromARGB(255, 207, 206, 206)
-                                : Colors.black,
-                          ),
+                    child: Center(
+                      child: Text(
+                        textoCierre,
+                        style: GoogleFonts.montserrat(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 18,
+                          color: theme.brightness == Brightness.dark
+                              ? const Color.fromARGB(255, 207, 206, 206)
+                              : Colors.black,
                         ),
                       ),
                     ),

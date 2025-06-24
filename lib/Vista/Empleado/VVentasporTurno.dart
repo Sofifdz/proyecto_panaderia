@@ -152,182 +152,220 @@ class _VVentasporTurnoState extends State<VVentasporTurno> {
               totalVentas += venta.total;
             }
 
-            // StreamBuilder para pagos en subcolección dentro de la caja
             return StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('cajas')
                   .doc(IDcaja)
-                  .collection('pagos')
+                  .collection('ventas')
+                  .orderBy('fecha') 
                   .snapshots(),
-              builder: (context, pagosSnapshot) {
-                if (pagosSnapshot.connectionState == ConnectionState.waiting) {
+              builder: (context, ventasSnapshot) {
+                if (ventasSnapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                double totalPagos = 0;
-                if (pagosSnapshot.hasData &&
-                    pagosSnapshot.data!.docs.isNotEmpty) {
-                  for (var doc in pagosSnapshot.data!.docs) {
-                    final data = doc.data() as Map<String, dynamic>;
-                    print('Pago doc id: ${doc.id}, data: $data'); // debug
-                    final pagoMonto = (data['monto'] ?? 0).toDouble();
-                    totalPagos += pagoMonto;
-                  }
-                } else {
-                  print('No hay pagos para la caja $IDcaja');
+                if (!ventasSnapshot.hasData) {
+                  return Center(
+                    child: Text(
+                      "No hay ventas registradas en este turno.",
+                      style:
+                          GoogleFonts.roboto(fontSize: 20, color: Colors.red),
+                    ),
+                  );
                 }
 
-                double totalNeto = totalVentas - totalPagos;
+                final ventasList = ventasSnapshot.data!.docs
+                    .map((doc) => Ventas.fromFirestore(doc))
+                    .toList();
 
-                return Column(
-                  children: [
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: ventasList.length,
-                        itemBuilder: (context, index) {
-                          final venta = ventasList[index];
-                          final DateTime fechaParseada =
-                              DateTime.parse(venta.fecha);
-                          String ff = DateFormat('dd/MM/yyyy\nhh:mm a')
-                              .format(fechaParseada);
+                double totalVentas = 0;
+                for (var venta in ventasList) {
+                  totalVentas += venta.total;
+                }
 
-                          return Card(
-                            margin: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
+                return StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('cajas')
+                      .doc(IDcaja)
+                      .collection('pagos')
+                      .snapshots(),
+                  builder: (context, pagosSnapshot) {
+                    if (pagosSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    double totalPagos = 0;
+                    if (pagosSnapshot.hasData &&
+                        pagosSnapshot.data!.docs.isNotEmpty) {
+                      for (var doc in pagosSnapshot.data!.docs) {
+                        final data = doc.data() as Map<String, dynamic>;
+                        final pagoMonto = (data['monto'] ?? 0).toDouble();
+                        totalPagos += pagoMonto;
+                      }
+                    }
+
+                    double totalNeto = totalVentas - totalPagos;
+
+                    return Column(
+                      children: [
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: ventasList.length,
+                            itemBuilder: (context, index) {
+                              final venta = ventasList[index];
+                              final DateTime fechaParseada =
+                                  DateTime.parse(venta.fecha);
+                              String ff = DateFormat('dd/MM/yyyy\nhh:mm a')
+                                  .format(fechaParseada);
+
+                              return Card(
+                                margin:
+                                    const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                                color: Theme.of(context).brightness ==
+                                        Brightness.dark
                                     ? const Color(0xFF2C2C2E)
                                     : Colors.grey[200],
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => VTicket(venta: venta),
-                                  ),
-                                );
-                              },
-                              child: SizedBox(
-                                height: 100,
-                                child: Center(
-                                  child: venta.desdePedido == true
-                                      ? Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              'Pedido ${venta.cliente}',
-                                              style: GoogleFonts.roboto(
-                                                fontSize: 23,
-                                                color: Theme.of(context)
-                                                            .brightness ==
-                                                        Brightness.dark
-                                                    ? const Color(0xFFB0B0B0)
-                                                    : Colors.black,
-                                              ),
-                                            ),
-                                            Text(
-                                              '\$${venta.total.toStringAsFixed(2)}',
-                                              style: GoogleFonts.roboto(
-                                                fontSize: 23,
-                                                color: Theme.of(context)
-                                                            .brightness ==
-                                                        Brightness.dark
-                                                    ? const Color(0xFFB0B0B0)
-                                                    : Colors.black,
-                                              ),
-                                            ),
-                                            Text(
-                                              ff,
-                                              style: GoogleFonts.roboto(
-                                                fontSize: 15,
-                                                color: Theme.of(context)
-                                                            .brightness ==
-                                                        Brightness.dark
-                                                    ? const Color(0xFFB0B0B0)
-                                                    : Colors.black,
-                                              ),
-                                            ),
-                                          ],
-                                        )
-                                      : Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              '#${venta.IDventa.toString()}',
-                                              style: GoogleFonts.roboto(
-                                                fontSize: 23,
-                                                color: Theme.of(context)
-                                                            .brightness ==
-                                                        Brightness.dark
-                                                    ? const Color(0xFFB0B0B0)
-                                                    : Colors.black,
-                                              ),
-                                            ),
-                                            Text(
-                                              '\$${venta.total.toStringAsFixed(2)}',
-                                              style: GoogleFonts.roboto(
-                                                fontSize: 23,
-                                                color: Theme.of(context)
-                                                            .brightness ==
-                                                        Brightness.dark
-                                                    ? const Color(0xFFB0B0B0)
-                                                    : Colors.black,
-                                              ),
-                                            ),
-                                            Text(
-                                              ff,
-                                              style: GoogleFonts.roboto(
-                                                fontSize: 15,
-                                                color: Theme.of(context)
-                                                            .brightness ==
-                                                        Brightness.dark
-                                                    ? const Color(0xFFB0B0B0)
-                                                    : Colors.black,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    Divider(
-                      thickness: 2,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0xFFB0B0B0)
-                          : Colors.black,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 10),
-                      child: Column(
-                        children: [
-                          _filaResumen('Ventas:', totalVentas, context),
-                          _filaResumen('Pagos:', totalPagos, context),
-                          Divider(
-                            thickness: 1,
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            VTicket(venta: venta),
+                                      ),
+                                    );
+                                  },
+                                  child: SizedBox(
+                                    height: 100,
+                                    child: Center(
+                                      child: venta.desdePedido == true
+                                          ? Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceAround,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  'Pedido ${venta.cliente}',
+                                                  style: GoogleFonts.roboto(
+                                                    fontSize: 23,
+                                                    color: Theme.of(context)
+                                                                .brightness ==
+                                                            Brightness.dark
+                                                        ? const Color(
+                                                            0xFFB0B0B0)
+                                                        : Colors.black,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  '\$${venta.total.toStringAsFixed(2)}',
+                                                  style: GoogleFonts.roboto(
+                                                    fontSize: 23,
+                                                    color: Theme.of(context)
+                                                                .brightness ==
+                                                            Brightness.dark
+                                                        ? const Color(
+                                                            0xFFB0B0B0)
+                                                        : Colors.black,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  ff,
+                                                  style: GoogleFonts.roboto(
+                                                    fontSize: 15,
+                                                    color: Theme.of(context)
+                                                                .brightness ==
+                                                            Brightness.dark
+                                                        ? const Color(
+                                                            0xFFB0B0B0)
+                                                        : Colors.black,
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+                                          : Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceAround,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  '#${venta.IDventa.toString()}',
+                                                  style: GoogleFonts.roboto(
+                                                    fontSize: 23,
+                                                    color: Theme.of(context)
+                                                                .brightness ==
+                                                            Brightness.dark
+                                                        ? const Color(
+                                                            0xFFB0B0B0)
+                                                        : Colors.black,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  '\$${venta.total.toStringAsFixed(2)}',
+                                                  style: GoogleFonts.roboto(
+                                                    fontSize: 23,
+                                                    color: Theme.of(context)
+                                                                .brightness ==
+                                                            Brightness.dark
+                                                        ? const Color(
+                                                            0xFFB0B0B0)
+                                                        : Colors.black,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  ff,
+                                                  style: GoogleFonts.roboto(
+                                                    fontSize: 15,
+                                                    color: Theme.of(context)
+                                                                .brightness ==
+                                                            Brightness.dark
+                                                        ? const Color(
+                                                            0xFFB0B0B0)
+                                                        : Colors.black,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        Divider(
+                          thickness: 2,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? const Color(0xFFB0B0B0)
+                              : Colors.black,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
+                          child: Column(
+                            children: [
+                              _filaResumen('Ventas:', totalVentas, context),
+                              _filaResumen('Pagos:', totalPagos, context),
+                              Divider(
+                                thickness: 1,
+                                color: Theme.of(context).brightness ==
+                                        Brightness.dark
                                     ? const Color(0xFFB0B0B0)
                                     : Colors.black,
+                              ),
+                              _filaResumen('Total:', totalNeto, context,
+                                  esTotal: true),
+                            ],
                           ),
-                          _filaResumen('Total:', totalNeto, context,
-                              esTotal: true),
-                        ],
-                      ),
-                    ),
-                  ],
+                        ),
+                      ],
+                    );
+                  },
                 );
               },
             );
@@ -337,7 +375,7 @@ class _VVentasporTurnoState extends State<VVentasporTurno> {
     );
   }
 
-// Widget auxiliar para filas de resumen
+
   Widget _filaResumen(String texto, double monto, BuildContext context,
       {bool esTotal = false}) {
     return Padding(

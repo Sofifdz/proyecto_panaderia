@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Productos {
-  String id; 
+  String id;
   String productoname;
   int existencias;
   int precio;
@@ -13,14 +13,17 @@ class Productos {
     required this.precio,
   });
 
-
   factory Productos.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return Productos(
-      id: doc.id, 
+      id: doc.id,
       productoname: data['productoname'] ?? '',
-      existencias: (data['existencias'] ?? 0).toInt(),
-      precio: (data['precio'] ?? 0).toInt(),
+      existencias: data['existencias'] is int
+          ? data['existencias']
+          : int.tryParse(data['existencias'].toString()) ?? 0,
+      precio: data['precio'] is int
+          ? data['precio']
+          : int.tryParse(data['precio'].toString()) ?? 0,
     );
   }
 
@@ -32,4 +35,3 @@ class Productos {
     };
   }
 }
-

@@ -90,7 +90,7 @@ class DrawerConfig {
         'Venta Temporal',
         'Ventas del turno',
         'Pedidos',
-        'Pagos',
+        'Gastos',
         'Almacen',
         'Corte de caja',
         'Salir'

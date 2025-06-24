@@ -55,7 +55,6 @@ class VDetallesCortes extends StatelessWidget {
           }
 
           final dataCaja = snapshotCaja.data!.data() as Map<String, dynamic>;
-
           final inicio = dataCaja['inicioCaja'] ?? 0;
           final cierre = dataCaja['cierreCaja'] ?? 0;
 
@@ -90,7 +89,6 @@ class VDetallesCortes extends StatelessWidget {
                       .collection('cajas')
                       .doc(cajaId)
                       .collection('ventas')
-                      .orderBy('fecha')
                       .snapshots(),
                   builder: (context, snapshotVentas) {
                     if (snapshotVentas.hasError) {
@@ -122,7 +120,8 @@ class VDetallesCortes extends StatelessWidget {
                         }
 
                         if (!snapshotPagos.hasData) {
-                          return const Center(child: CircularProgressIndicator());
+                          return const Center(
+                              child: CircularProgressIndicator());
                         }
 
                         final pagos = snapshotPagos.data!.docs;
@@ -132,37 +131,66 @@ class VDetallesCortes extends StatelessWidget {
                           return suma + monto;
                         });
 
+                        final List<Map<String, dynamic>> items = [
+                          ...ventas.map((doc) {
+                            final data = doc.data() as Map<String, dynamic>;
+                            return {
+                              'tipo': 'venta',
+                              'monto': (data['total'] ?? 0).toDouble(),
+                              'fecha': (data['fecha'] as Timestamp).toDate(),
+                              'data': data
+                            };
+                          }),
+                          ...pagos.map((doc) {
+                            final data = doc.data() as Map<String, dynamic>;
+                            return {
+                              'tipo': 'pago',
+                              'monto': (data['monto'] ?? 0).toDouble(),
+                              'fecha': (data['fecha'] as Timestamp).toDate(),
+                              'data': data
+                            };
+                          }),
+                        ];
+
+                       
+                        items.sort((a, b) => a['fecha'].compareTo(b['fecha']));
+
                         return Column(
                           children: [
                             Expanded(
                               child: ListView.builder(
-                                itemCount: ventas.length,
+                                itemCount: items.length,
                                 itemBuilder: (context, index) {
-                                  final venta = ventas[index].data()
-                                      as Map<String, dynamic>;
-                                  final monto =
-                                      (venta['total'] ?? 0).toDouble();
-                                  final fecha =
-                                      (venta['fecha'] as Timestamp).toDate();
+                                  final item = items[index];
+                                  final tipo = item['tipo'];
+                                  final monto = item['monto'];
+                                  final fecha = item['fecha'];
+                                  final data = item['data'];
 
                                   return SizedBox(
                                     height: 100,
                                     child: Card(
-                                      color: theme.brightness ==
-                                              Brightness.dark
-                                          ? const Color(0xFF2C2C2E)
-                                          : const Color.fromARGB(
-                                              146, 225, 225, 225),
+                                      color: tipo == 'pago'
+                                          ? theme.brightness == Brightness.dark
+                                              ? const Color(0xFF2C2C2E)
+                                              : const Color.fromARGB(
+                                                  146, 225, 225, 225)
+                                          : theme.brightness == Brightness.dark
+                                              ? const Color(0xFF2C2C2E)
+                                              : const Color.fromARGB(
+                                                  146, 225, 225, 225),
                                       margin: const EdgeInsets.all(10.0),
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceAround,
                                         children: [
                                           Text(
-                                            venta['desdePedido'] == true &&
-                                                    venta['cliente'] != null
-                                                ? 'Pedido de ${venta['cliente']}'
-                                                : '#${index + 1}',
+                                            tipo == 'pago'
+                                                ? 'Pago de\n${data['nombre'] ?? '---'}'
+                                                : data['desdePedido'] == true &&
+                                                        data['cliente'] != null
+                                                    ? '${data['cliente']}'
+                                                    : '#${index + 1}',
                                             style: GoogleFonts.montserrat(
                                               fontSize: 20,
                                               color: theme.brightness ==
@@ -206,8 +234,8 @@ class VDetallesCortes extends StatelessWidget {
                                           fontSize: 18,
                                           fontWeight: FontWeight.w500)),
                                   Text('\$${totalPagos.toStringAsFixed(2)}',
-                                      style: GoogleFonts.montserrat(
-                                          fontSize: 18)),
+                                      style:
+                                          GoogleFonts.montserrat(fontSize: 18)),
                                 ],
                               ),
                             ),
@@ -223,8 +251,8 @@ class VDetallesCortes extends StatelessWidget {
                                           fontSize: 18,
                                           fontWeight: FontWeight.w500)),
                                   Text('\$${totalVentas.toStringAsFixed(2)}',
-                                      style: GoogleFonts.montserrat(
-                                          fontSize: 18)),
+                                      style:
+                                          GoogleFonts.montserrat(fontSize: 18)),
                                 ],
                               ),
                             ),
@@ -240,7 +268,7 @@ class VDetallesCortes extends StatelessWidget {
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold)),
                                   Text(
-                                      '\$${(totalPagos - totalVentas).toStringAsFixed(2)}',
+                                      '\$${(totalVentas - totalPagos).toStringAsFixed(2)}',
                                       style: GoogleFonts.montserrat(
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold)),

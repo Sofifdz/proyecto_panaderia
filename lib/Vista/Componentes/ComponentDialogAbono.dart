@@ -106,7 +106,7 @@ Future<void> ComponentDialogAbono(
                         TextStyle(color: isDark ? Colors.white : Colors.black),
                     decoration: InputDecoration(
                       labelText: modoEntrega
-                          ? 'Cantigar a pagar'
+                          ? 'Cantidad a pagar'
                           : 'Cantidad a abonar',
                       labelStyle: TextStyle(
                           color: isDark ? Colors.white70 : Colors.black87),
@@ -161,21 +161,39 @@ Future<void> ComponentDialogAbono(
                             if (cantidadIngresada > 0) {
                               nuevoAbono += cantidadIngresada;
 
-                              await FirebaseFirestore.instance
-                                  .collection('ventas')
-                                  .add({
-                                'cliente': pedido.cliente,
-                                'total': cantidadIngresada,
-                                'fecha': Timestamp.now(),
-                                'usuarioId': usuarioId,
-                                'pedidoId': pedido.NoPedido,
-                                'desdePedido': true,
-                                'descripcion': pedidoData['descripcion'],
-                                'productos': productos,
-                              });
-                            }
+                              // Obtener caja actual
+                              final cajaQuery = await FirebaseFirestore.instance
+                                  .collection('cajas')
+                                  .where('usuarioId', isEqualTo: usuarioId)
+                                  .where('estado', isEqualTo: 'abierta')
+                                  .limit(1)
+                                  .get();
 
-                            bool nuevoEsLiquidado = nuevoAbono >= pedido.precio;
+                              if (cajaQuery.docs.isNotEmpty) {
+                                final cajaId = cajaQuery.docs.first.id;
+
+                                final ventaData = {
+                                  'cliente': pedido.cliente,
+                                  'total': cantidadIngresada,
+                                  'fecha': Timestamp.now(),
+                                  'usuarioId': usuarioId,
+                                  'pedidoId': pedido.NoPedido,
+                                  'desdePedido': true,
+                                  'descripcion': pedido.descripcion,
+                                  'productos': productos,
+                                };
+
+                                await FirebaseFirestore.instance
+                                    .collection('ventas')
+                                    .add(ventaData);
+
+                                await FirebaseFirestore.instance
+                                    .collection('cajas')
+                                    .doc(cajaId)
+                                    .collection('ventas')
+                                    .add(ventaData);
+                              }
+                            }
 
                             await FirebaseFirestore.instance
                                 .collection('pedidos')
@@ -183,15 +201,14 @@ Future<void> ComponentDialogAbono(
                                 .update({
                               'isEntregado': true,
                               'abonos': nuevoAbono,
-                              'isLiquidado': nuevoEsLiquidado,
+                              'isLiquidado':
+                                  nuevoAbono >= pedido.precio ? true : false,
                             });
 
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(nuevoEsLiquidado
-                                    ? "Pedido entregado y liquidado"
-                                    : "Pedido entregado correctamente"),
+                                content: Text("Pedido entregado correctamente"),
                               ),
                             );
                           })
@@ -199,7 +216,7 @@ Future<void> ComponentDialogAbono(
                         ? () async {
                             final nuevoAbono =
                                 pedido.abonos + cantidadIngresada;
-                            final bool nuevoEsLiquidado =
+                            final nuevoEsLiquidado =
                                 nuevoAbono >= pedido.precio;
 
                             await FirebaseFirestore.instance
@@ -210,25 +227,47 @@ Future<void> ComponentDialogAbono(
                               'isLiquidado': nuevoEsLiquidado,
                             });
 
-                            await FirebaseFirestore.instance
-                                .collection('ventas')
-                                .add({
-                              'cliente': pedido.cliente,
-                              'total': cantidadIngresada,
-                              'fecha': Timestamp.now(),
-                              'usuarioId': usuarioId,
-                              'pedidoId': pedido.NoPedido,
-                              'desdePedido': true,
-                              'descripcion': pedidoData['descripcion'],
-                              'productos': productos,
-                            });
+                            // Obtener caja actual
+                            final cajaQuery = await FirebaseFirestore.instance
+                                .collection('cajas')
+                                .where('usuarioId', isEqualTo: usuarioId)
+                                .where('estado', isEqualTo: 'abierta')
+                                .limit(1)
+                                .get();
+
+                            if (cajaQuery.docs.isNotEmpty) {
+                              final cajaId = cajaQuery.docs.first.id;
+
+                              final ventaData = {
+                                'cliente': pedido.cliente,
+                                'total': cantidadIngresada,
+                                'fecha': Timestamp.now(),
+                                'usuarioId': usuarioId,
+                                'pedidoId': pedido.NoPedido,
+                                'desdePedido': true,
+                                'descripcion': pedido.descripcion,
+                                'productos': productos,
+                              };
+
+                              await FirebaseFirestore.instance
+                                  .collection('ventas')
+                                  .add(ventaData);
+
+                              await FirebaseFirestore.instance
+                                  .collection('cajas')
+                                  .doc(cajaId)
+                                  .collection('ventas')
+                                  .add(ventaData);
+                            }
 
                             Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text(nuevoEsLiquidado
-                                  ? "Pedido liquidado correctamente"
-                                  : "Abono registrado correctamente"),
-                            ));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(nuevoEsLiquidado
+                                    ? "Pedido liquidado correctamente"
+                                    : "Abono registrado correctamente"),
+                              ),
+                            );
                           }
                         : null),
                 child: Text(

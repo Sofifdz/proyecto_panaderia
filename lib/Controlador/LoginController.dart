@@ -1,13 +1,14 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:proyecto_panaderia/Modelo/Usuarios.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:proyecto_panaderia/Modelo/Usuarios.dart';
 import 'package:proyecto_panaderia/Vista/VLogin.dart';
-
+import 'package:proyecto_panaderia/Controlador/SessionManager.dart'; 
 
 class LoginController {
+ 
   static Future<Usuarios?> iniciarSesion(String email, String password) async {
     final firestore = FirebaseFirestore.instance;
+    print('Buscando usuario con email: $email y password: $password');
 
     final querySnapshot = await firestore
         .collection('users')
@@ -15,19 +16,32 @@ class LoginController {
         .where('password', isEqualTo: password)
         .get();
 
+    print('Documentos encontrados: ${querySnapshot.docs.length}');
+
     if (querySnapshot.docs.isEmpty) return null;
 
     final doc = querySnapshot.docs.first;
-    return Usuarios.fromFirestore(doc);
+    final usuario = Usuarios.fromFirestore(doc);
+
+  
+    await SessionManager.guardarSesion(
+      userId: usuario.id,
+      username: usuario.username,
+      role: usuario.role,
+    );
+
+    return usuario;
   }
 
-    Future<void> logOut(BuildContext context) async {
-    final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  Future<void> logOut(BuildContext context) async {
     try {
-      await _auth.signOut();
-      Navigator.push(
+      await SessionManager.cerrarSesion(); 
+
+      Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => Login()),
+        MaterialPageRoute(builder: (_) => Login()),
+        (route) => false,
       );
     } catch (e) {
       print('Error al cerrar sesión: $e');
@@ -36,5 +50,4 @@ class LoginController {
       );
     }
   }
-
 }

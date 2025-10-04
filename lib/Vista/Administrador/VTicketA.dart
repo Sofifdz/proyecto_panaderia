@@ -1,22 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:proyecto_panaderia/Modelo/Ventas.dart';
 
-class VTicket extends StatelessWidget {
+class VTicketA extends StatelessWidget {
   final Ventas venta;
 
-  const VTicket({super.key, required this.venta});
+  const VTicketA({super.key, required this.venta});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    DateTime fechaDt;
+    try {
+      fechaDt = DateTime.parse(venta.fecha);
+    } catch (_) {
+      fechaDt = DateTime.now();
+    }
+    final fechaFormateada = DateFormat('dd/MM/yyyy hh:mm a').format(fechaDt);
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: isDark
-            ? const Color(0xFF1E1E1E)
-            : const Color.fromARGB(255, 209, 219, 250),
+        backgroundColor: const Color.fromARGB(160, 133, 203, 144),
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
@@ -42,7 +49,7 @@ class VTicket extends StatelessWidget {
               Center(
                 child: Text(
                   venta.desdePedido == true
-                      ? 'Pedido #${venta.pedidoId}'
+                      ? 'Pedido #${venta.pedidoId ?? ''}'
                       : 'Venta #${venta.IDventa}',
                   style: GoogleFonts.montserrat(
                     fontSize: 28,
@@ -54,7 +61,7 @@ class VTicket extends StatelessWidget {
               const SizedBox(height: 12),
               Center(
                 child: Text(
-                  'Fecha: ${venta.fecha}',
+                  'Fecha: $fechaFormateada',
                   style: GoogleFonts.montserrat(
                     fontSize: 16,
                     color: isDark ? Colors.white70 : Colors.grey[700],
@@ -75,13 +82,13 @@ class VTicket extends StatelessWidget {
                 child: ListView.builder(
                   itemCount: venta.productos.length,
                   itemBuilder: (context, index) {
-                    final producto = venta.productos[index];
+                    final producto = venta.productos[index] as Map<String, dynamic>;
                     final nombre = producto['nombre'] ?? 'Producto';
                     final cantidad = producto['cantidad'] ?? 1;
                     final precio = (producto['precio'] ?? 0).toDouble();
                     final subtotal = cantidad * precio;
-                    final descripcion = venta.descripcion.toString();
-                    final cliente = venta.cliente.toString();
+                    final descripcion = venta.descripcion ?? '';
+                    final cliente = venta.cliente ?? '';
 
                     if (venta.desdePedido == true && index == 0) {
                       return Column(

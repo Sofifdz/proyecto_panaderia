@@ -50,7 +50,7 @@ class _VpagosState extends State<Vpagos> {
       appBar: AppBar(
         title: Center(
           child: Text(
-            "Pagos",
+            "Gastos",
             style: GoogleFonts.montserrat(
               fontSize: 30,
               fontWeight: FontWeight.bold,
@@ -131,13 +131,13 @@ class _VpagosState extends State<Vpagos> {
               if (pagos.isEmpty) {
                 return Center(
                   child: Text(
-                    'No hay pagos registrados',
+                    'No hay gastos registrados',
                     style: GoogleFonts.montserrat(fontSize: 18),
                   ),
                 );
               }
 
-              // Calcular total de pagos
+            
               double totalPagos = pagos.fold(0, (sum, pago) => sum + pago.monto);
 
               return Column(

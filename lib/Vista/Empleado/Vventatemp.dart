@@ -105,7 +105,7 @@ class _VventatempState extends State<Vventatemp> {
                 ),
               ],
               title: Text(
-                "Nueva Venta",
+                "Venta Temporal",
                 style: GoogleFonts.montserrat(
                   fontSize: 30,
                   fontWeight: FontWeight.bold,
@@ -172,11 +172,10 @@ class _VventatempState extends State<Vventatemp> {
                                 controller: _controller,
                               ).then((productoSeleccionado) {
                                 if (productoSeleccionado != null) {
-                                  _controller.agregarProductoDesdeCard(
-                                    productoSeleccionado.productoname,
-                                    productoSeleccionado.precio.toDouble(),
-                                    1,
-                                  );
+                                  _controller
+                                      .agregarProductoCompletoDesdeDialogo(
+                                          productoSeleccionado, 1);
+
                                   setState(() {});
                                 }
                               });
@@ -226,6 +225,15 @@ class _VventatempState extends State<Vventatemp> {
                                     ),
                                   ),
                                   Text("Cantidad: ${pc.cantidad}",
+                                      style: GoogleFonts.roboto(
+                                        fontSize: 15,
+                                        color: Theme.of(context).brightness ==
+                                                Brightness.dark
+                                            ? Colors.white
+                                            : Colors.black,
+                                      )),
+                                  Text(
+                                      "Subtotal: \$${(pc.producto.precio * pc.cantidad).toStringAsFixed(2)}",
                                       style: GoogleFonts.roboto(
                                         fontSize: 15,
                                         color: Theme.of(context).brightness ==

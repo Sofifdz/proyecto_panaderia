@@ -12,23 +12,30 @@ class Ventas {
   final String? cliente;
   final String? descripcion;
 
-  Ventas(
-      {required this.IDventa,
-      required this.productos,
-      required this.total,
-      required this.fecha,
-      required this.usuarioId,
-      required this.IDcaja,
-      this.desdePedido = false,
-      this.pedidoId,
-      this.cliente,
-      this.descripcion});
+  Ventas({
+    required this.IDventa,
+    required this.productos,
+    required this.total,
+    required this.fecha,
+    required this.usuarioId,
+    required this.IDcaja,
+    this.desdePedido = false,
+    this.pedidoId,
+    this.cliente,
+    this.descripcion,
+
+  });
+
 
   factory Ventas.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+    return Ventas.fromFirestoreData(data);
+  }
 
+  factory Ventas.fromFirestoreData(Map<String, dynamic> data) {
     String fechaIso = '';
     final fechaData = data['fecha'];
+
     if (fechaData is Timestamp) {
       fechaIso = fechaData.toDate().toIso8601String();
     } else if (fechaData is String) {
@@ -49,5 +56,20 @@ class Ventas {
       cliente: data['cliente'],
       descripcion: data['descripcion'],
     );
+  }
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      'ventaId': IDventa,
+      'productos': productos,
+      'total': total,
+      'fecha': fecha,
+      'usuarioId': usuarioId,
+      'IDcaja': IDcaja,
+      'desdePedido': desdePedido,
+      'pedidoId': pedidoId,
+      'cliente': cliente,
+      'descripcion': descripcion,
+    };
   }
 }

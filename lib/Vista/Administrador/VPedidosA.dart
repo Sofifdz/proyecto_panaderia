@@ -253,7 +253,7 @@ class _VPedidosAState extends State<VPedidosA> {
                                               Text(
                                                 pedido.cliente,
                                                 style: GoogleFonts.montserrat(
-                                                  fontSize: 22,
+                                                  fontSize: 20,
                                                   color: Theme.of(context)
                                                               .brightness ==
                                                           Brightness.dark

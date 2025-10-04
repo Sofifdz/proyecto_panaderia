@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:proyecto_panaderia/Controlador/CajaController.dart';
@@ -5,7 +6,6 @@ import 'package:proyecto_panaderia/Controlador/LoginController.dart';
 import 'package:proyecto_panaderia/Vista/Administrador/VVentasUsuarios.dart';
 import 'package:proyecto_panaderia/Vista/Componentes/ShowDialogCaja.dart';
 import 'package:proyecto_panaderia/Vista/Empleado/VVentas.dart';
-
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -32,6 +32,8 @@ class _LoginState extends State<Login> {
         );
         return;
       }
+
+   
 
       if (mounted) {
         if (usuario.role == 'Administrador') {
@@ -262,3 +264,4 @@ class _LoginState extends State<Login> {
     );
   }
 }
+

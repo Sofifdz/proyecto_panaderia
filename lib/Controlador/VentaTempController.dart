@@ -28,9 +28,11 @@ class VentaTempController {
   FocusNode focusNode = FocusNode();
   List<ProductoConCantidad> productosEscaneados = [];
 
+  String tipoVenta = 'almacen';
   void limpiarVenta() {
     productosEscaneados.clear();
     codigoController.clear();
+    tipoVenta = 'almacen';
   }
 
   double calcularTotal() {
@@ -51,12 +53,10 @@ class VentaTempController {
     }
 
     print('Guardando venta...');
-    print('ProductosEscaneados:');
     for (var pc in productosEscaneados) {
       print(
           ' - ${pc.producto.productoname} x${pc.cantidad} a \$${pc.producto.precio}');
     }
-    print('Total: ${calcularTotal()}');
 
     final cajasSnapshot = await FirebaseFirestore.instance
         .collection('cajas')
@@ -72,7 +72,6 @@ class VentaTempController {
 
     final IDcaja = cajasSnapshot.docs.first.id;
 
-    // Obtener el número de ventas actuales en la subcolección
     final ventasSnapshot = await FirebaseFirestore.instance
         .collection('cajas')
         .doc(IDcaja)
@@ -97,6 +96,7 @@ class VentaTempController {
       'fecha': Timestamp.now(),
       'IDventa': IDventa,
       'IDcaja': IDcaja,
+      'tipoVenta': tipoVenta,
     };
 
     try {
@@ -132,6 +132,7 @@ class VentaTempController {
 
       _mostrarMensaje('Venta registrada con éxito');
       productosEscaneados.clear();
+      tipoVenta = 'almacen';
       refresh();
     } catch (e) {
       _mostrarMensaje('Error al registrar la venta: $e');
@@ -140,6 +141,7 @@ class VentaTempController {
 
   Future<void> buscarProducto(String input) async {
     if (input.isEmpty) return;
+    tipoVenta = 'almacen';
 
     final regex = RegExp(r'^(.+?)(\*(\d+))?$');
     final match = regex.firstMatch(input);
@@ -159,12 +161,21 @@ class VentaTempController {
 
     if (doc.exists) {
       Productos producto = Productos.fromFirestore(doc);
+
+      if (producto.existencias <= 0) {
+        _mostrarMensaje('No hay existencias de ${producto.productoname}');
+        codigoController.clear();
+        FocusScope.of(context).requestFocus(focusNode);
+        return;
+      }
+
       int index =
           productosEscaneados.indexWhere((p) => p.producto.id == producto.id);
 
       if (index == -1) {
-        productosEscaneados
-            .add(ProductoConCantidad(producto: producto, cantidad: cantidad));
+        productosEscaneados.add(
+          ProductoConCantidad(producto: producto, cantidad: cantidad),
+        );
       } else {
         productosEscaneados[index].cantidad += cantidad;
       }
@@ -178,6 +189,8 @@ class VentaTempController {
   }
 
   void agregarProductoDesdeCard(String nombre, double precio, int cantidad) {
+    tipoVenta = 'pan';
+
     int index = productosEscaneados
         .indexWhere((p) => p.producto.productoname == nombre);
     if (index == -1) {
@@ -196,6 +209,29 @@ class VentaTempController {
     }
     codigoController.clear();
     FocusScope.of(context).requestFocus(focusNode);
+    refresh();
+  }
+
+  void agregarProductoCompletoDesdeDialogo(Productos producto, int cantidad) {
+    tipoVenta = 'pan';
+
+    if (producto.existencias <= 0) {
+      _mostrarMensaje('No hay existencias de ${producto.productoname}');
+      return;
+    }
+
+    int index = productosEscaneados.indexWhere(
+      (p) => p.producto.id == producto.id,
+    );
+
+    if (index == -1) {
+      productosEscaneados.add(
+        ProductoConCantidad(producto: producto, cantidad: cantidad),
+      );
+    } else {
+      productosEscaneados[index].cantidad += cantidad;
+    }
+
     refresh();
   }
 

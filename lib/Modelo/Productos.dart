@@ -34,4 +34,11 @@ class Productos {
       'precio': precio,
     };
   }
+
+    Map<String, dynamic> toJson() => toFirestore();
+
+  factory Productos.fromJson(Map<String, dynamic> json) {
+    return Productos.fromFirestore(json as DocumentSnapshot<Object?>);
+  }
+
 }

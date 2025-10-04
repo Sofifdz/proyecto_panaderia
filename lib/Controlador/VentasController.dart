@@ -87,6 +87,7 @@ class VentasController {
       'fecha': Timestamp.now(),
       'IDventa': IDventa,
       'IDcaja': IDcaja,
+      'eliminada': false, 
     };
 
     try {
@@ -206,4 +207,40 @@ class VentasController {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(mensaje)));
   }
+  
+  Future<void> eliminarVenta(String IDventa, String IDcaja) async {
+  final messenger = ScaffoldMessenger.of(context); // guardamos referencia
+  try {
+    final ventasRef = FirebaseFirestore.instance
+        .collection('cajas')
+        .doc(IDcaja)
+        .collection('ventas');
+
+    final querySnapshot =
+        await ventasRef.where('ventaId', isEqualTo: int.parse(IDventa)).get();
+
+    if (querySnapshot.docs.isEmpty) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('No se encontró la venta con ID $IDventa')),
+      );
+      return;
+    }
+
+    final ventaDoc = querySnapshot.docs.first;
+
+    // Marcamos como eliminada
+    await ventasRef.doc(ventaDoc.id).update({'eliminada': true});
+
+    messenger.showSnackBar(
+      const SnackBar(content: Text('Venta eliminada correctamente')),
+    );
+
+    refresh(); // refresca la UI
+  } catch (e) {
+    messenger.showSnackBar(
+      SnackBar(content: Text('Error al eliminar la venta: $e')),
+    );
+  }
+}
+
 }

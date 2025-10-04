@@ -6,39 +6,76 @@ import 'package:proyecto_panaderia/Controlador/AlmacenController.dart';
 import 'package:proyecto_panaderia/Modelo/Usuarios.dart';
 import 'package:proyecto_panaderia/Modelo/Pedidos.dart';
 import 'package:proyecto_panaderia/Modelo/Productos.dart';
+import 'package:proyecto_panaderia/Modelo/Ventas.dart';
 
 class DeleteDialog {
   static Future<bool?> showDeleteDialog<T>({
     required BuildContext context,
     required T item,
-    required Function onDelete,
+    required VoidCallback onDelete,
   }) async {
     String mensaje = "";
     Color eliminarColor = const Color.fromARGB(255, 81, 81, 81);
 
     Future<void> eliminar() async {
-      if (item is Usuarios) {
-        final eliminar = UsuarioController();
-        await eliminar.eliminarUsuario(item.id);
-      } else if (item is Pedidos) {
-        await FirebaseFirestore.instance
-            .collection('pedidos')
-            .doc(item.NoPedido)
-            .delete();
-      } else if (item is Productos) {
-        final controller = AlmacenController();
-        await controller.eliminarProducto(item.id);
+      final messenger = ScaffoldMessenger.of(context);
+
+      try {
+        if (item is Usuarios) {
+          final controller = UsuarioController();
+          await controller.eliminarUsuario(item.id);
+        } else if (item is Pedidos) {
+          await FirebaseFirestore.instance
+              .collection('pedidos')
+              .doc(item.NoPedido)
+              .delete();
+        } else if (item is Productos) {
+          final controller = AlmacenController();
+          await controller.eliminarProducto(item.id);
+        } else if (item is Ventas) {
+          final ventasRef = FirebaseFirestore.instance
+              .collection('cajas')
+              .doc(item.IDcaja)
+              .collection('ventas');
+
+         
+          final querySnapshot =
+              await ventasRef.where('ventaId', isEqualTo: item.IDventa).get();
+
+          if (querySnapshot.docs.isEmpty) {
+            messenger.showSnackBar(
+              SnackBar(
+                  content: Text('No se encontró la venta #${item.IDventa}')),
+            );
+            return;
+          }
+
+          final docId = querySnapshot.docs.first.id;
+
+          await ventasRef.doc(docId).update({'eliminada': true});
+
+          messenger.showSnackBar(
+            const SnackBar(content: Text('Venta eliminada correctamente')),
+          );
+        }
+      } catch (e) {
+        messenger.showSnackBar(
+          SnackBar(content: Text('Error al eliminar: $e')),
+        );
       }
     }
 
+    // Mensajes de confirmación
     if (item is Usuarios) {
       mensaje = "¿Estás seguro de que deseas eliminar a ${item.username}?";
     } else if (item is Pedidos) {
-      mensaje =
-          "¿Estás seguro de que deseas eliminar el pedido de ${item.cliente}?";
+      mensaje = "¿Estás seguro de que deseas eliminar el pedido de ${item.cliente}?";
       eliminarColor = Colors.red;
     } else if (item is Productos) {
       mensaje = "¿Estás seguro de que deseas eliminar ${item.productoname}?";
+    } else if (item is Ventas) {
+      mensaje = "¿Estás seguro de que deseas eliminar la venta #${item.IDventa}?";
+      eliminarColor = Colors.red;
     } else {
       return null; 
     }
@@ -46,8 +83,7 @@ class DeleteDialog {
     return showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
-        final brightness = Theme.of(context).brightness;
-        final isDark = brightness == Brightness.dark;
+        final isDark = Theme.of(context).brightness == Brightness.dark;
 
         return AlertDialog(
           backgroundColor: isDark ? const Color(0xFF2C2C2E) : Colors.white,
@@ -56,36 +92,31 @@ class DeleteDialog {
             style: GoogleFonts.montserrat(
               fontSize: 17,
               fontWeight: FontWeight.bold,
-              color:
-                  isDark ? Colors.white : const Color.fromARGB(255, 81, 81, 81),
+              color: isDark ? Colors.white : const Color.fromARGB(255, 81, 81, 81),
             ),
           ),
-          actions: <Widget>[
+          actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
               child: Text(
                 'Cancelar',
                 style: GoogleFonts.montserrat(
                   fontSize: 15,
-                  color: isDark
-                      ? Colors.white70
-                      : const Color.fromARGB(255, 81, 81, 81),
+                  color: isDark ? Colors.white70 : const Color.fromARGB(255, 81, 81, 81),
                 ),
               ),
             ),
             TextButton(
               onPressed: () async {
                 await eliminar();
-                onDelete();
+                onDelete(); 
                 Navigator.pop(context, true);
               },
               child: Text(
                 "Eliminar",
                 style: GoogleFonts.montserrat(
                   fontSize: 15,
-                 color: isDark
-                      ? Colors.white70
-                      : const Color.fromARGB(255, 81, 81, 81),
+                  color: eliminarColor,
                 ),
               ),
             ),

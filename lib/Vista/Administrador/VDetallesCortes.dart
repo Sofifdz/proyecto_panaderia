@@ -6,7 +6,6 @@ import 'package:proyecto_panaderia/Controlador/VentaSegmentedControl.dart';
 import 'package:proyecto_panaderia/Modelo/Ventas.dart';
 import 'package:proyecto_panaderia/Vista/Administrador/VTicketA.dart';
 
-
 class VDetallesCortes extends StatefulWidget {
   final String cajaId;
 
@@ -103,7 +102,8 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
             children: [
               /// --- Resumen inicial ---
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -125,7 +125,6 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
                 ),
               ),
 
-              /// --- SEGMENTED CONTROL (desde el widget externo) ---
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                 child: VentaSegmentedControl(
@@ -138,7 +137,6 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
                 ),
               ),
 
-              /// --- LISTA DE VENTAS ---
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance
@@ -148,7 +146,8 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
                       .snapshots(),
                   builder: (context, snapshotVentas) {
                     if (snapshotVentas.hasError) {
-                      return Center(child: Text('Error: ${snapshotVentas.error}'));
+                      return Center(
+                          child: Text('Error: ${snapshotVentas.error}'));
                     }
 
                     if (!snapshotVentas.hasData) {
@@ -159,15 +158,24 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
 
                     final ventasFiltradas = todasVentas.where((doc) {
                       final data = doc.data() as Map<String, dynamic>;
-                      final esPedido = data['desdePedido'] == true;
 
+                      
+                      if (tipoVentaFiltro == 'eliminadas') {
+                        return data['eliminada'] == true;
+                      }
+
+                      
+                      if (data['eliminada'] == true) return false;
+
+                      final esPedido = data['desdePedido'] == true;
                       if (esPedido) {
                         return tipoVentaFiltro == 'todas' ||
                             tipoVentaFiltro == 'pan';
                       }
 
                       final tipo = determinarTipoVenta(data['productos'] ?? []);
-                      return tipoVentaFiltro == 'todas' || tipo == tipoVentaFiltro;
+                      return tipoVentaFiltro == 'todas' ||
+                          tipo == tipoVentaFiltro;
                     }).toList();
 
                     double totalVentas =
@@ -185,11 +193,13 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
                           .snapshots(),
                       builder: (context, snapshotPagos) {
                         if (snapshotPagos.hasError) {
-                          return Center(child: Text('Error: ${snapshotPagos.error}'));
+                          return Center(
+                              child: Text('Error: ${snapshotPagos.error}'));
                         }
 
                         if (!snapshotPagos.hasData) {
-                          return const Center(child: CircularProgressIndicator());
+                          return const Center(
+                              child: CircularProgressIndicator());
                         }
 
                         final pagos = snapshotPagos.data!.docs;
@@ -240,22 +250,27 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
                                     child: Card(
                                       color: theme.brightness == Brightness.dark
                                           ? const Color(0xFF2C2C2E)
-                                          : const Color.fromARGB(146, 225, 225, 225),
+                                          : const Color.fromARGB(
+                                              146, 225, 225, 225),
                                       margin: const EdgeInsets.all(10.0),
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
                                         children: [
                                           Flexible(
                                             child: Text(
                                               tipo == 'pago'
                                                   ? 'Pago de\n${data['nombre'] ?? '---'}'
-                                                  : data['desdePedido'] == true &&
-                                                          data['cliente'] != null
+                                                  : data['desdePedido'] ==
+                                                              true &&
+                                                          data['cliente'] !=
+                                                              null
                                                       ? '${data['cliente']}'
                                                       : '#${index + 1}',
                                               style: GoogleFonts.montserrat(
                                                 fontSize: 15,
-                                                color: theme.brightness == Brightness.dark
+                                                color: theme.brightness ==
+                                                        Brightness.dark
                                                     ? const Color(0xFFB0B0B0)
                                                     : Colors.black,
                                               ),
@@ -268,14 +283,17 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
                                             '\$${monto.toStringAsFixed(2)}',
                                             style: GoogleFonts.montserrat(
                                               fontSize: 20,
-                                              color: theme.brightness == Brightness.dark
+                                              color: theme.brightness ==
+                                                      Brightness.dark
                                                   ? const Color(0xFFB0B0B0)
                                                   : Colors.black,
                                             ),
                                           ),
                                           Text(
-                                            DateFormat('dd/MM/yyyy hh:mm a').format(fecha),
-                                            style: GoogleFonts.montserrat(fontSize: 14),
+                                            DateFormat('dd/MM/yyyy hh:mm a')
+                                                .format(fecha),
+                                            style: GoogleFonts.montserrat(
+                                                fontSize: 14),
                                           ),
                                           if (tipo == 'venta')
                                             IconButton(
@@ -283,12 +301,14 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
                                               color: Colors.green[800],
                                               onPressed: () {
                                                 final ventaObj =
-                                                    Ventas.fromFirestoreData(data);
+                                                    Ventas.fromFirestoreData(
+                                                        data);
                                                 Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
                                                     builder: (context) =>
-                                                        VTicketA(venta: ventaObj),
+                                                        VTicketA(
+                                                            venta: ventaObj),
                                                   ),
                                                 );
                                               },
@@ -319,7 +339,7 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
     );
   }
 
-  /// --- Resumen inferior ---
+
   Widget _resumenCaja(String label, double value, {bool isBold = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

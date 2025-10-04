@@ -14,9 +14,9 @@ class VentaSegmentedControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Colores
+   
     const colorBorder = Color.fromARGB(255, 60, 120, 80);
-    const colorSelected = Color.fromARGB(255, 60, 120, 80); // verde más oscuro
+    const colorSelected = Color.fromARGB(255, 60, 120, 80); 
     const colorUnselected = Colors.white;
     const colorPressed = Color.fromARGB(80, 60, 120, 80);
 
@@ -39,11 +39,11 @@ class VentaSegmentedControl extends StatelessWidget {
 
   Widget _buildChild(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 5),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 7),
       child: Text(
         label,
         style: GoogleFonts.montserrat(
-          fontSize: 14,
+          fontSize: 13,
           fontWeight: FontWeight.w600,
           color: value == selectedValue ? Colors.white : Colors.black87,
         ),

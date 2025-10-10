@@ -25,239 +25,246 @@ class _VPersonalState extends State<VPersonal> {
   TextEditingController _searchController = TextEditingController();
   String _query = "";
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  void actualizarEmpleados() {
-    setState(() {});
-  }
-
-  void _onSearchChanged(String value) {
-    setState(() {
-      _query = value;
-    });
-  }
-
+  void actualizarEmpleados() => setState(() {});
+  void _onSearchChanged(String value) => setState(() => _query = value);
   void _clearSearch() {
     _searchController.clear();
     _onSearchChanged('');
   }
 
-  void _actualizar() {
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(160, 133, 203, 144),
-        leading: Builder(builder: (context) {
-          return IconButton(
-            icon: Icon(
-              Icons.menu,
-              color: theme.brightness == Brightness.dark
-                  ? Colors.white
-                  : Color.fromARGB(255, 81, 81, 81),
-              size: 30,
+        toolbarHeight: 90,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isDark
+                  ? [Colors.green.shade900, Colors.green.shade700]
+                  : [Colors.green.shade400, Colors.green.shade300],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-          );
-        }),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.person_add_alt_1_rounded,
-              color: theme.brightness == Brightness.dark
-                  ? Colors.white
-                  : Color.fromARGB(255, 81, 81, 81),
-              size: 30,
-            ),
-            onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => VAgregarPersonal(
-                            usuarioId: widget.usuarioId,
-                            username: widget.username,
-                          )));
-            },
-          )
-        ],
-        title: Center(
-          child: Text(
-            "Personal",
-            style: GoogleFonts.montserrat(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-              color: theme.brightness == Brightness.dark
-                  ? Colors.white
-                  : Color.fromARGB(255, 81, 81, 81),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(25),
+              bottomRight: Radius.circular(25),
             ),
           ),
         ),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: Icon(Icons.menu,
+                size: 30, color: isDark ? Colors.white : Colors.black87),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
+        title: Text(
+          "Personal",
+          style: GoogleFonts.montserrat(
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : Colors.black87,
+          ),
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.person_add_alt_1_rounded,
+                color: isDark ? Colors.white : Colors.black87, size: 30),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => VAgregarPersonal(
+                    usuarioId: widget.usuarioId,
+                    username: widget.username,
+                  ),
+                ),
+              );
+            },
+          )
+        ],
       ),
       drawer: DrawerConfig.administradorDrawer(
           context, widget.usuarioId, widget.username),
-      body: cuerpo(context),
-    );
-  }
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection('users').snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting)
+            return const Center(child: CircularProgressIndicator());
 
-  Widget cuerpo(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('users').snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(
-            child: Text(
-              "No hay empleados registrados",
-              style: GoogleFonts.montserrat(fontSize: 20, color: Colors.red),
-            ),
-          );
-        }
-
-        final empleadosList = snapshot.data!.docs
-            .map((doc) => Usuarios.fromFirestore(
-                doc as QueryDocumentSnapshot<Map<String, dynamic>>))
-            .toList();
-
-        return Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Column(
-            children: [
-              ComponentInputSearch(
-                searchController: _searchController,
-                onChanged: _onSearchChanged,
-                onClear: _clearSearch,
-                showFilterSheet: () {}, 
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty)
+            return Center(
+              child: Text(
+                "No hay empleados registrados",
+                style: GoogleFonts.montserrat(
+                    fontSize: 18, color: Colors.redAccent),
               ),
-              const SizedBox(height: 10),
-              Expanded(
-                child: Builder(
-                  builder: (context) {
-                    final filteredList = empleadosList
-                        .where((e) => e.username
-                            .toLowerCase()
-                            .contains(_query.toLowerCase()))
-                        .toList();
+            );
 
-                    if (filteredList.isEmpty) {
-                      return Center(
-                        child: Text(
-                          "No hay resultados",
-                          style: GoogleFonts.montserrat(
-                            fontSize: 20,
-                            color: Colors.red,
+          final empleadosList = snapshot.data!.docs
+              .map((doc) => Usuarios.fromFirestore(
+                  doc as QueryDocumentSnapshot<Map<String, dynamic>>))
+              .toList();
+
+          final filteredList = empleadosList
+              .where((e) =>
+                  e.username.toLowerCase().contains(_query.toLowerCase()))
+              .toList();
+
+          return Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF2C2C2E)
+                        : const Color.fromARGB(146, 225, 225, 225),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Row(
+                    children: [
+                      Icon(Icons.search,
+                          color: isDark ? Colors.white70 : Colors.black54),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: _onSearchChanged,
+                          style: TextStyle(
+                              color: isDark ? Colors.white : Colors.black87),
+                          decoration: InputDecoration(
+                            hintText: 'Buscar empleado',
+                            hintStyle: TextStyle(
+                                color:
+                                    isDark ? Colors.white54 : Colors.black54),
+                            border: InputBorder.none,
                           ),
                         ),
-                      );
-                    }
-
-                    return ListView.builder(
-                      itemCount: filteredList.length,
-                      itemBuilder: (context, index) {
-                        final usuario = filteredList[index];
-
-                        return Dismissible(
-                          key: Key(usuario.id),
-                          direction: DismissDirection.endToStart,
-                          confirmDismiss: (direction) async {
-                            return await DeleteDialog.showDeleteDialog(
-                              context: context,
-                              item: usuario,
-                              onDelete: actualizarEmpleados,
-                            );
-                          },
-                          background: Container(
-                            color: Colors.red,
-                            alignment: Alignment.centerRight,
-                            child:
-                                const Icon(Icons.delete, color: Colors.white),
+                      ),
+                      if (_query.isNotEmpty)
+                        GestureDetector(
+                          onTap: _clearSearch,
+                          child: Icon(Icons.close,
+                              color: isDark ? Colors.white70 : Colors.black54),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Expanded(
+                  child: filteredList.isEmpty
+                      ? Center(
+                          child: Text(
+                            "No hay resultados",
+                            style: GoogleFonts.montserrat(
+                                fontSize: 18, color: Colors.redAccent),
                           ),
-                          child: Card(
-                            color: theme.brightness == Brightness.dark
-                                ? const Color(0xFF2C2C2E)
-                                : const Color.fromARGB(146, 225, 225, 225),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => VEditarPersonal(
-                                      usuarioId: widget.usuarioId,
-                                      username: widget.username,
-                                      user: usuario,
-                                      updateUser: (Usuarios updatedUser) async {
-                                        await FirebaseFirestore.instance
-                                            .collection('users')
-                                            .doc(updatedUser.id)
-                                            .update(updatedUser.toFirestore());
-                                      },
-                                    ),
-                                  ),
-                                ).then((_) => actualizarEmpleados());
+                        )
+                      : ListView.builder(
+                          itemCount: filteredList.length,
+                          itemBuilder: (context, index) {
+                            final usuario = filteredList[index];
+                            return Dismissible(
+                              key: Key(usuario.id),
+                              direction: DismissDirection.endToStart,
+                              confirmDismiss: (direction) async {
+                                return await DeleteDialog.showDeleteDialog(
+                                  context: context,
+                                  item: usuario,
+                                  onDelete: actualizarEmpleados,
+                                );
                               },
-                              child: SizedBox(
-                                height: 100,
-                                child: Center(
-                                  child: ListTile(
-                                    leading: Icon(
-                                      Icons.person,
+                              background: Container(
+                                color: Colors.red,
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.only(right: 20),
+                                child: const Icon(Icons.delete,
+                                    color: Colors.white),
+                              ),
+                              child: Container(
+                                margin: const EdgeInsets.only(bottom: 16),
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? Colors.grey[850]
+                                      : Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(15),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: isDark
+                                          ? Colors.black.withOpacity(0.2)
+                                          : Colors.grey.withOpacity(0.2),
+                                      blurRadius: 6,
+                                      offset: const Offset(2, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 12),
+                                  leading: Icon(Icons.person,
                                       size: 40,
-                                      color: theme.brightness == Brightness.dark
-                                          ? const Color(0xFFB0B0B0)
-                                          : Colors.black,
-                                    ),
-                                    title: Text(
-                                      "Nombre",
-                                      style: GoogleFonts.montserrat(
-                                        fontSize: 15,
-                                        color:
-                                            theme.brightness == Brightness.dark
-                                                ? const Color(0xFFB0B0B0)
-                                                : Colors.black,
-                                      ),
-                                    ),
-                                    subtitle: Text(
-                                      usuario.username,
-                                      style: GoogleFonts.montserrat(
-                                        fontSize: 20,
-                                        color:
-                                            theme.brightness == Brightness.dark
-                                                ? Colors.white
-                                                : Colors.black,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                      color: isDark
+                                          ? Colors.white70
+                                          : Colors.black87),
+                                  title: Text(
+                                    usuario.username,
+                                    style: GoogleFonts.montserrat(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDark
+                                          ? Colors.white
+                                          : Colors.black87,
                                     ),
                                   ),
+                                  subtitle: Text(
+                                    "Rol: ${usuario.role}",
+                                    style: GoogleFonts.montserrat(
+                                      fontSize: 16,
+                                      color: isDark
+                                          ? Colors.white60
+                                          : Colors.black54,
+                                    ),
+                                  ),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => VEditarPersonal(
+                                          usuarioId: widget.usuarioId,
+                                          username: widget.username,
+                                          user: usuario,
+                                          updateUser:
+                                              (Usuarios updatedUser) async {
+                                            await FirebaseFirestore.instance
+                                                .collection('users')
+                                                .doc(updatedUser.id)
+                                                .update(
+                                                    updatedUser.toFirestore());
+                                          },
+                                        ),
+                                      ),
+                                    ).then((_) => actualizarEmpleados());
+                                  },
                                 ),
                               ),
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  },
+                            );
+                          },
+                        ),
                 ),
-              ),
-            ],
-          ),
-        );
-      },
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:board_datetime_picker/board_datetime_picker.dart';
 import 'package:proyecto_panaderia/Controlador/PedidoController.dart';
-import 'package:proyecto_panaderia/Vista/Administrador/VPedidosA.dart';
 
 class VAgregarPedidoA extends StatefulWidget {
   final String usuarioId;
@@ -24,263 +23,183 @@ class _VAgregarPedidoAState extends State<VAgregarPedidoA> {
   final precioController = TextEditingController();
   final fechaController = BoardDateTimeTextController();
   DateTime date = DateTime.now();
-
   final formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(160, 133, 203, 144),
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_rounded,
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white
-                : Color.fromARGB(255, 81, 81, 81),
-            size: 30,
+        toolbarHeight: 90,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isDark
+                  ? [Colors.green.shade900, Colors.green.shade700]
+                  : [Colors.green.shade400, Colors.green.shade300],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(25),
+              bottomRight: Radius.circular(25),
+            ),
           ),
-          onPressed: () {
-            Navigator.pop(context);
-
-          },
         ),
-        actions: [agregar(context)],
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_rounded,
+              color: isDark ? Colors.white : Colors.black87, size: 30),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Agregar Pedido',
+          style: GoogleFonts.montserrat(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: isDark ? Colors.white : Colors.black87),
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.save,
+                size: 30, color: isDark ? Colors.greenAccent : Colors.green),
+            onPressed: () {
+              _pedidoController.guardarPedido(
+                context: context,
+                cliente: clienteController.text,
+                descripcion: descripcionController.text,
+                precio: precioController.text,
+                fecha: date,
+              );
+            },
+          ),
+        ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
         child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Componentes("Cliente", clienteController),
-              Componentes("Descripción", descripcionController,
-                  isDescription: true),
-              Componentes("Precio", precioController),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Container(
-                    height: 65,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? const Color(
-                              0xFF2E3B3B) 
-                          : const Color.fromARGB(160, 133, 203, 144),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        Text(
-                          'Fecha de entrega: ',
-                          style: GoogleFonts.montserrat(
-                            fontSize: 18,
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? const Color(0xFFB0B0B0)
-                                    : Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () async {
-                            final isDark =
-                                Theme.of(context).brightness == Brightness.dark;
-
-                            DateTime? selectedDate = await showDatePicker(
-                              context: context,
-                              initialDate: date,
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime(2101),
-                              builder: (context, child) {
-                                return Theme(
-                                  data: isDark
-                                      ? ThemeData.dark().copyWith(
-                                          colorScheme: const ColorScheme.dark(
-                                            primary: Color(0xFF8BC34A),
-                                            onPrimary: Colors.black,
-                                            onSurface: Colors.white,
-                                          ),
-                                          dialogBackgroundColor:
-                                              Color(0xFF1E1E1E),
-                                          textButtonTheme: TextButtonThemeData(
-                                            style: TextButton.styleFrom(
-                                              foregroundColor: Colors.white,
-                                              textStyle: GoogleFonts.montserrat(
-                                                  fontSize: 16),
-                                            ),
-                                          ),
-                                        )
-                                      : ThemeData.light().copyWith(
-                                          colorScheme: const ColorScheme.light(
-                                            primary: Colors.green,
-                                            onPrimary: Colors.white,
-                                            onSurface: Colors.black,
-                                          ),
-                                          dialogBackgroundColor:
-                                              const Color.fromARGB(
-                                                  255, 240, 240, 240),
-                                          textButtonTheme: TextButtonThemeData(
-                                            style: TextButton.styleFrom(
-                                              foregroundColor: Colors.black,
-                                              textStyle: GoogleFonts.montserrat(
-                                                  fontSize: 16),
-                                            ),
-                                          ),
-                                        ),
-                                  child: child!,
-                                );
-                              },
-                            );
-
-                            if (selectedDate != null && selectedDate != date) {
-                              TimeOfDay? selectedTime = await showTimePicker(
-                                context: context,
-                                initialTime: TimeOfDay(
-                                    hour: date.hour, minute: date.minute),
-                                builder: (context, child) {
-                                  return Theme(
-                                    data: isDark
-                                        ? ThemeData.dark().copyWith(
-                                            colorScheme: const ColorScheme.dark(
-                                              primary: Color(0xFF8BC34A),
-                                              onPrimary: Colors.black,
-                                              onSurface: Colors.white,
-                                            ),
-                                            dialogBackgroundColor:
-                                                Color(0xFF1E1E1E),
-                                            textButtonTheme:
-                                                TextButtonThemeData(
-                                              style: TextButton.styleFrom(
-                                                foregroundColor: Colors.white,
-                                                textStyle:
-                                                    GoogleFonts.montserrat(
-                                                        fontSize: 16),
-                                              ),
-                                            ),
-                                          )
-                                        : ThemeData.light().copyWith(
-                                            colorScheme:
-                                                const ColorScheme.light(
-                                              primary: Colors.green,
-                                              onPrimary: Colors.white,
-                                              onSurface: Colors.black,
-                                            ),
-                                            dialogBackgroundColor:
-                                                const Color.fromARGB(
-                                                    255, 240, 240, 240),
-                                            textButtonTheme:
-                                                TextButtonThemeData(
-                                              style: TextButton.styleFrom(
-                                                foregroundColor: Colors.black,
-                                                textStyle:
-                                                    GoogleFonts.montserrat(
-                                                        fontSize: 16),
-                                              ),
-                                            ),
-                                          ),
-                                    child: child!,
-                                  );
-                                },
-                              );
-
-                              if (selectedTime != null) {
-                                setState(() {
-                                  date = DateTime(
-                                    selectedDate.year,
-                                    selectedDate.month,
-                                    selectedDate.day,
-                                    selectedTime.hour,
-                                    selectedTime.minute,
-                                  );
-                                  fechaController.setDate(date);
-                                });
-                              }
-                            }
-                          },
-                          child: Text(
-                            BoardDateFormat('dd/MM/yyyy HH:mm').format(date),
-                            style: GoogleFonts.montserrat(
-                              fontSize: 18,
-                              color: Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? Colors.white
-                                  : Colors.black,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              )
-            ],
+          child: Form(
+            key: formKey,
+            child: Column(
+              children: [
+                _buildTextField(clienteController, "Cliente", "Cliente es requerido"),
+                const SizedBox(height: 20),
+                _buildTextField(descripcionController, "Descripción", "Descripción es requerida",
+                    isDescription: true),
+                const SizedBox(height: 20),
+                _buildTextField(precioController, "Precio", "Precio es requerido",
+                    isNumber: true),
+                const SizedBox(height: 25),
+                _buildDatePicker(context),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget Componentes(String titulo, TextEditingController controller,
-      {bool isDescription = false}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildTextField(TextEditingController controller, String label, String errorText,
+      {bool isDescription = false, bool isNumber = false}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return TextFormField(
+      controller: controller,
+      keyboardType: isNumber
+          ? TextInputType.number
+          : isDescription
+              ? TextInputType.multiline
+              : TextInputType.text,
+      textInputAction: isDescription ? TextInputAction.newline : TextInputAction.done,
+      maxLines: isDescription ? null : 1,
+      style: GoogleFonts.montserrat(color: isDark ? Colors.white : Colors.black87),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: GoogleFonts.montserrat(color: isDark ? Colors.white70 : Colors.black54),
+        filled: true,
+        fillColor: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.green, width: 2),
+        ),
+      ),
+      validator: (value) => (value == null || value.isEmpty) ? errorText : null,
+    );
+  }
+
+  Widget _buildDatePicker(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      height: 65,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+        border: Border.all(color: Colors.green, width: 1.5),
+      ),
+      child: Row(
         children: [
           Text(
-            titulo,
+            'Fecha de entrega: ',
             style: GoogleFonts.montserrat(
-              fontSize: 25,
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white
-                  : Colors.black,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
+              color: isDark ? Colors.white70 : Colors.black87,
             ),
           ),
-          const SizedBox(height: 10),
-          Container(
-            padding: isDescription ? const EdgeInsets.all(.0) : EdgeInsets.zero,
-            child: TextFormField(
-              controller: controller,
-              keyboardType:
-                  isDescription ? TextInputType.multiline : TextInputType.text,
-              textInputAction: isDescription
-                  ? TextInputAction.newline
-                  : TextInputAction.done,
-              maxLines: isDescription ? null : 1,
-              decoration: InputDecoration(
-                hintText: isDescription
-                    ? 'Escribe la descripción del pedido'
-                    : 'Ingresa $titulo',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+          TextButton(
+            onPressed: () async {
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+
+              DateTime? selectedDate = await showDatePicker(
+                context: context,
+                initialDate: date,
+                firstDate: DateTime(2000),
+                lastDate: DateTime(2101),
+                builder: (context, child) {
+                  return Theme(
+                    data: isDark ? ThemeData.dark() : ThemeData.light(),
+                    child: child!,
+                  );
+                },
+              );
+
+              if (selectedDate != null && selectedDate != date) {
+                TimeOfDay? selectedTime = await showTimePicker(
+                  context: context,
+                  initialTime: TimeOfDay(hour: date.hour, minute: date.minute),
+                  builder: (context, child) {
+                    return Theme(data: isDark ? ThemeData.dark() : ThemeData.light(), child: child!);
+                  },
+                );
+
+                if (selectedTime != null) {
+                  setState(() {
+                    date = DateTime(
+                      selectedDate.year,
+                      selectedDate.month,
+                      selectedDate.day,
+                      selectedTime.hour,
+                      selectedTime.minute,
+                    );
+                    fechaController.setDate(date);
+                  });
+                }
+              }
+            },
+            child: Text(
+              BoardDateFormat('dd/MM/yyyy HH:mm').format(date),
+              style: GoogleFonts.montserrat(
+                fontSize: 18,
+                color: isDark ? Colors.white : Colors.black87,
               ),
             ),
           ),
         ],
       ),
     );
-  }
-
-  Widget agregar(BuildContext context) {
-    return IconButton(
-        onPressed: () {
-          _pedidoController.guardarPedido(
-            context: context,
-            cliente: clienteController.text,
-            descripcion: descripcionController.text,
-            precio: precioController.text,
-            fecha: date,
-          );
-        },
-        icon: Icon(
-          Icons.save,
-          color: Theme.of(context).brightness == Brightness.dark
-              ? const Color.fromARGB(150, 37, 255, 44)
-              : Colors.green,
-          size: 30,
-        ));
   }
 }

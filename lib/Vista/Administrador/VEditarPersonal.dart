@@ -24,16 +24,12 @@ class VEditarPersonal extends StatefulWidget {
 }
 
 class _VEditarPersonalState extends State<VEditarPersonal> {
-  var usernameController;
-  var emailController;
-  var passwordController;
-  var rolController;
-  var idcontroller;
+  late TextEditingController usernameController;
+  late TextEditingController emailController;
+  late TextEditingController passwordController;
   final formKey = GlobalKey<FormState>();
-
   bool isVisible = false;
-
-  String? _selectedValue = "Empleado";
+  String? _selectedValue;
 
   @override
   void initState() {
@@ -46,20 +42,45 @@ class _VEditarPersonalState extends State<VEditarPersonal> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(160, 133, 203, 144),
+        toolbarHeight: 90,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_rounded,
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white
-                : Color.fromARGB(255, 81, 81, 81),
+            color: isDark ? Colors.white : Colors.black87,
             size: 30,
           ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Editar Personal',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : Colors.black87,
+          ),
+        ),
+        centerTitle: true,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isDark
+                  ? [Colors.green.shade900, Colors.green.shade700]
+                  : [Colors.green.shade400, Colors.green.shade300],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(25),
+              bottomRight: Radius.circular(25),
+            ),
+          ),
         ),
         actions: [
           EditarPersonalController.Editar(
@@ -70,113 +91,159 @@ class _VEditarPersonalState extends State<VEditarPersonal> {
             usernameController,
             passwordController,
             _selectedValue,
-          )
+          ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(20.0, 50.0, 20.0, 50.0),
+      body: SafeArea(
         child: SingleChildScrollView(
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextFormField(
-                  controller: emailController,
-                  decoration: InputDecoration(
-                    labelText: "Email",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    prefixIcon: const Icon(Icons.person),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Nombre es requerido";
-                    }
-                    return null;
-                  },
-                  enabled: false,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF2C2C2E) : Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: isDark
+                      ? Colors.black.withOpacity(0.3)
+                      : Colors.grey.withOpacity(0.3),
+                  blurRadius: 10,
+                  offset: const Offset(2, 4),
                 ),
-                const SizedBox(height: 15),
-                TextFormField(
-                  controller: usernameController,
-                  decoration: InputDecoration(
-                    labelText: "Username",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    prefixIcon: const Icon(Icons.person),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Usuario es requerido";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 15),
-                TextFormField(
-                  controller: passwordController,
-                  decoration: InputDecoration(
-                    labelText: "Password",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    prefixIcon: const Icon(Icons.lock),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        isVisible ? Icons.visibility : Icons.visibility_off,
+              ],
+            ),
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Email (disabled)
+                  TextFormField(
+                    controller: emailController,
+                    enabled: false,
+                    decoration: InputDecoration(
+                      labelText: "Email",
+                      labelStyle: TextStyle(
+                        color: isDark ? Colors.white70 : Colors.grey[700],
+                        fontWeight: FontWeight.w500,
                       ),
-                      onPressed: () {
+                      filled: true,
+                      fillColor: isDark ? Colors.white12 : Colors.grey.shade200,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      prefixIcon: const Icon(Icons.person),
+                    ),
+                    style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+                  ),
+                  const SizedBox(height: 25),
+
+                  // Username
+                  TextFormField(
+                    controller: usernameController,
+                    decoration: InputDecoration(
+                      labelText: "Username",
+                      labelStyle: TextStyle(
+                        color: isDark ? Colors.white70 : Colors.grey[700],
+                        fontWeight: FontWeight.w500,
+                      ),
+                      filled: true,
+                      fillColor: isDark ? Colors.white12 : Colors.grey.shade200,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      prefixIcon: const Icon(Icons.person),
+                    ),
+                    style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Usuario es requerido";
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 25),
+
+                  // Password
+                  TextFormField(
+                    controller: passwordController,
+                    obscureText: !isVisible,
+                    decoration: InputDecoration(
+                      labelText: "Password",
+                      labelStyle: TextStyle(
+                        color: isDark ? Colors.white70 : Colors.grey[700],
+                        fontWeight: FontWeight.w500,
+                      ),
+                      filled: true,
+                      fillColor: isDark ? Colors.white12 : Colors.grey.shade200,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      prefixIcon: const Icon(Icons.lock),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          isVisible ? Icons.visibility : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            isVisible = !isVisible;
+                          });
+                        },
+                      ),
+                    ),
+                    style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Password es requerido";
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 25),
+
+                  // Role Dropdown
+                  Container(
+                    width: double.infinity,
+                    height: 60,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white12 : Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: DropdownButton<String>(
+                      isExpanded: true,
+                      value: _selectedValue,
+                      underline: const SizedBox(),
+                      items: [
+                        DropdownMenuItem(
+                          value: "Empleado",
+                          child: Center(
+                              child: Text("Empleado",
+                                  style: GoogleFonts.roboto(
+                                      fontSize: 18,
+                                      color: isDark ? Colors.white : Colors.black87))),
+                        ),
+                        DropdownMenuItem(
+                          value: "Administrador",
+                          child: Center(
+                              child: Text("Administrador",
+                                  style: GoogleFonts.roboto(
+                                      fontSize: 18,
+                                      color: isDark ? Colors.white : Colors.black87))),
+                        ),
+                      ],
+                      onChanged: (String? newValue) {
                         setState(() {
-                          isVisible = !isVisible;
+                          _selectedValue = newValue;
                         });
                       },
                     ),
                   ),
-                  obscureText: !isVisible,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Password es requerido";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 25),
-                Container(
-                  width: 400,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: Colors.green,
-                  ),
-                  child: DropdownButton<String>(
-                    isExpanded: true,
-                    value: _selectedValue,
-                    items: [
-                      DropdownMenuItem<String>(
-                        value: "Empleado",
-                        child: Center(
-                            child: Text("Empleado",
-                                style: GoogleFonts.roboto(fontSize: 20))),
-                      ),
-                      DropdownMenuItem<String>(
-                        value: "Administrador",
-                        child: Center(
-                            child: Text("Administrador",
-                                style: GoogleFonts.roboto(fontSize: 20))),
-                      ),
-                    ],
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedValue = newValue;
-                      });
-                      print('Seleccionado: $newValue');
-                    },
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

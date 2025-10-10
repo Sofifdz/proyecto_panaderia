@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:proyecto_panaderia/Controlador/CajaController.dart';
@@ -14,11 +13,45 @@ class Login extends StatefulWidget {
   State<Login> createState() => _LoginState();
 }
 
-class _LoginState extends State<Login> {
+class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
   final _emailcontroller = TextEditingController();
   final _passwordcontroller = TextEditingController();
   bool isVisible = false;
   final formKey = GlobalKey<FormState>();
+
+  late AnimationController _animController;
+  late Animation<Offset> _slideLogo;
+  late Animation<Offset> _slideFields;
+  late Animation<double> _fadeFields;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _animController =
+        AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+
+    _slideLogo = Tween<Offset>(
+      begin: const Offset(0, -0.5),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
+
+    _slideFields = Tween<Offset>(
+      begin: const Offset(0, 0.5),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
+
+    _fadeFields = Tween<double>(begin: 0, end: 1).animate(
+        CurvedAnimation(parent: _animController, curve: Curves.easeOut));
+
+    _animController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
 
   Future<void> _login() async {
     final email = _emailcontroller.text.trim();
@@ -32,8 +65,6 @@ class _LoginState extends State<Login> {
         );
         return;
       }
-
-   
 
       if (mounted) {
         if (usuario.role == 'Administrador') {
@@ -79,189 +110,224 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final size = MediaQuery.of(context).size;
+
+    // Colores personalizados
+    final headerGradientColors = isDarkMode
+        ? [Colors.green.shade900, Colors.green.shade700]
+        : [Colors.green.shade400, Colors.green.shade200];
+
+    final fieldBackground = isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100;
+    final containerBackground = isDarkMode ? Colors.grey.shade50 : Colors.white;
+    final iconColor = isDarkMode ? Colors.green.shade200 : Colors.green.shade700;
+    final buttonColor = isDarkMode ? Colors.green.shade600 : Colors.green.shade300;
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final secondaryTextColor = isDarkMode ? Colors.white60 : Colors.black54;
 
     return Scaffold(
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: isDarkMode
-            ? const BoxDecoration(
+        color: isDarkMode ? Colors.grey[900] : Colors.grey[50],
+        child: Stack(
+          children: [
+            // Header decorativo con gradiente verde
+            Container(
+              height: size.height * 0.25,
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFF0F2027), Color(0xFF203A43)],
+                  colors: headerGradientColors,
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-              )
-            : null,
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(40.0, 150.0, 40.0, 40.0),
-                child: Container(
-                  height: 600,
-                  padding: const EdgeInsets.all(25.0),
-                  decoration: BoxDecoration(
-                    color: isDarkMode
-                        ? const Color(0xFF1E1E1E)
-                        : const Color.fromARGB(255, 126, 178, 202),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: isDarkMode
-                            ? Colors.black.withOpacity(0.5)
-                            : Colors.grey.withOpacity(0.3),
-                        blurRadius: 10,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  child: Form(
-                    key: formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Center(
-                          child: Icon(
-                            Icons.storefront_outlined,
-                            color: isDarkMode ? Colors.white70 : Colors.white,
-                            size: 100,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        Center(
-                          child: Text(
-                            "Iniciar Sesión",
-                            style: GoogleFonts.roboto(
-                              fontSize: 27,
-                              fontWeight: FontWeight.bold,
-                              color: isDarkMode ? Colors.white : Colors.black,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Divider(
-                          color: isDarkMode
-                              ? Colors.white30
-                              : Colors.black.withOpacity(0.3),
-                          thickness: 1.2,
-                          indent: 10,
-                          endIndent: 10,
-                        ),
-                        const SizedBox(height: 20),
-                        txt(context, "Correo", isDarkMode),
-                        const SizedBox(height: 5),
-                        txtField(
-                          context,
-                          _emailcontroller,
-                          Icon(Icons.mail,
-                              color: isDarkMode ? Colors.white70 : null),
-                          null,
-                          false,
-                          isDarkMode,
-                        ),
-                        const SizedBox(height: 20),
-                        txt(context, "Contraseña", isDarkMode),
-                        const SizedBox(height: 5),
-                        txtField(
-                          context,
-                          _passwordcontroller,
-                          Icon(Icons.password,
-                              color: isDarkMode ? Colors.white70 : null),
-                          IconButton(
-                            onPressed: () {
-                              setState(() {
-                                isVisible = !isVisible;
-                              });
-                            },
-                            icon: Icon(
-                              isVisible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                              color: isDarkMode ? Colors.white70 : null,
-                            ),
-                          ),
-                          !isVisible,
-                          isDarkMode,
-                        ),
-                        const SizedBox(height: 30),
-                        Center(
-                          child: SizedBox(
-                            width: double.infinity,
-                            height: 45,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFA6C89A),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              onPressed: () async {
-                                await _login();
-                              },
-                              child: Text(
-                                "Iniciar",
-                                style: GoogleFonts.roboto(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(40),
+                  bottomRight: Radius.circular(40),
                 ),
               ),
-            ],
+            ),
+            Center(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    SlideTransition(
+                      position: _slideLogo,
+                      child: Container(
+                        margin: const EdgeInsets.only(top: 40),
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: containerBackground,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 15,
+                              offset: const Offset(0, 8),
+                            )
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.storefront_rounded,
+                          color: iconColor,
+                          size: 100,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 25),
+                    SlideTransition(
+                      position: _slideFields,
+                      child: FadeTransition(
+                        opacity: _fadeFields,
+                        child: Container(
+                          width: size.width * 0.85,
+                          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 25),
+                          decoration: BoxDecoration(
+                            color: containerBackground,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 25,
+                                offset: const Offset(0, 10),
+                              )
+                            ],
+                          ),
+                          child: Form(
+                            key: formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Text(
+                                  "Bienvenido",
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.roboto(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    color: textColor,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  "Inicia sesión para continuar",
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.roboto(
+                                    fontSize: 16,
+                                    color: secondaryTextColor,
+                                  ),
+                                ),
+                                const SizedBox(height: 30),
+                                _buildTextField(
+                                  label: "Correo",
+                                  controller: _emailcontroller,
+                                  icon: Icons.mail_outline,
+                                  isDarkMode: isDarkMode,
+                                  fieldBackground: fieldBackground,
+                                  iconColor: iconColor,
+                                ),
+                                const SizedBox(height: 20),
+                                _buildTextField(
+                                  label: "Contraseña",
+                                  controller: _passwordcontroller,
+                                  icon: Icons.lock_outline,
+                                  isPassword: true,
+                                  isDarkMode: isDarkMode,
+                                  toggleVisible: () {
+                                    setState(() {
+                                      isVisible = !isVisible;
+                                    });
+                                  },
+                                  visible: isVisible,
+                                  fieldBackground: fieldBackground,
+                                  iconColor: iconColor,
+                                ),
+                                const SizedBox(height: 35),
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  height: 50,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: buttonColor,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                      elevation: 5,
+                                    ),
+                                    onPressed: _login,
+                                    child: Text(
+                                      "Ingresar",
+                                      style: GoogleFonts.roboto(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: textColor,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required String label,
+    required TextEditingController controller,
+    required IconData icon,
+    bool isPassword = false,
+    bool isDarkMode = false,
+    VoidCallback? toggleVisible,
+    bool visible = false,
+    Color? fieldBackground,
+    Color? iconColor,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.roboto(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: isDarkMode ? Colors.white70 : Colors.black87,
           ),
         ),
-      ),
-    );
-  }
-
-  Widget txt(BuildContext context, String texto, bool isDarkMode) {
-    return Text(
-      texto,
-      style: GoogleFonts.roboto(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-        color: isDarkMode ? Colors.white : Colors.black,
-      ),
-    );
-  }
-
-  Widget txtField(
-    BuildContext context,
-    TextEditingController variable,
-    Icon icono,
-    IconButton? iconofinal,
-    bool yesOrNo,
-    bool isDarkMode,
-  ) {
-    return TextFormField(
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return "Campo obligatorio";
-        }
-        return null;
-      },
-      controller: variable,
-      obscureText: yesOrNo,
-      style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
-      decoration: InputDecoration(
-        prefixIcon: icono,
-        suffixIcon: iconofinal,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+        const SizedBox(height: 5),
+        TextFormField(
+          controller: controller,
+          obscureText: isPassword ? !visible : false,
+          validator: (value) =>
+              value == null || value.isEmpty ? "Campo obligatorio" : null,
+          style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87),
+          decoration: InputDecoration(
+            prefixIcon: Icon(icon, color: iconColor),
+            suffixIcon: isPassword
+                ? IconButton(
+                    icon: Icon(
+                      visible ? Icons.visibility : Icons.visibility_off,
+                      color: iconColor,
+                    ),
+                    onPressed: toggleVisible,
+                  )
+                : null,
+            filled: true,
+            fillColor: fieldBackground,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+          ),
         ),
-        filled: true,
-        fillColor: isDarkMode ? const Color(0xFF2C2C2C) : Colors.white,
-      ),
+      ],
     );
   }
 }
-

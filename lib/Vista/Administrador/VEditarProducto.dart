@@ -4,7 +4,6 @@ import 'package:proyecto_panaderia/Controlador/AlmacenController.dart';
 import 'package:proyecto_panaderia/Controlador/EditarProductoController.dart';
 import 'package:proyecto_panaderia/Modelo/Productos.dart';
 
-
 class VEditarProducto extends StatefulWidget {
   final Productos producto;
   final Future<void> Function(Productos) updateProduct;
@@ -24,10 +23,10 @@ class VEditarProducto extends StatefulWidget {
 }
 
 class _VEditarProductoState extends State<VEditarProducto> {
-  var idcontroller;
-  var productonameController;
-  var existenciaController;
-  var precioController;
+  late TextEditingController idcontroller;
+  late TextEditingController productonameController;
+  late TextEditingController existenciaController;
+  late TextEditingController precioController;
   final formKey = GlobalKey<FormState>();
 
   @override
@@ -45,132 +44,213 @@ class _VEditarProductoState extends State<VEditarProducto> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: const Color.fromARGB(160, 133, 203, 144),
-          leading: IconButton(
-            icon: Icon(
-              Icons.arrow_back_rounded,
-              color: theme.brightness == Brightness.dark
-                  ? Colors.white
-                  : Color.fromARGB(255, 81, 81, 81),
-              size: 30,
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-            },
+      appBar: AppBar(
+        toolbarHeight: 90,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_rounded,
+            color: isDark ? Colors.white : Colors.black87,
+            size: 30,
           ),
-          actions: [
-            EditarProductoController.editar(
-              context: context,
-              formKey: formKey,
-              widget: widget,
-              productonameController: productonameController,
-              precioController: precioController,
-              existenciaController: existenciaController,
-            ),
-          ],
+          onPressed: () => Navigator.pop(context),
         ),
-        body: Padding(
-            padding: const EdgeInsets.fromLTRB(20.0, 50.0, 20.0, 50.0),
-            child: SingleChildScrollView(
-              child: Form(
-                  key: formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+        title: Text(
+          'Editar Producto',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : Colors.black87,
+          ),
+        ),
+        centerTitle: true,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isDark
+                  ? [Colors.green.shade900, Colors.green.shade700]
+                  : [Colors.green.shade400, Colors.green.shade300],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(25),
+              bottomRight: Radius.circular(25),
+            ),
+          ),
+        ),
+        actions: [
+          EditarProductoController.editar(
+            context: context,
+            formKey: formKey,
+            widget: widget,
+            productonameController: productonameController,
+            precioController: precioController,
+            existenciaController: existenciaController,
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF2C2C2E) : Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: isDark
+                      ? Colors.black.withOpacity(0.3)
+                      : Colors.grey.withOpacity(0.3),
+                  blurRadius: 10,
+                  offset: const Offset(2, 4),
+                ),
+              ],
+            ),
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Nombre
+                  TextFormField(
+                    controller: productonameController,
+                    decoration: InputDecoration(
+                      labelText: "Nombre",
+                      labelStyle: TextStyle(
+                        color: isDark ? Colors.white70 : Colors.grey[700],
+                        fontWeight: FontWeight.w500,
+                      ),
+                      filled: true,
+                      fillColor: isDark ? Colors.white12 : Colors.grey.shade200,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                    style: TextStyle(
+                        color: isDark ? Colors.white : Colors.black87),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Nombre es requerido";
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 25),
+
+         
+                  Row(
                     children: [
-                      TextFormField(
-                        controller: productonameController,
-                        decoration: InputDecoration(
-                          labelText: "Nombre",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
+                      Expanded(
+                        flex: 5,
+                        child: TextFormField(
+                          enabled: false,
+                          controller: idcontroller,
+                          decoration: InputDecoration(
+                            labelText: "Código",
+                            labelStyle: TextStyle(
+                              color: isDark ? Colors.white70 : Colors.grey[700],
+                              fontWeight: FontWeight.w500,
+                            ),
+                            filled: true,
+                            fillColor:
+                                isDark ? Colors.white12 : Colors.grey.shade200,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
                           ),
+                          style: TextStyle(
+                              color: isDark ? Colors.white : Colors.black87),
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "Nombre es requerido";
-                          }
-                          return null;
-                        },
                       ),
-                      const SizedBox(height: 25),
-                      Row(
-                        children: [
-                          Expanded(
-                            flex: 5,
-                            child: TextFormField(
-                              enabled: false,
-                              controller: idcontroller,
-                              decoration: InputDecoration(
-                                labelText: "Codigo",
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return "Codigo es requerido";
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          Expanded(
-                              child: IconButton(
-                                  onPressed: () {},
-                                  icon: Icon(
-                                    Icons.barcode_reader,
-                                    size: 35,
-                                    color:
-                                        const Color.fromARGB(255, 81, 81, 81),
-                                  )))
-                        ],
-                      ),
-                      const SizedBox(height: 25),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: existenciaController,
-                              decoration: InputDecoration(
-                                labelText: "Cantidad",
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return "Cantidad es requerida";
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 25),
-                          Expanded(
-                            child: TextFormField(
-                              controller: precioController,
-                              decoration: InputDecoration(
-                                labelText: "Precio",
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return "Precio es requerido";
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                        ],
+                      const SizedBox(width: 10),
+                      IconButton(
+                        onPressed: () {},
+                        icon: Icon(
+                          Icons.barcode_reader,
+                          size: 35,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
                       ),
                     ],
-                  )),
-            )));
+                  ),
+                  const SizedBox(height: 25),
+
+         
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: existenciaController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: "Cantidad",
+                            labelStyle: TextStyle(
+                              color: isDark ? Colors.white70 : Colors.grey[700],
+                              fontWeight: FontWeight.w500,
+                            ),
+                            filled: true,
+                            fillColor:
+                                isDark ? Colors.white12 : Colors.grey.shade200,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                          style: TextStyle(
+                              color: isDark ? Colors.white : Colors.black87),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Cantidad es requerida";
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 20),
+                      Expanded(
+                        child: TextFormField(
+                          controller: precioController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: "Precio",
+                            labelStyle: TextStyle(
+                              color: isDark ? Colors.white70 : Colors.grey[700],
+                              fontWeight: FontWeight.w500,
+                            ),
+                            filled: true,
+                            fillColor:
+                                isDark ? Colors.white12 : Colors.grey.shade200,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                          style: TextStyle(
+                              color: isDark ? Colors.white : Colors.black87),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Precio es requerido";
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

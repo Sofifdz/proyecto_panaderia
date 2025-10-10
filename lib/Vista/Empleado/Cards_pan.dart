@@ -63,94 +63,122 @@ class CardspanState extends State<CardsPan> {
   Widget buildCardPan(int index, CategoriaPan pan, Color color) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     double screenWidth = MediaQuery.of(context).size.width;
-    double cardWidth = screenWidth * 0.3;
+    double cardWidth = screenWidth * 0.34;
+    if (cardWidth < 120) cardWidth = 120;
 
-    return GestureDetector(
-      onTap: () {},
-      child: Container(
-        width: cardWidth,
-        margin: const EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-          color: isDark ? Color(0xFF1E1E1E) : color,
-          //border: Border.all(color: Colors.black, width: 1.0),
-          borderRadius: BorderRadius.circular(8.0),
-          boxShadow: [
-            BoxShadow(
-              color: isDark ? Colors.black45 : Colors.grey.withOpacity(0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-          border: Border.all(
-            color: isDark ? Colors.grey[700]! : Colors.black,
-            width: 1,
+    return Container(
+      width: cardWidth,
+      margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+      decoration: BoxDecoration(
+        color: isDark ? Color(0xFF2C2C2C) : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: isDark ? Colors.black38 : Colors.grey.withOpacity(0.2),
+            blurRadius: 6,
+            offset: const Offset(0, 4),
           ),
+        ],
+        border: Border.all(
+          color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+          width: 1,
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SizedBox(
-            height: 150,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    pan.nombre,
-                    style: GoogleFonts.roboto(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 25,
-                      color: isDark ? Colors.white : Colors.black,
-                    ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+   
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  pan.nombre,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.roboto(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                    color: isDark ? Colors.white : Colors.black87,
                   ),
-                  Text(
-                    pan.cantidad.toString(),
-                    style: GoogleFonts.roboto(
-                      fontSize: 25,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0xFFB0B0B0)
-                          : Colors.black,
-                    ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "\$${pan.precio.toStringAsFixed(2)}",
+                  style: GoogleFonts.roboto(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                    color: isDark ? Colors.grey[300] : Colors.grey[700],
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          if (pan.cantidad > 0) {
-                            setState(() {
-                              pan.cantidad--;
-                            });
-                            widget.onEliminar(pan.nombre);
-                          }
-                        },
-                        icon: const Icon(
-                          Icons.remove,
-                          color: Colors.red,
-                          size: 35,
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.add,
-                            color: Colors.green, size: 35),
-                        onPressed: () {
-                          int cantidad = obtenerCantidadDesdeCodigo();
+                ),
+              ],
+            ),
 
-                          setState(() {
-                            pan.cantidad += cantidad;
-                          });
-
-                          widget.onAgregar(pan.nombre, pan.precio, cantidad);
-
-                          widget.codigoController.clear();
-                          FocusScope.of(context).requestFocus(FocusNode());
-                        },
-                      ),
-                    ],
-                  ),
-                ],
+  
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.grey[800] : Colors.grey[100],
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                pan.cantidad.toString(),
+                textAlign: TextAlign.center,
+                style: GoogleFonts.roboto(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
               ),
             ),
-          ),
+
+      
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    if (pan.cantidad > 0) {
+                      setState(() {
+                        pan.cantidad--;
+                      });
+                      widget.onEliminar(pan.nombre);
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.red[100],
+                    ),
+                    child:
+                        const Icon(Icons.remove, color: Colors.red, size: 28),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    int cantidad = obtenerCantidadDesdeCodigo();
+                    setState(() {
+                      pan.cantidad += cantidad;
+                    });
+                    widget.onAgregar(pan.nombre, pan.precio, cantidad);
+                    widget.codigoController.clear();
+                    FocusScope.of(context).requestFocus(FocusNode());
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.green[100],
+                    ),
+                    child: const Icon(Icons.add, color: Colors.green, size: 28),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

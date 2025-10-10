@@ -4,8 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:proyecto_panaderia/Controlador/DrawerConfig.dart';
 import 'package:proyecto_panaderia/Controlador/PedidoController.dart';
 import 'package:proyecto_panaderia/Modelo/Pedidos.dart';
+import 'package:proyecto_panaderia/Vista/Componentes/Component_date.dart';
 import 'package:proyecto_panaderia/Vista/Empleado/VAgregarPedidoE.dart';
 import 'package:proyecto_panaderia/Vista/Empleado/VDetallesPedidoE.dart';
+import 'package:proyecto_panaderia/Vista/Componentes/DeleteDialog.dart';
+import 'package:intl/intl.dart';
 
 class VPedidosE extends StatefulWidget {
   final String usuarioId;
@@ -21,76 +24,83 @@ class VPedidosE extends StatefulWidget {
 }
 
 class _VPedidosEState extends State<VPedidosE> {
-  List<Pedidos> pedidosList = [];
-  bool isLoading = true;
+  String usuarioId = '';
+  String username = 'Cargando...';
+  bool entregados = false; 
+  DateTime? fechaSeleccionada;
 
-  void pedidos() {
-    setState(() {});
+  @override
+  void initState() {
+    super.initState();
+    usuarioId = widget.usuarioId;
+    username = widget.username;
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).brightness == Brightness.dark
-            ? const Color(0xFF1E1E1E)
-            : const Color.fromARGB(255, 209, 219, 250),
-        leading: Builder(builder: (context) {
-          return IconButton(
-            icon: Icon(Icons.menu,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white
-                    : const Color.fromARGB(255, 81, 81, 81),
-                size: 30),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-          );
-        }),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.add_circle_outline_outlined,
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white
-                  : const Color.fromARGB(255, 81, 81, 81),
-              size: 30,
+        toolbarHeight: 90,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isDark
+                  ? [Colors.purple.shade900, Colors.purple.shade700]
+                  : [Colors.purple.shade200, Colors.purple.shade100],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => VAgregarPedidoE(
-                            usuarioId: widget.usuarioId,
-                            username: widget.username,
-                          )));
-            },
-          )
-        ],
-        title: Center(
-          child: Text(
-            "Pedidos",
-            style: GoogleFonts.montserrat(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white
-                  : const Color.fromARGB(255, 81, 81, 81),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(25),
+              bottomRight: Radius.circular(25),
             ),
           ),
         ),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: Icon(Icons.menu,
+                color: isDark ? Colors.white : Colors.black87, size: 30),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
+        title: Text(
+          "Pedidos",
+          style: GoogleFonts.montserrat(
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : Colors.black87,
+          ),
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add_circle_outline_outlined,
+                color: isDark ? Colors.white : Colors.black87, size: 30),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => VAgregarPedidoE(
+                    usuarioId: widget.usuarioId,
+                    username: widget.username,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       drawer: DrawerConfig.empleadoDrawer(
         context,
-        widget.usuarioId,
-        widget.username,
+        usuarioId,
+        username,
       ),
-      body: cuerpo(context),
-    );
-  }
-
-  Widget cuerpo(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
+      body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('pedidos').snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -100,16 +110,57 @@ class _VPedidosEState extends State<VPedidosE> {
             return Center(
               child: Text(
                 "No hay pedidos registrados",
-                style: GoogleFonts.roboto(fontSize: 20, color: Colors.red),
+                style: GoogleFonts.montserrat(fontSize: 20, color: Colors.red),
               ),
             );
           }
-          final pedidosList = snapshot.data!.docs
-              .map((doc) => Pedidos.fromFirestore(doc))
-              .where((pedido) =>
-                  !pedido.isEntregado ||
-                  (pedido.isEntregado && !pedido.isLiquidado))
-              .toList();
+
+          final pedidosList =
+              snapshot.data!.docs.map((doc) => Pedidos.fromFirestore(doc)).toList();
+
+          bool isFechaOk(Pedidos pedido) {
+            if (fechaSeleccionada == null) return true;
+            try {
+              final fechaStr = pedido.fecha.split(' ')[0];
+              final partes = fechaStr.split('/');
+              final day = int.parse(partes[0]);
+              final month = int.parse(partes[1]);
+              final year = int.parse(partes[2]);
+              final pedidoDate = DateTime(year, month, day);
+              return pedidoDate.year == fechaSeleccionada!.year &&
+                  pedidoDate.month == fechaSeleccionada!.month &&
+                  pedidoDate.day == fechaSeleccionada!.day;
+            } catch (e) {
+              print("Error al parsear fecha: ${pedido.fecha}, $e");
+              return false;
+            }
+          }
+
+          final pedidosFiltrados = pedidosList.where((pedido) {
+            if (entregados) {
+              return !pedido.isLiquidado && isFechaOk(pedido);
+            } else {
+              return isFechaOk(pedido);
+            }
+          }).toList();
+
+          pedidosFiltrados.sort((a, b) {
+            try {
+              final formatter = DateFormat('dd/MM/yyyy');
+              final aDate = formatter.parse(a.fecha.split(' ')[0]);
+              final bDate = formatter.parse(b.fecha.split(' ')[0]);
+              int cmp = bDate.compareTo(aDate);
+              if (cmp != 0) return cmp;
+
+              if (!a.isLiquidado && b.isLiquidado) return -1;
+              if (a.isLiquidado && !b.isLiquidado) return 1;
+
+              return 0;
+            } catch (e) {
+              return 0;
+            }
+          });
+
           PedidoController pedidoController = PedidoController();
 
           return Padding(
@@ -117,137 +168,164 @@ class _VPedidosEState extends State<VPedidosE> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "Pendientes",
-                  style: GoogleFonts.roboto(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? const Color(0xFFB0B0B0)
-                        : Colors.black,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      entregados ? "No Liquidado" : "Todos",
+                      style: GoogleFonts.montserrat(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
+                    ),
+                    const Spacer(),
+                    Switch(
+                      activeColor: Colors.purple,
+                      value: entregados,
+                      onChanged: (bool value) {
+                        setState(() {
+                          entregados = value;
+                        });
+                      },
+                    ),
+                    IconButton(
+                      onPressed: () async {
+                         final picked = await Component_date.show(
+                          context: context,
+                          initialDate: fechaSeleccionada,
+                        );
+                        setState(() {
+                          fechaSeleccionada = picked;
+                        });
+                        // Aquí podrías implementar el selector de fecha si lo deseas
+                      },
+                      icon: const Icon(Icons.calendar_month, size: 30),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 10),
                 Expanded(
-                    child: ListView.builder(
-                        itemCount: pedidosList.length,
-                        itemBuilder: (context, index) {
-                          if (index >= pedidosList.length) return SizedBox();
+                  child: ListView.builder(
+                    itemCount: pedidosFiltrados.length,
+                    itemBuilder: (context, index) {
+                      final pedido = pedidosFiltrados[index];
 
-                          final pedido = pedidosList[index];
-                          bool estaLiquidado = pedido.abonos >= pedido.precio;
-
-                          Color cardColor;
-                          if (pedido.isEntregado) {
-                            cardColor = Colors.green[200]!;
-                          } else if (pedido.abonos > 0 &&
-                              pedido.abonos < pedido.precio) {
-                            cardColor = Colors.orange[200]!;
-                          } else {
-                            cardColor = Colors.white;
-                          }
-
-                          return InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => VDetallesPedidoE(
-                                            pedidoId: pedido.NoPedido,
-                                            usuarioId: widget.usuarioId,
-                                            username: widget.username,
-                                          )));
-                            },
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  height: 120,
-                                  padding: const EdgeInsets.all(16.0),
-                                  decoration: BoxDecoration(
-                                    color: _obtenerColor(pedido),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            pedido.cliente,
-                                            style: GoogleFonts.roboto(
-                                                fontSize: 25,
-                                                color: Theme.of(context)
-                                                            .brightness ==
-                                                        Brightness.dark
-                                                    ? const Color(0xFFB0B0B0)
-                                                    : Colors.black,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                          const SizedBox(height: 5),
-                                          Column(
-                                            children: [
-                                              pedidoController
-                                                  .estadoPedidoWidget(
-                                                      pedido, context)
-                                            ],
-                                          )
-                                        ],
-                                      ),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        children: [
-                                          Text(
-                                            "Fecha de entrega:",
-                                            style: GoogleFonts.roboto(
-                                              fontSize: 18,
-                                              color: Theme.of(context)
-                                                          .brightness ==
-                                                      Brightness.dark
-                                                  ? const Color(0xFFB0B0B0)
-                                                  : Colors.black,
-                                            ),
-                                          ),
-                                          Text(
-                                            pedido.fecha,
-                                            style: GoogleFonts.roboto(
-                                                fontSize: 18,
-                                                color: Theme.of(context)
-                                                            .brightness ==
-                                                        Brightness.dark
-                                                    ? const Color(0xFFB0B0B0)
-                                                    : Colors.black,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
+                      return Dismissible(
+                        key: Key(pedido.NoPedido),
+                        direction: DismissDirection.endToStart,
+                        confirmDismiss: (direction) async {
+                          return await DeleteDialog.showDeleteDialog(
+                            item: pedido,
+                            context: context,
+                            onDelete: () => setState(() {}),
+                          );
+                        },
+                        background: Container(
+                          color: Colors.red,
+                          alignment: Alignment.centerRight,
+                          child: const Icon(Icons.delete, color: Colors.white),
+                        ),
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => VDetallesPedidoE(
+                                  pedidoId: pedido.NoPedido,
+                                  username: username,
+                                  usuarioId: usuarioId,
                                 ),
-                                const SizedBox(height: 10),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 16),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              gradient: pedido.isLiquidado
+                                  ? (pedido.isEntregado
+                                      ? LinearGradient(
+                                          colors: [
+                                            Colors.green.shade300,
+                                            Colors.green.shade100
+                                          ],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        )
+                                      : LinearGradient(
+                                          colors: isDark
+                                              ? [Color(0xFF3A3A3C), Color(0xFF2C2C2E)]
+                                              : [Colors.grey.shade200, Colors.grey.shade100],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        ))
+                                  : LinearGradient(
+                                      colors: [Colors.red.shade300, Colors.red.shade100],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: isDark
+                                      ? Colors.black.withOpacity(0.3)
+                                      : Colors.grey.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(2, 4),
+                                ),
                               ],
                             ),
-                          );
-                        })),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      pedido.cliente,
+                                      style: GoogleFonts.montserrat(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: isDark ? Colors.white : Colors.black87,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    pedidoController.estadoPedidoWidget(pedido, context),
+                                  ],
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      "Fecha de entrega:",
+                                      style: GoogleFonts.montserrat(
+                                        fontSize: 16,
+                                        color: isDark ? Colors.white60 : Colors.black54,
+                                      ),
+                                    ),
+                                    Text(
+                                      pedido.fecha,
+                                      style: GoogleFonts.montserrat(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: isDark ? Colors.white : Colors.black87,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ],
             ),
           );
-        });
-  }
-
-  Color _obtenerColor(Pedidos pedido) {
-    if (pedido.isEntregado) {
-      return const Color.fromARGB(146, 148, 184, 152);
-    } else if (pedido.abonos > 0 && pedido.abonos < pedido.precio) {
-      return const Color.fromARGB(255, 217, 217, 218);
-    } else {
-      return Theme.of(context).brightness == Brightness.dark
-          ? const Color(0xFF2C2C2E)
-          : const Color.fromARGB(255, 217, 217, 218);
-    }
+        },
+      ),
+    );
   }
 }

@@ -22,12 +22,9 @@ class _VCortesUsuariosState extends State<VCortesUsuarios> {
   String? mesSeleccionado;
   List<String> listaMeses = [];
 
-  bool _actualizando = false;
-
   @override
   void initState() {
     super.initState();
-
     final now = DateTime.now();
     mesSeleccionado = DateFormat('MMMM yyyy', 'es_MX').format(now);
   }
@@ -35,32 +32,45 @@ class _VCortesUsuariosState extends State<VCortesUsuarios> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(160, 133, 203, 144),
+        toolbarHeight: 90,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isDark
+                  ? [Colors.green.shade900, Colors.green.shade700]
+                  : [Colors.green.shade400, Colors.green.shade300],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(25),
+              bottomRight: Radius.circular(25),
+            ),
+          ),
+        ),
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
-            color: theme.brightness == Brightness.dark
-                ? Colors.white
-                : const Color.fromARGB(255, 81, 81, 81),
+            color: isDark ? Colors.white : Colors.black87,
             size: 30,
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Center(
-          child: Text(
-            'Cortes de ${widget.nombreUsuario}',
-            style: GoogleFonts.montserrat(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-              color: theme.brightness == Brightness.dark
-                  ? Colors.white
-                  : const Color.fromARGB(255, 81, 81, 81),
-            ),
+        title: Text(
+          'Cortes de ${widget.nombreUsuario}',
+          style: GoogleFonts.montserrat(
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : Colors.black87,
           ),
         ),
+        centerTitle: true,
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -112,26 +122,41 @@ class _VCortesUsuariosState extends State<VCortesUsuarios> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(160, 133, 203, 144),
-                  borderRadius: BorderRadius.circular(12),
+                  color: isDark ? Colors.grey[850] : Colors.grey[100],
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: isDark
+                          ? Colors.black.withOpacity(0.3)
+                          : Colors.grey.withOpacity(0.3),
+                      blurRadius: 6,
+                      offset: const Offset(2, 4),
+                    ),
+                  ],
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     isExpanded: true,
-                    dropdownColor: const Color.fromARGB(255, 235, 255, 238),
-                    iconEnabledColor: Colors.black,
+                    dropdownColor:
+                        isDark ? Colors.grey[850] : Colors.green[50],
+                    iconEnabledColor: isDark ? Colors.white : Colors.black87,
                     value: mesSeleccionado,
-                    hint: const Text(
+                    hint: Text(
                       "Selecciona un mes",
-                      style: TextStyle(color: Colors.black),
+                      style: GoogleFonts.montserrat(
+                        color: isDark ? Colors.white70 : Colors.black87,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     items: listaMeses.map((mes) {
                       return DropdownMenuItem<String>(
                         value: mes,
                         child: Text(
                           mes,
-                          style: const TextStyle(
-                              color: Colors.black, fontWeight: FontWeight.bold),
+                          style: GoogleFonts.montserrat(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       );
                     }).toList(),
@@ -165,49 +190,64 @@ class _VCortesUsuariosState extends State<VCortesUsuarios> {
                         ? format.format(fechaCierre!)
                         : format.format(fechaApertura!);
 
-                    return Card(
-                      color: theme.brightness == Brightness.dark
-                          ? const Color(0xFF2C2C2E)
-                          : const Color.fromARGB(146, 225, 225, 225),
-                      margin:
-                          const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                    return Container(
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: esCerrada
+                            ? isDark
+                                ?  Colors.grey[850]
+                                : Colors.green.shade400
+
+                               
+                                
+                            : isDark
+                                ? Colors.orange.shade800
+                                : Colors.orange.shade100,
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: isDark
+                                ? Colors.black.withOpacity(0.2)
+                                : Colors.grey.withOpacity(0.2),
+                                
+                            blurRadius: 6,
+                            offset: const Offset(2, 4),
+                          ),
+                        ],
                       ),
                       child: ListTile(
                         leading: Icon(
                           esCerrada ? Icons.lock : Icons.lock_open,
                           color: esCerrada
-                              ? Colors.green[800]
-                              : Colors.orange[800],
+                              ? Colors.green[900]
+                              : Colors.orange[900],
                         ),
                         title: Text(
                           esCerrada ? "Caja Cerrada" : "Caja Abierta",
                           style: GoogleFonts.montserrat(
                             fontWeight: FontWeight.bold,
                             fontSize: 18,
-                            color: theme.brightness == Brightness.dark
-                                ? Colors.white
-                                : Colors.black,
+                            color: isDark ? Colors.white : Colors.black87,
                           ),
                         ),
                         subtitle: Text(
                           fechaTexto,
                           style: GoogleFonts.montserrat(
                             fontSize: 14,
-                            color: theme.brightness == Brightness.dark
-                                ? Colors.grey[300]
-                                : Colors.black87,
+                            color: isDark ? Colors.white60 : Colors.black87,
                           ),
                         ),
                         trailing: IconButton(
-                          icon: const Icon(Icons.arrow_forward_ios, size: 20),
+                          icon: Icon(Icons.arrow_forward_ios,
+                              size: 20,
+                              color: isDark ? Colors.white70 : Colors.black54),
                           onPressed: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) =>
-                                    VDetallesCortes(cajaId: cajasFiltradas[index].id),
+                                builder: (_) => VDetallesCortes(
+                                    cajaId: cajasFiltradas[index].id),
                               ),
                             );
                           },

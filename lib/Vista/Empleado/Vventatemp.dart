@@ -200,7 +200,7 @@ class _VventatempState extends State<Vventatemp> {
                       style: GoogleFonts.roboto(
                         fontSize: 25,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color:  isDark ?  Colors.white : Colors.black,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -280,7 +280,7 @@ class _VventatempState extends State<Vventatemp> {
                     ),
                     Divider(
                       thickness: 2,
-                      color: Colors.black54,
+                      color:  isDark ?  Colors.white : Colors.black,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -289,14 +289,14 @@ class _VventatempState extends State<Vventatemp> {
                             style: GoogleFonts.roboto(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black,
+                              color: isDark ?  Colors.white : Colors.black,
                             )),
                         Text(
                             "\$${_controller.calcularTotal().toStringAsFixed(2)}",
                             style: GoogleFonts.roboto(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black,
+                              color: isDark ?  Colors.white : Colors.black,
                             )),
                       ],
                     ),

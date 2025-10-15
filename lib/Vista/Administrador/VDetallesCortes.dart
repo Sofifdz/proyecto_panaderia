@@ -112,15 +112,13 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
 
           return Column(
             children: [
-          
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color:
-                        isDark ? Colors.grey[850]: Colors.green.shade100,
+                    color: isDark ? Colors.grey[850] : Colors.green.shade100,
                     borderRadius: BorderRadius.circular(15),
                     boxShadow: [
                       BoxShadow(
@@ -151,8 +149,6 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
                   ),
                 ),
               ),
-
-     
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                 child: VentaSegmentedControl(
@@ -164,8 +160,6 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
                   },
                 ),
               ),
-
-         
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance
@@ -187,12 +181,6 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
 
                     final ventasFiltradas = todasVentas.where((doc) {
                       final data = doc.data() as Map<String, dynamic>;
-
-                      if (tipoVentaFiltro == 'eliminadas') {
-                        return data['eliminada'] == true;
-                      }
-
-                      if (data['eliminada'] == true) return false;
 
                       final esPedido = data['desdePedido'] == true;
                       if (esPedido) {
@@ -305,8 +293,7 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
                                               tipo == 'pago'
                                                   ? 'Pago de\n${data['nombre'] ?? '---'}'
                                                   : data['desdePedido'] == true &&
-                                                          data['cliente'] !=
-                                                              null
+                                                          data['cliente'] != null
                                                       ? '${data['cliente']}'
                                                       : '#${index + 1}',
                                               style: GoogleFonts.montserrat(

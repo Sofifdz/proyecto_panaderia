@@ -32,18 +32,18 @@ class VentaSegmentedControl extends StatelessWidget {
         'pan': _buildChild('Pan', 'pan'),
         'almacen': _buildChild('Almacén', 'almacen'),
         'mixto': _buildChild('Mixto', 'mixto'),
-        'eliminadas': _buildChildIcon(Icons.delete, 'eliminadas'),
+       
       },
     );
   }
 
   Widget _buildChild(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 7),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 11),
       child: Text(
         label,
         style: GoogleFonts.montserrat(
-          fontSize: 13,
+          fontSize: 12,
           fontWeight: FontWeight.w600,
           color: value == selectedValue ? Colors.white : Colors.black87,
         ),
@@ -51,14 +51,5 @@ class VentaSegmentedControl extends StatelessWidget {
     );
   }
 
-  Widget _buildChildIcon(IconData icon, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 5),
-      child: Icon(
-        icon,
-        size: 20,
-        color: value == selectedValue ? Colors.white : Colors.black87,
-      ),
-    );
-  }
+
 }

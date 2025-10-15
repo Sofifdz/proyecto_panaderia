@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:proyecto_panaderia/Vista/Administrador/VDetallesCortes.dart';
+import 'package:proyecto_panaderia/Vista/Componentes/Component_date.dart';
 
 class VCortesUsuarios extends StatefulWidget {
   final String userId;
@@ -21,6 +22,7 @@ class VCortesUsuarios extends StatefulWidget {
 class _VCortesUsuariosState extends State<VCortesUsuarios> {
   String? mesSeleccionado;
   List<String> listaMeses = [];
+  DateTime? fechaFiltro;
 
   @override
   void initState() {
@@ -71,6 +73,31 @@ class _VCortesUsuariosState extends State<VCortesUsuarios> {
           ),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.calendar_today,
+                color: isDark ? Colors.white : Colors.black87),
+            onPressed: () async {
+              final picked =
+                  await Component_date.show(context: context, initialDate: fechaFiltro);
+              if (picked != null) {
+                setState(() {
+                  fechaFiltro = picked;
+               
+                  mesSeleccionado = DateFormat('MMMM yyyy', 'es_MX').format(picked);
+                });
+              }
+            },
+          ),
+          if (fechaFiltro != null)
+            IconButton(
+              icon: Icon(Icons.clear,
+                  color: isDark ? Colors.white : Colors.black87),
+              onPressed: () => setState(() {
+                fechaFiltro = null;
+              }),
+            ),
+        ],
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -94,6 +121,7 @@ class _VCortesUsuariosState extends State<VCortesUsuarios> {
             );
           }
 
+        
           final Set<String> mesesUnicos = cajas.map((doc) {
             final fecha = (doc['fechaApertura'] as Timestamp).toDate();
             return DateFormat('MMMM yyyy', 'es_MX').format(fecha);
@@ -104,18 +132,28 @@ class _VCortesUsuariosState extends State<VCortesUsuarios> {
             mesSeleccionado = null;
           }
 
-          final cajasFiltradas = mesSeleccionado == null
-              ? cajas
-              : cajas.where((doc) {
-                  final fecha = (doc['fechaApertura'] as Timestamp).toDate();
-                  final mesActual =
-                      DateFormat('MMMM yyyy', 'es_MX').format(fecha);
-                  return mesActual == mesSeleccionado;
-                }).toList();
+       
+          final cajasFiltradas = cajas.where((doc) {
+            final fecha = (doc['fechaApertura'] as Timestamp).toDate();
+
+            if (fechaFiltro != null) {
+              return fecha.year == fechaFiltro!.year &&
+                     fecha.month == fechaFiltro!.month &&
+                     fecha.day == fechaFiltro!.day;
+            }
+
+            if (mesSeleccionado != null) {
+              final mesActual = DateFormat('MMMM yyyy', 'es_MX').format(fecha);
+              return mesActual == mesSeleccionado;
+            }
+
+            return true;
+          }).toList();
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              
               Container(
                 width: double.infinity,
                 margin: const EdgeInsets.all(16),
@@ -137,8 +175,7 @@ class _VCortesUsuariosState extends State<VCortesUsuarios> {
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     isExpanded: true,
-                    dropdownColor:
-                        isDark ? Colors.grey[850] : Colors.green[50],
+                    dropdownColor: isDark ? Colors.grey[850] : Colors.green[50],
                     iconEnabledColor: isDark ? Colors.white : Colors.black87,
                     value: mesSeleccionado,
                     hint: Text(
@@ -163,6 +200,7 @@ class _VCortesUsuariosState extends State<VCortesUsuarios> {
                     onChanged: (valor) {
                       setState(() {
                         mesSeleccionado = valor;
+                        fechaFiltro = null; 
                       });
                     },
                   ),
@@ -196,11 +234,8 @@ class _VCortesUsuariosState extends State<VCortesUsuarios> {
                       decoration: BoxDecoration(
                         color: esCerrada
                             ? isDark
-                                ?  Colors.grey[850]
+                                ? Colors.grey[850]
                                 : Colors.green.shade400
-
-                               
-                                
                             : isDark
                                 ? Colors.orange.shade800
                                 : Colors.orange.shade100,
@@ -210,7 +245,6 @@ class _VCortesUsuariosState extends State<VCortesUsuarios> {
                             color: isDark
                                 ? Colors.black.withOpacity(0.2)
                                 : Colors.grey.withOpacity(0.2),
-                                
                             blurRadius: 6,
                             offset: const Offset(2, 4),
                           ),

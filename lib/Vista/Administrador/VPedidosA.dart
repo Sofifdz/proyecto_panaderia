@@ -23,7 +23,7 @@ class VPedidosA extends StatefulWidget {
 class _VPedidosAState extends State<VPedidosA> {
   String usuarioId = '';
   String username = 'Cargando...';
-  bool entregados = false; 
+  bool entregados = false;
   DateTime? fechaSeleccionada;
 
   @override
@@ -108,8 +108,9 @@ class _VPedidosAState extends State<VPedidosA> {
             );
           }
 
-          final pedidosList =
-              snapshot.data!.docs.map((doc) => Pedidos.fromFirestore(doc)).toList();
+          final pedidosList = snapshot.data!.docs
+              .map((doc) => Pedidos.fromFirestore(doc))
+              .toList();
 
           bool isFechaOk(Pedidos pedido) {
             if (fechaSeleccionada == null) return true;
@@ -182,17 +183,25 @@ class _VPedidosAState extends State<VPedidosA> {
                       },
                     ),
                     IconButton(
+                      icon: const Icon(Icons.calendar_month, size: 30),
                       onPressed: () async {
                         final picked = await Component_date.show(
                           context: context,
                           initialDate: fechaSeleccionada,
                         );
-                        setState(() {
-                          fechaSeleccionada = picked;
-                        });
+                        if (picked != null) {
+                          setState(() {
+                            fechaSeleccionada = picked;
+                          });
+                        }
                       },
-                      icon: const Icon(Icons.calendar_month, size: 30),
                     ),
+                    if (fechaSeleccionada != null)
+                      IconButton(
+                        icon: Icon(Icons.clear,
+                            color: isDark ? Colors.white : Colors.black87),
+                        onPressed: () => setState(() => fechaSeleccionada = null),
+                      ),
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -238,19 +247,31 @@ class _VPedidosAState extends State<VPedidosA> {
                               gradient: pedido.isLiquidado
                                   ? (pedido.isEntregado
                                       ? LinearGradient(
-                                          colors: [Colors.green.shade300, Colors.green.shade100],
+                                          colors: [
+                                            Colors.green.shade300,
+                                            Colors.green.shade100
+                                          ],
                                           begin: Alignment.topLeft,
                                           end: Alignment.bottomRight,
                                         )
                                       : LinearGradient(
                                           colors: isDark
-                                              ? [Color(0xFF3A3A3C), Color(0xFF2C2C2E)]
-                                              : [Colors.grey.shade200, Colors.grey.shade100],
+                                              ? [
+                                                  Color(0xFF3A3A3C),
+                                                  Color(0xFF2C2C2E)
+                                                ]
+                                              : [
+                                                  Colors.grey.shade200,
+                                                  Colors.grey.shade100
+                                                ],
                                           begin: Alignment.topLeft,
                                           end: Alignment.bottomRight,
                                         ))
                                   : LinearGradient(
-                                      colors: [Colors.red.shade300, Colors.red.shade100],
+                                      colors: [
+                                        Colors.red.shade300,
+                                        Colors.red.shade100
+                                      ],
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                     ),
@@ -275,11 +296,14 @@ class _VPedidosAState extends State<VPedidosA> {
                                       style: GoogleFonts.montserrat(
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
-                                        color: isDark ? Colors.white : Colors.black87,
+                                        color: isDark
+                                            ? Colors.white
+                                            : Colors.black87,
                                       ),
                                     ),
                                     const SizedBox(height: 5),
-                                    pedidoController.estadoPedidoWidget(pedido, context),
+                                    pedidoController.estadoPedidoWidget(
+                                        pedido, context),
                                   ],
                                 ),
                                 Column(
@@ -289,7 +313,9 @@ class _VPedidosAState extends State<VPedidosA> {
                                       "Fecha de entrega:",
                                       style: GoogleFonts.montserrat(
                                         fontSize: 16,
-                                        color: isDark ? Colors.white60 : Colors.black54,
+                                        color: isDark
+                                            ? Colors.white60
+                                            : Colors.black54,
                                       ),
                                     ),
                                     Text(
@@ -297,7 +323,9 @@ class _VPedidosAState extends State<VPedidosA> {
                                       style: GoogleFonts.montserrat(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
-                                        color: isDark ? Colors.white : Colors.black87,
+                                        color: isDark
+                                            ? Colors.white
+                                            : Colors.black87,
                                       ),
                                     ),
                                   ],

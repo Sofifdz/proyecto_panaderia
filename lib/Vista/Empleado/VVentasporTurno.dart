@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import 'package:proyecto_panaderia/Controlador/CajaController.dart';
 import 'package:proyecto_panaderia/Controlador/DrawerConfig.dart';
 import 'package:proyecto_panaderia/Modelo/Ventas.dart';
-import 'package:proyecto_panaderia/Vista/Componentes/DeleteDialog.dart';
 import 'package:proyecto_panaderia/Vista/Empleado/VTicket.dart';
 
 class VVentasporTurno extends StatefulWidget {
@@ -58,9 +57,7 @@ class _VVentasporTurnoState extends State<VVentasporTurno> {
         ),
         leading: Builder(
           builder: (context) => IconButton(
-            icon: Icon(Icons.menu,
-                color: Colors.white,
-                size: 30),
+            icon: const Icon(Icons.menu, color: Colors.white, size: 30),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
@@ -97,13 +94,14 @@ class _VVentasporTurnoState extends State<VVentasporTurno> {
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                            color: Colors.purple.withOpacity(0.4),
-                            offset: const Offset(2, 4),
-                            blurRadius: 6),
+                          color: Colors.purple.withOpacity(0.4),
+                          offset: const Offset(2, 4),
+                          blurRadius: 6,
+                        ),
                       ],
                     ),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 10),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     child: Text(
                       'Caja: \$${monto.toStringAsFixed(2)}',
                       style: GoogleFonts.montserrat(
@@ -144,6 +142,7 @@ class _VVentasporTurnoState extends State<VVentasporTurno> {
             ),
           );
         }
+
         final IDcaja = fechasSnapshot.data!['cajaId'];
         _cajaId = IDcaja;
 
@@ -170,7 +169,6 @@ class _VVentasporTurnoState extends State<VVentasporTurno> {
 
             final ventasList = ventasSnapshot.data!.docs
                 .map((doc) => Ventas.fromFirestore(doc))
-                .where((venta) => venta.eliminada == false)
                 .toList();
 
             double totalVentas = 0;
@@ -213,7 +211,7 @@ class _VVentasporTurnoState extends State<VVentasporTurno> {
                           String ff = DateFormat('dd/MM/yyyy\nhh:mm a')
                               .format(fechaParseada);
 
-                        
+                  
                           if (venta.desdePedido == true) {
                             return Card(
                               margin: const EdgeInsets.fromLTRB(20, 10, 20, 10),
@@ -277,87 +275,62 @@ class _VVentasporTurnoState extends State<VVentasporTurno> {
                             );
                           }
 
-                          
-                          return Dismissible(
-                            key: ValueKey(venta.IDventa),
-                            direction: DismissDirection.endToStart,
-                            background: Container(
-                              color: Colors.red,
-                              alignment: Alignment.centerRight,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20),
-                              child:
-                                  const Icon(Icons.delete, color: Colors.white),
+                       
+                          return Card(
+                            margin: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                            color: isDark
+                                ? const Color(0xFF2C2C2E)
+                                : Colors.purple.shade50,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
                             ),
-                            confirmDismiss: (direction) async {
-                              final result =
-                                  await DeleteDialog.showDeleteDialog(
-                                context: context,
-                                item: venta,
-                                onDelete: () {
-                                  setState(() {
-                                    ventasList.removeAt(index);
-                                  });
-                                },
-                              );
-                              return result ?? false;
-                            },
-                            child: Card(
-                              margin: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-                              color: isDark
-                                  ? const Color(0xFF2C2C2E)
-                                  : Colors.purple.shade50,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              child: InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          VTicket(venta: venta),
-                                    ),
-                                  );
-                                },
-                                child: SizedBox(
-                                  height: 100,
-                                  child: Center(
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          '#${venta.IDventa.toString()}',
-                                          style: GoogleFonts.roboto(
-                                            fontSize: 23,
-                                            color: isDark
-                                                ? Colors.white
-                                                : Colors.black,
-                                          ),
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        VTicket(venta: venta),
+                                  ),
+                                );
+                              },
+                              child: SizedBox(
+                                height: 100,
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        '#${venta.IDventa.toString()}',
+                                        style: GoogleFonts.roboto(
+                                          fontSize: 23,
+                                          color: isDark
+                                              ? Colors.white
+                                              : Colors.black,
                                         ),
-                                        Text(
-                                          '\$${venta.total.toStringAsFixed(2)}',
-                                          style: GoogleFonts.roboto(
-                                            fontSize: 23,
-                                            color: isDark
-                                                ? Colors.white
-                                                : Colors.black,
-                                          ),
+                                      ),
+                                      Text(
+                                        '\$${venta.total.toStringAsFixed(2)}',
+                                        style: GoogleFonts.roboto(
+                                          fontSize: 23,
+                                          color: isDark
+                                              ? Colors.white
+                                              : Colors.black,
                                         ),
-                                        Text(
-                                          ff,
-                                          style: GoogleFonts.roboto(
-                                            fontSize: 15,
-                                            color: isDark
-                                                ? Colors.white
-                                                : Colors.black,
-                                          ),
+                                      ),
+                                      Text(
+                                        ff,
+                                        style: GoogleFonts.roboto(
+                                          fontSize: 15,
+                                          color: isDark
+                                              ? Colors.white
+                                              : Colors.black,
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),

@@ -4,19 +4,30 @@ import 'package:proyecto_panaderia/Modelo/ProductoCantidad.dart';
 import 'package:proyecto_panaderia/Modelo/Productos.dart';
 
 class VentasController {
-  final String usuarioId;
-  final BuildContext context;
-  final VoidCallback refresh;
+  static final VentasController _instance = VentasController._internal();
+
+  factory VentasController({
+    required String usuarioId,
+    required BuildContext context,
+    required VoidCallback refresh,
+  }) {
+    _instance.usuarioId = usuarioId;
+    _instance.context = context;
+    _instance.refresh = refresh;
+    return _instance;
+  }
+
+  VentasController._internal();
+
+  late String usuarioId;
+  late BuildContext context;
+  late VoidCallback refresh;
 
   TextEditingController codigoController = TextEditingController();
   FocusNode focusNode = FocusNode();
-  List<ProductoConCantidad> productosEscaneados = [];
 
-  VentasController({
-    required this.usuarioId,
-    required this.context,
-    required this.refresh,
-  });
+  // Lista que siempre se mantiene
+  List<ProductoConCantidad> productosEscaneados = [];
 
   void limpiarVenta() {
     productosEscaneados.clear();
@@ -40,14 +51,6 @@ class VentasController {
       return;
     }
 
-    print('Guardando venta...');
-    print('ProductosEscaneados:');
-    for (var pc in productosEscaneados) {
-      print(
-          ' - ${pc.producto.productoname} x${pc.cantidad} a \$${pc.producto.precio}');
-    }
-    print('Total: ${calcularTotal()}');
-
     final cajasSnapshot = await FirebaseFirestore.instance
         .collection('cajas')
         .where('usuarioId', isEqualTo: usuarioId)
@@ -62,7 +65,6 @@ class VentasController {
 
     final IDcaja = cajasSnapshot.docs.first.id;
 
-   
     final ventasSnapshot = await FirebaseFirestore.instance
         .collection('cajas')
         .doc(IDcaja)
@@ -87,7 +89,7 @@ class VentasController {
       'fecha': Timestamp.now(),
       'IDventa': IDventa,
       'IDcaja': IDcaja,
-      'eliminada': false, 
+      'eliminada': false,
     };
 
     try {
@@ -122,7 +124,7 @@ class VentasController {
       await batch.commit();
 
       _mostrarMensaje('Venta registrada con éxito');
-      productosEscaneados.clear();
+      limpiarVenta();
       refresh();
     } catch (e) {
       _mostrarMensaje('Error al registrar la venta: $e');
@@ -207,40 +209,4 @@ class VentasController {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(mensaje)));
   }
-  
-  Future<void> eliminarVenta(String IDventa, String IDcaja) async {
-  final messenger = ScaffoldMessenger.of(context); // guardamos referencia
-  try {
-    final ventasRef = FirebaseFirestore.instance
-        .collection('cajas')
-        .doc(IDcaja)
-        .collection('ventas');
-
-    final querySnapshot =
-        await ventasRef.where('ventaId', isEqualTo: int.parse(IDventa)).get();
-
-    if (querySnapshot.docs.isEmpty) {
-      messenger.showSnackBar(
-        SnackBar(content: Text('No se encontró la venta con ID $IDventa')),
-      );
-      return;
-    }
-
-    final ventaDoc = querySnapshot.docs.first;
-
-    // Marcamos como eliminada
-    await ventasRef.doc(ventaDoc.id).update({'eliminada': true});
-
-    messenger.showSnackBar(
-      const SnackBar(content: Text('Venta eliminada correctamente')),
-    );
-
-    refresh(); // refresca la UI
-  } catch (e) {
-    messenger.showSnackBar(
-      SnackBar(content: Text('Error al eliminar la venta: $e')),
-    );
-  }
-}
-
 }

@@ -27,7 +27,6 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-
     _animController =
         AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
 
@@ -112,23 +111,26 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final size = MediaQuery.of(context).size;
 
-    // Colores personalizados
+    // Colores adaptados según el modo
     final headerGradientColors = isDarkMode
         ? [Colors.green.shade900, Colors.green.shade700]
         : [Colors.green.shade400, Colors.green.shade200];
 
-    final fieldBackground = isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100;
-    final containerBackground = isDarkMode ? Colors.grey.shade50 : Colors.white;
-    final iconColor = isDarkMode ? Colors.green.shade200 : Colors.green.shade700;
-    final buttonColor = isDarkMode ? Colors.green.shade600 : Colors.green.shade300;
+    final fieldBackground =
+        isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100;
+    final containerBackground =
+        isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
+    final iconColor = isDarkMode ? Colors.green.shade300 : Colors.green.shade700;
+    final buttonColor =
+        isDarkMode ? Colors.green.shade700 : Colors.green.shade300;
     final textColor = isDarkMode ? Colors.white : Colors.black87;
-    final secondaryTextColor = isDarkMode ? Colors.white60 : Colors.black54;
+    final secondaryTextColor = isDarkMode ? Colors.white70 : Colors.black54;
 
     return Scaffold(
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        color: isDarkMode ? Colors.grey[900] : Colors.grey[50],
+        color: isDarkMode ? Colors.black : Colors.grey[50],
         child: Stack(
           children: [
             // Header decorativo con gradiente verde
@@ -160,7 +162,9 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black26,
+                              color: isDarkMode
+                                  ? Colors.black54
+                                  : Colors.black26,
                               blurRadius: 15,
                               offset: const Offset(0, 8),
                             )
@@ -180,13 +184,15 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
                         opacity: _fadeFields,
                         child: Container(
                           width: size.width * 0.85,
-                          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 25),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 40, horizontal: 25),
                           decoration: BoxDecoration(
                             color: containerBackground,
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black12,
+                                color:
+                                    isDarkMode ? Colors.black54 : Colors.black12,
                                 blurRadius: 25,
                                 offset: const Offset(0, 10),
                               )
@@ -242,7 +248,8 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
                                 ),
                                 const SizedBox(height: 35),
                                 AnimatedContainer(
-                                  duration: const Duration(milliseconds: 200),
+                                  duration:
+                                      const Duration(milliseconds: 200),
                                   height: 50,
                                   child: ElevatedButton(
                                     style: ElevatedButton.styleFrom(
@@ -258,7 +265,7 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
                                       style: GoogleFonts.roboto(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
-                                        color: textColor,
+                                        color: Colors.white,
                                       ),
                                     ),
                                   ),
@@ -307,7 +314,9 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
           obscureText: isPassword ? !visible : false,
           validator: (value) =>
               value == null || value.isEmpty ? "Campo obligatorio" : null,
-          style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87),
+          style: TextStyle(
+              color: isDarkMode ? Colors.white : Colors.black87,
+              fontSize: 16),
           decoration: InputDecoration(
             prefixIcon: Icon(icon, color: iconColor),
             suffixIcon: isPassword

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:proyecto_panaderia/Controlador/CajaController.dart';
 import 'package:proyecto_panaderia/Controlador/LoginController.dart';
+import 'package:proyecto_panaderia/Vista/Administrador/VPagosA.dart';
 
 import 'package:proyecto_panaderia/Vista/Administrador/VPedidosA.dart';
 import 'package:proyecto_panaderia/Vista/Administrador/VPersonal.dart';
@@ -23,12 +24,13 @@ class DrawerConfig {
       usuarioId: usuarioId,
       username: username,
       colorr: Color.fromARGB(160, 133, 203, 144),
-      items: ['Ventas', 'Almacen', 'Personal', 'Pedidos', 'Salir'],
+      items: ['Ventas', 'Almacen', 'Personal', 'Pedidos','Pagos', 'Salir'],
       iconos: [
         Icons.shopping_basket,
         Icons.inventory,
         Icons.person,
         Icons.list_alt,
+        Icons.currency_exchange,
         Icons.exit_to_app
       ],
       onTaps: [
@@ -66,6 +68,13 @@ class DrawerConfig {
                   usuarioId: usuarioId,
                   username: username,
                 ),
+              ));
+        },
+        (){
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => VPagosA(usuarioId: usuarioId, username: username)
               ));
         },
         () {

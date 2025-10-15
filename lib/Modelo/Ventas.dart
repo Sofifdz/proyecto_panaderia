@@ -11,7 +11,6 @@ class Ventas {
   final String? pedidoId;
   final String? cliente;
   final String? descripcion;
-  final bool eliminada; // <-- Nuevo campo
 
   Ventas({
     required this.IDventa,
@@ -24,7 +23,6 @@ class Ventas {
     this.pedidoId,
     this.cliente,
     this.descripcion,
-    this.eliminada = false, // <-- Valor por defecto
   });
 
   factory Ventas.fromFirestore(DocumentSnapshot doc) {
@@ -55,7 +53,6 @@ class Ventas {
       pedidoId: data['pedidoId'],
       cliente: data['cliente'],
       descripcion: data['descripcion'],
-      eliminada: data['eliminada'] ?? false, // <-- Leer el campo
     );
   }
 
@@ -71,7 +68,6 @@ class Ventas {
       'pedidoId': pedidoId,
       'cliente': cliente,
       'descripcion': descripcion,
-      'eliminada': eliminada, // <-- Guardar el campo
     };
   }
 }

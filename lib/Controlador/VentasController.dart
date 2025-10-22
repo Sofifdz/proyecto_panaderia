@@ -26,12 +26,15 @@ class VentasController {
   TextEditingController codigoController = TextEditingController();
   FocusNode focusNode = FocusNode();
 
-  // Lista que siempre se mantiene
+
   List<ProductoConCantidad> productosEscaneados = [];
+
+  String tipoVenta = 'almacen';
 
   void limpiarVenta() {
     productosEscaneados.clear();
     codigoController.clear();
+    tipoVenta = 'almacen';
   }
 
   double calcularTotal() {
@@ -42,11 +45,7 @@ class VentasController {
   }
 
   Future<void> guardarVenta() async {
-    if (usuarioId.isEmpty) {
-      _mostrarMensaje('UsuarioId vacío.');
-      return;
-    }
-    if (productosEscaneados.isEmpty) {
+    if (usuarioId.isEmpty || productosEscaneados.isEmpty) {
       _mostrarMensaje('No hay productos para registrar la venta.');
       return;
     }
@@ -59,7 +58,7 @@ class VentasController {
         .get();
 
     if (cajasSnapshot.docs.isEmpty) {
-      _mostrarMensaje('No hay caja abierta para registrar ventas.');
+      _mostrarMensaje('No hay caja abierta.');
       return;
     }
 
@@ -77,7 +76,7 @@ class VentasController {
         'id': pc.producto.id,
         'nombre': pc.producto.productoname,
         'precio': pc.producto.precio,
-        'cantidad': pc.cantidad,
+        'cantidad': pc.cantidad, 
       };
     }).toList();
 
@@ -87,18 +86,19 @@ class VentasController {
       'productos': productosMapeados,
       'total': calcularTotal(),
       'fecha': Timestamp.now(),
-      'IDventa': IDventa,
       'IDcaja': IDcaja,
-      'eliminada': false,
+      'tipoVenta': tipoVenta,
     };
 
     try {
+
       await FirebaseFirestore.instance
           .collection('cajas')
           .doc(IDcaja)
           .collection('ventas')
           .add(venta);
 
+  
       final batch = FirebaseFirestore.instance.batch();
       for (var pc in productosEscaneados) {
         final docRef = FirebaseFirestore.instance
@@ -171,6 +171,8 @@ class VentasController {
   }
 
   void agregarProductoDesdeCard(String nombre, double precio, int cantidad) {
+    tipoVenta = 'pan';
+
     int index = productosEscaneados
         .indexWhere((p) => p.producto.productoname == nombre);
     if (index == -1) {
@@ -189,6 +191,29 @@ class VentasController {
     }
     codigoController.clear();
     FocusScope.of(context).requestFocus(focusNode);
+    refresh();
+  }
+
+  void agregarProductoCompletoDesdeDialogo(Productos producto, int cantidad) {
+    tipoVenta = 'almacén';
+
+    if (producto.existencias <= 0) {
+      _mostrarMensaje('No hay existencias de ${producto.productoname}');
+      return;
+    }
+
+    int index = productosEscaneados.indexWhere(
+      (p) => p.producto.id == producto.id,
+    );
+
+    if (index == -1) {
+      productosEscaneados.add(
+        ProductoConCantidad(producto: producto, cantidad: cantidad),
+      );
+    } else {
+      productosEscaneados[index].cantidad += cantidad;
+    }
+
     refresh();
   }
 

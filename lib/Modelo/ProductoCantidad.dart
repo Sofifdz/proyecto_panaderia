@@ -6,12 +6,10 @@ class ProductoConCantidad {
 
   ProductoConCantidad({required this.producto, this.cantidad = 1});
 
-
   Map<String, dynamic> toJson() => {
         'producto': producto.toJson(),
         'cantidad': cantidad,
       };
-
 
   factory ProductoConCantidad.fromJson(Map<String, dynamic> json) {
     return ProductoConCantidad(

@@ -26,7 +26,7 @@ class VPedidosE extends StatefulWidget {
 class _VPedidosEState extends State<VPedidosE> {
   String usuarioId = '';
   String username = 'Cargando...';
-  bool entregados = false; 
+  bool entregados = false;
   DateTime? fechaSeleccionada;
 
   @override
@@ -115,8 +115,9 @@ class _VPedidosEState extends State<VPedidosE> {
             );
           }
 
-          final pedidosList =
-              snapshot.data!.docs.map((doc) => Pedidos.fromFirestore(doc)).toList();
+          final pedidosList = snapshot.data!.docs
+              .map((doc) => Pedidos.fromFirestore(doc))
+              .toList();
 
           bool isFechaOk(Pedidos pedido) {
             if (fechaSeleccionada == null) return true;
@@ -137,11 +138,9 @@ class _VPedidosEState extends State<VPedidosE> {
           }
 
           final pedidosFiltrados = pedidosList.where((pedido) {
-            if (entregados) {
-              return !pedido.isLiquidado && isFechaOk(pedido);
-            } else {
-              return isFechaOk(pedido);
-            }
+            if (pedido.isLiquidado && pedido.isEntregado) return false;
+
+            return isFechaOk(pedido);
           }).toList();
 
           pedidosFiltrados.sort((a, b) {
@@ -171,7 +170,7 @@ class _VPedidosEState extends State<VPedidosE> {
                 Row(
                   children: [
                     Text(
-                      entregados ? "No Liquidado" : "Todos",
+                      "Pendientes",
                       style: GoogleFonts.montserrat(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -179,25 +178,15 @@ class _VPedidosEState extends State<VPedidosE> {
                       ),
                     ),
                     const Spacer(),
-                    Switch(
-                      activeColor: Colors.purple,
-                      value: entregados,
-                      onChanged: (bool value) {
-                        setState(() {
-                          entregados = value;
-                        });
-                      },
-                    ),
                     IconButton(
                       onPressed: () async {
-                         final picked = await Component_date.show(
+                        final picked = await Component_date.show(
                           context: context,
                           initialDate: fechaSeleccionada,
                         );
                         setState(() {
                           fechaSeleccionada = picked;
                         });
-                        // Aquí podrías implementar el selector de fecha si lo deseas
                       },
                       icon: const Icon(Icons.calendar_month, size: 30),
                     ),
@@ -255,13 +244,22 @@ class _VPedidosEState extends State<VPedidosE> {
                                         )
                                       : LinearGradient(
                                           colors: isDark
-                                              ? [Color(0xFF3A3A3C), Color(0xFF2C2C2E)]
-                                              : [Colors.grey.shade200, Colors.grey.shade100],
+                                              ? [
+                                                  Color(0xFF3A3A3C),
+                                                  Color(0xFF2C2C2E)
+                                                ]
+                                              : [
+                                                  Colors.grey.shade200,
+                                                  Colors.grey.shade100
+                                                ],
                                           begin: Alignment.topLeft,
                                           end: Alignment.bottomRight,
                                         ))
                                   : LinearGradient(
-                                      colors: [Colors.red.shade300, Colors.red.shade100],
+                                      colors: [
+                                        Colors.red.shade300,
+                                        Colors.red.shade100
+                                      ],
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                     ),
@@ -286,11 +284,15 @@ class _VPedidosEState extends State<VPedidosE> {
                                       style: GoogleFonts.montserrat(
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
-                                        color: isDark ? Colors.white : Colors.black87,
+                                        color: isDark
+                                            ? Colors.white
+                                            : Colors.black87,
                                       ),
                                     ),
                                     const SizedBox(height: 5),
-                                    pedidoController.estadoPedidoWidget(pedido, context),
+                                    pedidoController.estadoPedidoWidget(
+                                        pedido, context),
+                                    const SizedBox(height: 5),
                                   ],
                                 ),
                                 Column(
@@ -300,7 +302,9 @@ class _VPedidosEState extends State<VPedidosE> {
                                       "Fecha de entrega:",
                                       style: GoogleFonts.montserrat(
                                         fontSize: 16,
-                                        color: isDark ? Colors.white60 : Colors.black54,
+                                        color: isDark
+                                            ? Colors.white60
+                                            : Colors.black54,
                                       ),
                                     ),
                                     Text(
@@ -308,7 +312,9 @@ class _VPedidosEState extends State<VPedidosE> {
                                       style: GoogleFonts.montserrat(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
-                                        color: isDark ? Colors.white : Colors.black87,
+                                        color: isDark
+                                            ? Colors.white
+                                            : Colors.black87,
                                       ),
                                     ),
                                   ],

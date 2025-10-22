@@ -163,48 +163,125 @@ class _BusquedaProductoSheetState extends State<_BusquedaProductoSheet> {
                             itemCount: resultados.length,
                             itemBuilder: (context, index) {
                               final producto = resultados[index];
-                              return Card(
-                                color: isDark
-                                    ? Colors.deepPurple.shade700
-                                    : Colors.white,
-                                elevation: 3,
-                                margin:
-                                    const EdgeInsets.symmetric(vertical: 6.0),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                child: ListTile(
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 8),
-                                  title: Text(
-                                    producto.productoname,
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color:
-                                          isDark ? Colors.white : Colors.black,
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    "\$${producto.precio}",
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w500,
-                                      color: isDark
-                                          ? Colors.white70
-                                          : Colors.grey[800],
-                                    ),
-                                  ),
-                                  trailing: Icon(
-                                    Icons.add_circle_outline,
+                              int cantidad = 1;
+
+                              return StatefulBuilder(
+                                builder: (context, setStateSB) {
+                                  return Card(
                                     color: isDark
-                                        ? Colors.purpleAccent
-                                        : Colors.purple.shade300,
-                                  ),
-                                  onTap: () {
-                                    Navigator.of(context).pop(producto);
-                                  },
-                                ),
+                                        ? Colors.deepPurple.shade700
+                                        : Colors.white,
+                                    elevation: 3,
+                                    margin: const EdgeInsets.symmetric(
+                                        vertical: 6.0),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    child: ListTile(
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              horizontal: 16, vertical: 8),
+                                      title: Text(
+                                        producto.productoname,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: isDark
+                                              ? Colors.white
+                                              : Colors.black,
+                                        ),
+                                      ),
+                                      subtitle: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            "\$${producto.precio}",
+                                            style: GoogleFonts.poppins(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w500,
+                                              color: isDark
+                                                  ? Colors.white70
+                                                  : Colors.grey[800],
+                                            ),
+                                          ),
+                                          Row(
+                                            children: [
+                                              IconButton(
+                                                icon: const Icon(Icons
+                                                    .remove_circle_outline),
+                                                color: Colors.redAccent,
+                                                onPressed: () {
+                                                  if (cantidad > 1)
+                                                    setStateSB(
+                                                        () => cantidad--);
+                                                },
+                                              ),
+                                              Text(
+                                                cantidad.toString(),
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: isDark
+                                                      ? Colors.white
+                                                      : Colors.black,
+                                                ),
+                                              ),
+                                              IconButton(
+                                                icon: const Icon(
+                                                    Icons.add_circle_outline),
+                                                color: Colors.green,
+                                                onPressed: () {
+                                                  if (cantidad <
+                                                      producto.existencias) {
+                                                    setStateSB(
+                                                        () => cantidad++);
+                                                  } else {
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                            'No hay más existencias de ${producto.productoname}'),
+                                                      ),
+                                                    );
+                                                  }
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      trailing: IconButton(
+                                        icon: Icon(
+                                          Icons.add_shopping_cart,
+                                          size: 30,
+                                          color: isDark
+                                              ? Colors.purpleAccent
+                                              : Colors.purple.shade400,
+                                        ),
+                                        onPressed: () {
+                                          if (cantidad <=
+                                              producto.existencias) {
+                                            widget.controller
+                                                .agregarProductoCompletoDesdeDialogo(
+                                                    producto, cantidad);
+                                            Navigator.of(context)
+                                                .pop(); 
+                                          } else {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                    'Cantidad inválida para ${producto.productoname}'),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                },
                               );
                             },
                           ),

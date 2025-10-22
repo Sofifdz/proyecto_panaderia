@@ -213,7 +213,7 @@ class VentaTempController {
   }
 
   void agregarProductoCompletoDesdeDialogo(Productos producto, int cantidad) {
-    tipoVenta = 'pan';
+    tipoVenta = 'almacén';
 
     if (producto.existencias <= 0) {
       _mostrarMensaje('No hay existencias de ${producto.productoname}');

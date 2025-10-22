@@ -122,7 +122,10 @@ class _VVentasState extends State<VVentas> with SingleTickerProviderStateMixin {
                           horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [Colors.purple.shade300, Colors.purple.shade400],
+                          colors: [
+                            Colors.purple.shade300,
+                            Colors.purple.shade400
+                          ],
                         ),
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
@@ -179,8 +182,9 @@ class _VVentasState extends State<VVentas> with SingleTickerProviderStateMixin {
                               hintText: "Escanear código de barras",
                               prefixIcon: const Icon(Icons.qr_code_scanner),
                               filled: true,
-                              fillColor:
-                                  isDark ? const Color(0xFF3A3A3C) : Colors.purple.shade50,
+                              fillColor: isDark
+                                  ? const Color(0xFF3A3A3C)
+                                  : Colors.purple.shade50,
                               contentPadding: const EdgeInsets.symmetric(
                                   vertical: 10, horizontal: 15),
                               border: OutlineInputBorder(
@@ -196,12 +200,9 @@ class _VVentasState extends State<VVentas> with SingleTickerProviderStateMixin {
                               context: context,
                               controller: _controller,
                             ).then((productoSeleccionado) {
-                              if (productoSeleccionado != null) {
-                                _controller.agregarProductoDesdeCard(
-                                  productoSeleccionado.productoname,
-                                  productoSeleccionado.precio.toDouble(),
-                                  1,
-                                );
+                             if (productoSeleccionado != null) {
+                                _controller.agregarProductoCompletoDesdeDialogo(
+                                    productoSeleccionado, 1);
                                 setState(() {});
                               }
                             });
@@ -215,8 +216,7 @@ class _VVentasState extends State<VVentas> with SingleTickerProviderStateMixin {
                         style: GoogleFonts.roboto(
                           fontSize: 25,
                           fontWeight: FontWeight.bold,
-                          
-                          color:  isDark ?  Colors.white : Colors.black,
+                          color: isDark ? Colors.white : Colors.black,
                         )),
                     const SizedBox(height: 10),
                     ConstrainedBox(
@@ -236,15 +236,21 @@ class _VVentasState extends State<VVentas> with SingleTickerProviderStateMixin {
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: isDark
-                                        ? [Colors.purple.shade700, Colors.purple.shade600]
-                                        : [Colors.purple.shade50, Colors.purple.shade100], 
+                                        ? [
+                                            Colors.purple.shade700,
+                                            Colors.purple.shade600
+                                          ]
+                                        : [
+                                            Colors.purple.shade50,
+                                            Colors.purple.shade100
+                                          ],
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                   ),
                                   borderRadius: BorderRadius.circular(15),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.purple.withOpacity(0.1), 
+                                      color: Colors.purple.withOpacity(0.1),
                                       blurRadius: 6,
                                       offset: const Offset(2, 4),
                                     ),
@@ -257,7 +263,7 @@ class _VVentasState extends State<VVentas> with SingleTickerProviderStateMixin {
                                     Text(pc.producto.productoname,
                                         style: GoogleFonts.roboto(
                                           fontSize: 15,
-                                          color: Colors.black, 
+                                          color: Colors.black,
                                         )),
                                     Text("Precio: \$${pc.producto.precio}",
                                         style: GoogleFonts.roboto(
@@ -267,13 +273,21 @@ class _VVentasState extends State<VVentas> with SingleTickerProviderStateMixin {
                                     Text("Cantidad: ${pc.cantidad}",
                                         style: GoogleFonts.roboto(
                                           fontSize: 15,
-                                          color: Colors.black, 
+                                          color: Colors.black,
+                                        )),
+                                    Text(
+                                        "Subtotal: \$${(pc.producto.precio * pc.cantidad).toStringAsFixed(2)}",
+                                        style: GoogleFonts.roboto(
+                                          fontSize: 15,
+                                          color: Colors.black,
                                         )),
                                     IconButton(
-                                      icon: Icon(Icons.delete, color: Colors.red),
+                                      icon: const Icon(Icons.delete,
+                                          color: Colors.red),
                                       onPressed: () {
                                         setState(() {
-                                          _controller.productosEscaneados.remove(pc);
+                                          _controller.productosEscaneados
+                                              .remove(pc);
                                         });
                                       },
                                     ),
@@ -287,7 +301,7 @@ class _VVentasState extends State<VVentas> with SingleTickerProviderStateMixin {
                     ),
                     Divider(
                       thickness: 2,
-                      color:  isDark ?  Colors.white : Colors.black,
+                      color: isDark ? Colors.white : Colors.black,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -296,13 +310,14 @@ class _VVentasState extends State<VVentas> with SingleTickerProviderStateMixin {
                             style: GoogleFonts.roboto(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color:  isDark ?  Colors.white : Colors.black,
+                              color: isDark ? Colors.white : Colors.black,
                             )),
-                        Text("\$${_controller.calcularTotal().toStringAsFixed(2)}",
+                        Text(
+                            "\$${_controller.calcularTotal().toStringAsFixed(2)}",
                             style: GoogleFonts.roboto(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: isDark ?  Colors.white : Colors.black,
+                              color: isDark ? Colors.white : Colors.black,
                             )),
                       ],
                     ),

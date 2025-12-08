@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+<<<<<<< HEAD
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CategoriaPan {
   String id; // ✅ ID real del producto (028, 027, etc.)
+=======
+
+class CategoriaPan {
+>>>>>>> f59880e641c4aaf8b5f916dccaea8cf9c73acd3f
   String nombre;
   double precio;
   int cantidad;
   Color color;
 
   CategoriaPan({
+<<<<<<< HEAD
     required this.id,
+=======
+>>>>>>> f59880e641c4aaf8b5f916dccaea8cf9c73acd3f
     required this.color,
     required this.nombre,
     required this.precio,
@@ -19,8 +27,13 @@ class CategoriaPan {
 }
 
 class CardsPan extends StatefulWidget {
+<<<<<<< HEAD
   final Function(String id, double precio, int cantidad) onAgregar;
   final Function(String id) onEliminar;
+=======
+  final Function(String nombre, double precio, int cantidad) onAgregar;
+  final Function(String nombre) onEliminar;
+>>>>>>> f59880e641c4aaf8b5f916dccaea8cf9c73acd3f
   final TextEditingController codigoController;
 
   const CardsPan({
@@ -35,6 +48,7 @@ class CardsPan extends StatefulWidget {
 }
 
 class CardspanState extends State<CardsPan> {
+<<<<<<< HEAD
   List<CategoriaPan> categoriasPan = [];
 
   @override
@@ -80,6 +94,8 @@ class CardspanState extends State<CardsPan> {
     }
   }
 
+=======
+>>>>>>> f59880e641c4aaf8b5f916dccaea8cf9c73acd3f
   void resetearCantidades() {
     setState(() {
       for (var pan in categoriasPan) {
@@ -88,6 +104,19 @@ class CardspanState extends State<CardsPan> {
     });
   }
 
+<<<<<<< HEAD
+=======
+  List<CategoriaPan> categoriasPan = [
+    CategoriaPan(
+        nombre: "Pan 10",
+        precio: 10,
+        color: Color.fromARGB(255, 173, 219, 175)),
+    CategoriaPan(
+        nombre: "Pan 9", precio: 9, color: Color.fromARGB(255, 173, 199, 221)),
+    CategoriaPan(
+        nombre: "Pan 5", precio: 5, color: Color.fromARGB(255, 173, 128, 128)),
+  ];
+>>>>>>> f59880e641c4aaf8b5f916dccaea8cf9c73acd3f
 
   int obtenerCantidadDesdeCodigo() {
     final texto = widget.codigoController.text.trim();
@@ -108,7 +137,11 @@ class CardspanState extends State<CardsPan> {
       width: cardWidth,
       margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
       decoration: BoxDecoration(
+<<<<<<< HEAD
         color: isDark ? const Color(0xFF2C2C2C) : Colors.white,
+=======
+        color: isDark ? Color(0xFF2C2C2C) : Colors.white,
+>>>>>>> f59880e641c4aaf8b5f916dccaea8cf9c73acd3f
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
@@ -128,6 +161,10 @@ class CardspanState extends State<CardsPan> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+<<<<<<< HEAD
+=======
+   
+>>>>>>> f59880e641c4aaf8b5f916dccaea8cf9c73acd3f
             Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -151,6 +188,11 @@ class CardspanState extends State<CardsPan> {
                 ),
               ],
             ),
+<<<<<<< HEAD
+=======
+
+  
+>>>>>>> f59880e641c4aaf8b5f916dccaea8cf9c73acd3f
             Container(
               margin: const EdgeInsets.symmetric(vertical: 8),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -168,6 +210,11 @@ class CardspanState extends State<CardsPan> {
                 ),
               ),
             ),
+<<<<<<< HEAD
+=======
+
+      
+>>>>>>> f59880e641c4aaf8b5f916dccaea8cf9c73acd3f
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -177,7 +224,11 @@ class CardspanState extends State<CardsPan> {
                       setState(() {
                         pan.cantidad--;
                       });
+<<<<<<< HEAD
                       widget.onEliminar(pan.id);
+=======
+                      widget.onEliminar(pan.nombre);
+>>>>>>> f59880e641c4aaf8b5f916dccaea8cf9c73acd3f
                     }
                   },
                   child: Container(
@@ -186,8 +237,13 @@ class CardspanState extends State<CardsPan> {
                       shape: BoxShape.circle,
                       color: Colors.red[100],
                     ),
+<<<<<<< HEAD
                     child: const Icon(Icons.remove,
                         color: Colors.red, size: 28),
+=======
+                    child:
+                        const Icon(Icons.remove, color: Colors.red, size: 28),
+>>>>>>> f59880e641c4aaf8b5f916dccaea8cf9c73acd3f
                   ),
                 ),
                 GestureDetector(
@@ -196,7 +252,11 @@ class CardspanState extends State<CardsPan> {
                     setState(() {
                       pan.cantidad += cantidad;
                     });
+<<<<<<< HEAD
                     widget.onAgregar(pan.id, pan.precio, cantidad);
+=======
+                    widget.onAgregar(pan.nombre, pan.precio, cantidad);
+>>>>>>> f59880e641c4aaf8b5f916dccaea8cf9c73acd3f
                     widget.codigoController.clear();
                     FocusScope.of(context).requestFocus(FocusNode());
                   },
@@ -206,8 +266,12 @@ class CardspanState extends State<CardsPan> {
                       shape: BoxShape.circle,
                       color: Colors.green[100],
                     ),
+<<<<<<< HEAD
                     child: const Icon(Icons.add,
                         color: Colors.green, size: 28),
+=======
+                    child: const Icon(Icons.add, color: Colors.green, size: 28),
+>>>>>>> f59880e641c4aaf8b5f916dccaea8cf9c73acd3f
                   ),
                 ),
               ],
@@ -226,10 +290,15 @@ class CardspanState extends State<CardsPan> {
         children: categoriasPan
             .asMap()
             .entries
+<<<<<<< HEAD
             .map(
               (entry) =>
                   buildCardPan(entry.key, entry.value, entry.value.color),
             )
+=======
+            .map((entry) =>
+                buildCardPan(entry.key, entry.value, entry.value.color))
+>>>>>>> f59880e641c4aaf8b5f916dccaea8cf9c73acd3f
             .toList(),
       ),
     );

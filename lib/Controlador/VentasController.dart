@@ -196,7 +196,6 @@ class VentasController {
     } else {
       productosEscaneados[index].cantidad += cantidad;
     }
-
     refresh();
   }
 

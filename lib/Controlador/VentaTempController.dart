@@ -4,6 +4,7 @@ import 'package:proyecto_panaderia/Modelo/ProductoCantidad.dart';
 import 'package:proyecto_panaderia/Modelo/Productos.dart';
 
 class VentaTempController {
+  // Singleton
   static final VentaTempController _instance = VentaTempController._internal();
 
   factory VentaTempController({
@@ -25,11 +26,9 @@ class VentaTempController {
 
   TextEditingController codigoController = TextEditingController();
   FocusNode focusNode = FocusNode();
-
   List<ProductoConCantidad> productosEscaneados = [];
 
   String tipoVenta = 'almacen';
-
   void limpiarVenta() {
     productosEscaneados.clear();
     codigoController.clear();
@@ -121,7 +120,8 @@ class VentaTempController {
       await batch.commit();
 
       _mostrarMensaje('Venta registrada con éxito');
-      limpiarVenta();
+      productosEscaneados.clear();
+      tipoVenta = 'almacen';
       refresh();
     } catch (e) {
       _mostrarMensaje('Error al registrar la venta: $e');
@@ -149,12 +149,21 @@ class VentaTempController {
 
     if (doc.exists) {
       Productos producto = Productos.fromFirestore(doc);
+
+      if (producto.existencias <= 0) {
+        _mostrarMensaje('No hay existencias de ${producto.productoname}');
+        codigoController.clear();
+        FocusScope.of(context).requestFocus(focusNode);
+        return;
+      }
+
       int index =
           productosEscaneados.indexWhere((p) => p.producto.id == producto.id);
 
       if (index == -1) {
-        productosEscaneados
-            .add(ProductoConCantidad(producto: producto, cantidad: cantidad));
+        productosEscaneados.add(
+          ProductoConCantidad(producto: producto, cantidad: cantidad),
+        );
       } else {
         productosEscaneados[index].cantidad += cantidad;
       }
@@ -196,7 +205,6 @@ class VentaTempController {
     } else {
       productosEscaneados[index].cantidad += cantidad;
     }
-
     refresh();
   }
 

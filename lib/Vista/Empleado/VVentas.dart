@@ -200,7 +200,11 @@ class _VVentasState extends State<VVentas> with SingleTickerProviderStateMixin {
                               context: context,
                               controller: _controller,
                             ).then((productoSeleccionado) {
+<<<<<<< HEAD
                               if (productoSeleccionado != null) {
+=======
+                             if (productoSeleccionado != null) {
+>>>>>>> f59880e641c4aaf8b5f916dccaea8cf9c73acd3f
                                 _controller.agregarProductoCompletoDesdeDialogo(
                                     productoSeleccionado, 1);
                                 setState(() {});

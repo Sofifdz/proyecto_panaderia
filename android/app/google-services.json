@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "262672465725",
+    "project_id": "databasepanaderia",
+    "storage_bucket": "databasepanaderia.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:262672465725:android:b6774b556f216e1bc94f54",
+        "android_client_info": {
+          "package_name": "com.example.proyecto_panaderia"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCla5K4MNfAxIZ3PzisUqYNWevLZgjOgBA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

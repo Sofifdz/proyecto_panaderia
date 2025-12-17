@@ -23,17 +23,23 @@ class VentasController {
   late BuildContext context;
   late VoidCallback refresh;
 
-  TextEditingController codigoController = TextEditingController();
-  FocusNode focusNode = FocusNode();
+  final TextEditingController codigoController = TextEditingController();
+  final FocusNode focusNode = FocusNode();
 
-  List<ProductoConCantidad> productosEscaneados = [];
+  final List<ProductoConCantidad> productosEscaneados = [];
 
   String tipoVenta = 'almacen';
 
+  // 🔒 NUEVO: evita limpiezas accidentales
+  bool _ventaConfirmada = false;
+
   void limpiarVenta() {
+    if (!_ventaConfirmada) return; // ⛔ blindaje
+
     productosEscaneados.clear();
     codigoController.clear();
     tipoVenta = 'almacen';
+    _ventaConfirmada = false;
   }
 
   double calcularTotal() {
@@ -103,24 +109,26 @@ class VentasController {
             .doc(pc.producto.id);
 
         final doc = await docRef.get();
-        if (doc.exists) {
-          final currentStock =
-              (doc.data() as Map<String, dynamic>)['existencias'] ?? 0;
-          final newStock = currentStock - pc.cantidad;
+        if (!doc.exists) continue;
 
-          if (newStock < 0) {
-            _mostrarMensaje(
-                'No hay suficientes existencias de ${pc.producto.productoname}');
-            continue;
-          }
+        final currentStock =
+            (doc.data() as Map<String, dynamic>)['existencias'] ?? 0;
+        final newStock = currentStock - pc.cantidad;
 
-          batch.update(docRef, {'existencias': newStock});
+        if (newStock < 0) {
+          _mostrarMensaje(
+              'No hay suficientes existencias de ${pc.producto.productoname}');
+          continue;
         }
+
+        batch.update(docRef, {'existencias': newStock});
       }
 
       await batch.commit();
 
       _mostrarMensaje('Venta registrada con éxito');
+
+      _ventaConfirmada = true; // ✅ solo aquí
       limpiarVenta();
       refresh();
     } catch (e) {
@@ -129,49 +137,48 @@ class VentasController {
   }
 
   Future<void> buscarProducto(String input) async {
-    if (input.isEmpty) return;
+    input = input.trim();
+
+    if (input.isEmpty || input == '*' || input == '\n' || input == '\r') return;
 
     final regex = RegExp(r'^(.+?)(\*(\d+))?$');
     final match = regex.firstMatch(input);
+    if (match == null) return;
 
-    if (match == null) {
-      _mostrarMensaje('Formato de código inválido');
-      return;
-    }
+    final codigo = match.group(1)!;
+    final cantidad = int.tryParse(match.group(3) ?? '1') ?? 1;
 
-    String codigo = match.group(1)!;
-    int cantidad = int.tryParse(match.group(3) ?? '1') ?? 1;
-
-    DocumentSnapshot doc = await FirebaseFirestore.instance
+    final doc = await FirebaseFirestore.instance
         .collection('productos')
         .doc(codigo)
         .get();
 
-    if (doc.exists) {
-      Productos producto = Productos.fromFirestore(doc);
-      int index =
-          productosEscaneados.indexWhere((p) => p.producto.id == producto.id);
-
-      if (index == -1) {
-        productosEscaneados
-            .add(ProductoConCantidad(producto: producto, cantidad: cantidad));
-      } else {
-        productosEscaneados[index].cantidad += cantidad;
-      }
-      refresh();
-    } else {
+    if (!doc.exists) {
       _mostrarMensaje('Producto no encontrado');
+      return;
     }
 
+    final producto = Productos.fromFirestore(doc);
+
+    final index =
+        productosEscaneados.indexWhere((p) => p.producto.id == producto.id);
+
+    if (index == -1) {
+      productosEscaneados.add(
+        ProductoConCantidad(producto: producto, cantidad: cantidad),
+      );
+    } else {
+      productosEscaneados[index].cantidad += cantidad;
+    }
+
+    refresh();
     codigoController.clear();
     FocusScope.of(context).requestFocus(focusNode);
   }
 
+  // 👇 TODOS TUS DEMÁS MÉTODOS SIGUEN IGUAL
   void agregarProductoDesdeCard(
-    String productoId,
-    double precio,
-    int cantidad,
-  ) async {
+      String productoId, double precio, int cantidad) async {
     tipoVenta = 'pan';
 
     final doc = await FirebaseFirestore.instance
@@ -183,15 +190,12 @@ class VentasController {
 
     final producto = Productos.fromFirestore(doc);
 
-    int index =
+    final index =
         productosEscaneados.indexWhere((p) => p.producto.id == producto.id);
 
     if (index == -1) {
       productosEscaneados.add(
-        ProductoConCantidad(
-          producto: producto,
-          cantidad: cantidad,
-        ),
+        ProductoConCantidad(producto: producto, cantidad: cantidad),
       );
     } else {
       productosEscaneados[index].cantidad += cantidad;
@@ -207,9 +211,8 @@ class VentasController {
       return;
     }
 
-    int index = productosEscaneados.indexWhere(
-      (p) => p.producto.id == producto.id,
-    );
+    final index =
+        productosEscaneados.indexWhere((p) => p.producto.id == producto.id);
 
     if (index == -1) {
       productosEscaneados.add(
@@ -223,7 +226,7 @@ class VentasController {
   }
 
   void eliminarProductoDesdeCard(String productoId) {
-    int index =
+    final index =
         productosEscaneados.indexWhere((pc) => pc.producto.id == productoId);
 
     if (index != -1) {
@@ -239,5 +242,29 @@ class VentasController {
   void _mostrarMensaje(String mensaje) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(mensaje)));
+  }
+
+  void sumarUno(String productoId) {
+    final index =
+        productosEscaneados.indexWhere((p) => p.producto.id == productoId);
+
+    if (index != -1) {
+      productosEscaneados[index].cantidad++;
+      refresh();
+    }
+  }
+
+  void restarUno(String productoId) {
+    final index =
+        productosEscaneados.indexWhere((p) => p.producto.id == productoId);
+
+    if (index != -1) {
+      if (productosEscaneados[index].cantidad > 1) {
+        productosEscaneados[index].cantidad--;
+      } else {
+        productosEscaneados.removeAt(index);
+      }
+      refresh();
+    }
   }
 }

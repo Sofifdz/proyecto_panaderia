@@ -108,13 +108,29 @@ class _BusquedaProductoSheetState extends State<_BusquedaProductoSheet> {
                   ),
                 ),
                 const SizedBox(height: 15),
-                Text(
-                  "Buscar Producto",
-                  style: GoogleFonts.poppins(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : Colors.black87,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Buscar Producto",
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      icon: const Icon(Icons.close),
+                      label: const Text("Cerrar"),
+                      style: TextButton.styleFrom(
+                        foregroundColor:
+                            isDark ? Colors.white70 : Colors.grey[800],
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 15),
                 Container(
@@ -266,8 +282,6 @@ class _BusquedaProductoSheetState extends State<_BusquedaProductoSheet> {
                                             widget.controller
                                                 .agregarProductoCompletoDesdeDialogo(
                                                     producto, cantidad);
-                                            Navigator.of(context)
-                                                .pop(); 
                                           } else {
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(

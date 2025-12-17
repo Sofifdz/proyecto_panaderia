@@ -143,6 +143,18 @@ class _VPedidosEState extends State<VPedidosE> {
             return isFechaOk(pedido);
           }).toList();
 
+          if (pedidosFiltrados.isEmpty) {
+            return Center(
+              child: Text(
+                "No hay pedidos pendientes",
+                style: GoogleFonts.montserrat(
+                  fontSize: 22,
+                  color: Colors.red,
+                ),
+              ),
+            );
+          }
+
           pedidosFiltrados.sort((a, b) {
             try {
               final formatter = DateFormat('dd/MM/yyyy');

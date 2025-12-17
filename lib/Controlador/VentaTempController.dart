@@ -249,4 +249,28 @@ class VentaTempController {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(mensaje)));
   }
+
+  void sumarUno(String productoId) {
+    final index =
+        productosEscaneados.indexWhere((p) => p.producto.id == productoId);
+
+    if (index != -1) {
+      productosEscaneados[index].cantidad++;
+      refresh();
+    }
+  }
+
+  void restarUno(String productoId) {
+    final index =
+        productosEscaneados.indexWhere((p) => p.producto.id == productoId);
+
+    if (index != -1) {
+      if (productosEscaneados[index].cantidad > 1) {
+        productosEscaneados[index].cantidad--;
+      } else {
+        productosEscaneados.removeAt(index);
+      }
+      refresh();
+    }
+  }
 }

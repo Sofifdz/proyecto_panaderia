@@ -270,11 +270,39 @@ class _VVentasState extends State<VVentas> with SingleTickerProviderStateMixin {
                                           fontSize: 15,
                                           color: Colors.black,
                                         )),
-                                    Text("Cantidad: ${pc.cantidad}",
-                                        style: GoogleFonts.roboto(
-                                          fontSize: 15,
-                                          color: Colors.black,
-                                        )),
+                                    Row(
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.remove_circle,
+                                              color: Colors.orange),
+                                          onPressed: () {
+                                            _controller
+                                                .restarUno(pc.producto.id);
+                                            _cardsPanKey.currentState
+                                                ?.restarUnoPorId(
+                                                    pc.producto.id);
+                                          },
+                                        ),
+                                        Text(
+                                          pc.cantidad.toString(),
+                                          style: GoogleFonts.roboto(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.add_circle,
+                                              color: Colors.green),
+                                          onPressed: () {
+                                            _controller
+                                                .sumarUno(pc.producto.id);
+                                            _cardsPanKey.currentState
+                                                ?.sumarUnoPorId(pc.producto.id);
+                                          },
+                                        ),
+                                        
+                                      ],
+                                    ),
                                     Text(
                                         "Subtotal: \$${(pc.producto.precio * pc.cantidad).toStringAsFixed(2)}",
                                         style: GoogleFonts.roboto(
@@ -288,6 +316,10 @@ class _VVentasState extends State<VVentas> with SingleTickerProviderStateMixin {
                                         setState(() {
                                           _controller.productosEscaneados
                                               .remove(pc);
+
+                                          _cardsPanKey.currentState
+                                              ?.resetearCantidadPorId(
+                                                  pc.producto.id);
                                         });
                                       },
                                     ),

@@ -21,6 +21,7 @@ class Vventatemp extends StatefulWidget {
 }
 
 class _VventatempState extends State<Vventatemp> {
+  final GlobalKey<CardspanState> _cardsPanKey = GlobalKey<CardspanState>();
   late VentaTempController _controller;
 
   @override
@@ -108,7 +109,10 @@ class _VventatempState extends State<Vventatemp> {
                           horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [Colors.purple.shade300, Colors.purple.shade400],
+                          colors: [
+                            Colors.purple.shade300,
+                            Colors.purple.shade400
+                          ],
                         ),
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
@@ -146,6 +150,7 @@ class _VventatempState extends State<Vventatemp> {
                         scrollDirection: Axis.vertical,
                         children: [
                           CardsPan(
+                            key: _cardsPanKey,
                             codigoController: _controller.codigoController,
                             onAgregar: _controller.agregarProductoDesdeCard,
                             onEliminar: _controller.eliminarProductoDesdeCard,
@@ -200,7 +205,7 @@ class _VventatempState extends State<Vventatemp> {
                       style: GoogleFonts.roboto(
                         fontSize: 25,
                         fontWeight: FontWeight.bold,
-                        color:  isDark ?  Colors.white : Colors.black,
+                        color: isDark ? Colors.white : Colors.black,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -221,8 +226,14 @@ class _VventatempState extends State<Vventatemp> {
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: isDark
-                                        ? [Colors.purple.shade700, Colors.purple.shade600]
-                                        : [Colors.purple.shade50, Colors.purple.shade100],
+                                        ? [
+                                            Colors.purple.shade700,
+                                            Colors.purple.shade600
+                                          ]
+                                        : [
+                                            Colors.purple.shade50,
+                                            Colors.purple.shade100
+                                          ],
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                   ),
@@ -249,11 +260,38 @@ class _VventatempState extends State<Vventatemp> {
                                           fontSize: 15,
                                           color: Colors.black,
                                         )),
-                                    Text("Cantidad: ${pc.cantidad}",
-                                        style: GoogleFonts.roboto(
-                                          fontSize: 15,
-                                          color: Colors.black,
-                                        )),
+                                    Row(
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.remove_circle,
+                                              color: Colors.orange),
+                                          onPressed: () {
+                                            _controller
+                                                .restarUno(pc.producto.id);
+                                            _cardsPanKey.currentState
+                                                ?.restarUnoPorId(
+                                                    pc.producto.id);
+                                          },
+                                        ),
+                                        Text(
+                                          pc.cantidad.toString(),
+                                          style: GoogleFonts.roboto(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.add_circle,
+                                              color: Colors.green),
+                                          onPressed: () {
+                                            _controller
+                                                .sumarUno(pc.producto.id);
+                                            _cardsPanKey.currentState
+                                                ?.sumarUnoPorId(pc.producto.id);
+                                          },
+                                        ),
+                                      ],
+                                    ),
                                     Text(
                                         "Subtotal: \$${(pc.producto.precio * pc.cantidad).toStringAsFixed(2)}",
                                         style: GoogleFonts.roboto(
@@ -268,6 +306,9 @@ class _VventatempState extends State<Vventatemp> {
                                           _controller.productosEscaneados
                                               .remove(pc);
                                         });
+                                        _cardsPanKey.currentState
+                                            ?.resetearCantidadPorId(
+                                                pc.producto.id);
                                       },
                                     ),
                                   ],
@@ -280,7 +321,7 @@ class _VventatempState extends State<Vventatemp> {
                     ),
                     Divider(
                       thickness: 2,
-                      color:  isDark ?  Colors.white : Colors.black,
+                      color: isDark ? Colors.white : Colors.black,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -289,14 +330,14 @@ class _VventatempState extends State<Vventatemp> {
                             style: GoogleFonts.roboto(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: isDark ?  Colors.white : Colors.black,
+                              color: isDark ? Colors.white : Colors.black,
                             )),
                         Text(
                             "\$${_controller.calcularTotal().toStringAsFixed(2)}",
                             style: GoogleFonts.roboto(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: isDark ?  Colors.white : Colors.black,
+                              color: isDark ? Colors.white : Colors.black,
                             )),
                       ],
                     ),

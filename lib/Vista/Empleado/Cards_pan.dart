@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CategoriaPan {
-  String id; 
+  String id;
   String nombre;
   double precio;
   int cantidad;
@@ -48,7 +48,7 @@ class CardspanState extends State<CardsPan> {
         await FirebaseFirestore.instance.collection('productos').get();
 
     const nombresPermitidos = [
-      'Pan Francés',
+      'Pan 6',
       'Pan 10',
       'Pan 11',
     ];
@@ -57,16 +57,49 @@ class CardspanState extends State<CardsPan> {
       categoriasPan = query.docs
           .where((doc) => nombresPermitidos.contains(doc['productoname']))
           .map((doc) {
-            final precio = (doc['precio'] as num).toDouble();
+        final precio = (doc['precio'] as num).toDouble();
 
-            return CategoriaPan(
-              id: doc['id'], // ✅ ID REAL
-              nombre: doc['productoname'],
-              precio: precio,
-              color: _colorPorPrecio(precio),
-            );
-          })
-          .toList();
+        return CategoriaPan(
+          id: doc['id'],
+          nombre: doc['productoname'],
+          precio: precio,
+          color: _colorPorPrecio(precio),
+        );
+      }).toList();
+    });
+  }
+
+  void resetearCantidadPorId(String id) {
+    setState(() {
+      for (var pan in categoriasPan) {
+        if (pan.id == id) {
+          pan.cantidad = 0;
+          break;
+        }
+      }
+    });
+  }
+
+  void sumarUnoPorId(String id) {
+    setState(() {
+      for (var pan in categoriasPan) {
+        if (pan.id == id) {
+          pan.cantidad++;
+          break;
+        }
+      }
+    });
+  }
+
+  void restarUnoPorId(String id) {
+    setState(() {
+      for (var pan in categoriasPan) {
+        if (pan.id == id) {
+          pan.cantidad--;
+          if (pan.cantidad < 0) pan.cantidad = 0;
+          break;
+        }
+      }
     });
   }
 
@@ -87,7 +120,6 @@ class CardspanState extends State<CardsPan> {
       }
     });
   }
-
 
   int obtenerCantidadDesdeCodigo() {
     final texto = widget.codigoController.text.trim();
@@ -186,8 +218,8 @@ class CardspanState extends State<CardsPan> {
                       shape: BoxShape.circle,
                       color: Colors.red[100],
                     ),
-                    child: const Icon(Icons.remove,
-                        color: Colors.red, size: 28),
+                    child:
+                        const Icon(Icons.remove, color: Colors.red, size: 28),
                   ),
                 ),
                 GestureDetector(
@@ -206,8 +238,7 @@ class CardspanState extends State<CardsPan> {
                       shape: BoxShape.circle,
                       color: Colors.green[100],
                     ),
-                    child: const Icon(Icons.add,
-                        color: Colors.green, size: 28),
+                    child: const Icon(Icons.add, color: Colors.green, size: 28),
                   ),
                 ),
               ],

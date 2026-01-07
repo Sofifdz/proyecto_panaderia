@@ -30,11 +30,10 @@ class VentasController {
 
   String tipoVenta = 'almacen';
 
-  // 🔒 NUEVO: evita limpiezas accidentales
   bool _ventaConfirmada = false;
 
   void limpiarVenta() {
-    if (!_ventaConfirmada) return; // ⛔ blindaje
+    if (!_ventaConfirmada) return;
 
     productosEscaneados.clear();
     codigoController.clear();
@@ -137,38 +136,62 @@ class VentasController {
   }
 
   Future<void> buscarProducto(String input) async {
-    input = input.trim();
-
-    if (input.isEmpty || input == '*' || input == '\n' || input == '\r') return;
+    if (input.isEmpty) return;
 
     final regex = RegExp(r'^(.+?)(\*(\d+))?$');
     final match = regex.firstMatch(input);
-    if (match == null) return;
 
-    final codigo = match.group(1)!;
-    final cantidad = int.tryParse(match.group(3) ?? '1') ?? 1;
+    if (match == null) {
+      _mostrarMensaje('Formato de código inválido');
+      return;
+    }
 
-    final doc = await FirebaseFirestore.instance
+    String codigo = match.group(1)!;
+    int cantidad = int.tryParse(match.group(3) ?? '1') ?? 1;
+
+    DocumentSnapshot doc = await FirebaseFirestore.instance
         .collection('productos')
         .doc(codigo)
         .get();
 
     if (!doc.exists) {
       _mostrarMensaje('Producto no encontrado');
+      codigoController.clear();
       return;
     }
 
-    final producto = Productos.fromFirestore(doc);
+    Productos producto = Productos.fromFirestore(doc);
 
-    final index =
+    if (producto.existencias <= 0) {
+      _mostrarMensaje('No hay existencias de ${producto.productoname}');
+      codigoController.clear();
+      return;
+    }
+
+    int index =
         productosEscaneados.indexWhere((p) => p.producto.id == producto.id);
 
     if (index == -1) {
+      if (cantidad > producto.existencias) {
+        _mostrarMensaje(
+            'Solo hay ${producto.existencias} de ${producto.productoname}');
+        codigoController.clear();
+        return;
+      }
+
       productosEscaneados.add(
         ProductoConCantidad(producto: producto, cantidad: cantidad),
       );
     } else {
-      productosEscaneados[index].cantidad += cantidad;
+      int nuevaCantidad = productosEscaneados[index].cantidad + cantidad;
+
+      if (nuevaCantidad > producto.existencias) {
+        _mostrarMensaje('Stock insuficiente de ${producto.productoname}');
+        codigoController.clear();
+        return;
+      }
+
+      productosEscaneados[index].cantidad = nuevaCantidad;
     }
 
     refresh();
@@ -176,7 +199,6 @@ class VentasController {
     FocusScope.of(context).requestFocus(focusNode);
   }
 
-  // 👇 TODOS TUS DEMÁS MÉTODOS SIGUEN IGUAL
   void agregarProductoDesdeCard(
       String productoId, double precio, int cantidad) async {
     tipoVenta = 'pan';

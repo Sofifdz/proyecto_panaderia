@@ -41,7 +41,9 @@ class _VAlmacenCopiaState extends State<VAlmacenCopia> {
     _onSearchChanged('');
   }
 
-  void _actualizar() => setState(() {});
+  Future<void> _actualizar() async {
+    setState(() {});
+  }
 
   void _applyFilter(String? filter) => setState(() => _currentFilter = filter ?? '');
 
@@ -56,125 +58,135 @@ class _VAlmacenCopiaState extends State<VAlmacenCopia> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    const backgroundColor = Color(0xFFF4F6F8);
+    const cardColor = Colors.white;
+    const mainText = Color(0xFF111827);
+    const primaryBlue = Color(0xFF2563EB);
+
+    final isEmpleado = widget.esEmpleado;
 
     return Scaffold(
+      backgroundColor: backgroundColor,
+      drawer: isEmpleado
+          ? DrawerConfig.empleadoDrawer(context, widget.usuarioId, widget.username)
+          : DrawerConfig.administradorDrawer(context, widget.usuarioId, widget.username),
       appBar: AppBar(
-        toolbarHeight: 90,
-        backgroundColor: Colors.transparent,
+        toolbarHeight: 80,
+        backgroundColor: Color(0xFF1F2933),
         elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: widget.esEmpleado
-                  ? (isDark
-                      ? [Colors.purple.shade900, Colors.purple.shade700]
-                      : [Colors.purple.shade200, Colors.purple.shade100])
-                  : (isDark
-                      ? [Colors.green.shade900, Colors.green.shade700]
-                      : [Colors.green.shade400, Colors.green.shade300]),
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(25),
-              bottomRight: Radius.circular(25),
-            ),
-          ),
-        ),
         leading: Builder(
           builder: (context) => IconButton(
-            icon: Icon(Icons.menu, color: isDark ? Colors.white : Colors.black87, size: 30),
+            icon: Icon(Icons.menu, color: Colors.white, size: 28),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
         title: Text(
-          "Almacén",
+          "Almacén - ${widget.username}",
           style: GoogleFonts.montserrat(
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : Colors.black87,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
           ),
         ),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.add_circle_outline_outlined,
-                color: isDark ? Colors.white : Colors.black87, size: 30),
+            icon: Icon(Icons.add_circle, color: primaryBlue, size: 28),
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>
-                      widget.esEmpleado ? VAgregarProductoE() : VAgregarProducto(),
+                  builder: (_) => isEmpleado ? VAgregarProductoE() : VAgregarProducto(),
                 ),
               );
             },
           ),
         ],
       ),
-      drawer: widget.esEmpleado
-          ? DrawerConfig.empleadoDrawer(context, widget.usuarioId, widget.username)
-          : DrawerConfig.administradorDrawer(context, widget.usuarioId, widget.username),
       body: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-      
-            Row(
-              children: [
-                Expanded(
-                  child: ComponentInputSearch(
-                    searchController: _searchController,
-                    onChanged: _onSearchChanged,
-                    onClear: _clearSearch,
-                    showFilterSheet: () {},
+            
+            Container(
+              decoration: BoxDecoration(
+                color: cardColor,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)],
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ComponentInputSearch(
+                      searchController: _searchController,
+                      onChanged: _onSearchChanged,
+                      onClear: _clearSearch,
+                      showFilterSheet: () {},
+                    ),
                   ),
-                ),
-                IconButton(
-                  onPressed: _showFilterSheet,
-                  icon: Icon(Icons.tune, color: isDark ? Colors.white : Colors.black87, size: 30),
-                ),
-              ],
+                  IconButton(
+                    onPressed: _showFilterSheet,
+                    icon: Icon(Icons.tune, color: primaryBlue, size: 28),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 24),
+          
             Expanded(
               child: StreamBuilder<List<Productos>>(
                 stream: _almacenController.obtenerProductosStream(),
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting)
+                  if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
+                  }
 
-                  if (!snapshot.hasData || snapshot.data!.isEmpty)
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return Center(
-                      child: Text("No hay productos",
-                          style: GoogleFonts.montserrat(fontSize: 18, color: Colors.redAccent)),
+                      child: Text(
+                        "No hay productos",
+                        style: GoogleFonts.montserrat(fontSize: 18, color: Colors.redAccent),
+                      ),
                     );
+                  }
 
-                  final productosFiltrados = snapshot.data!
+                  var productosFiltrados = snapshot.data!
                       .where((p) => p.productoname.toLowerCase().contains(_query.toLowerCase()))
                       .toList();
 
-      
-                  if (_currentFilter == 'precio_asc')
-                    productosFiltrados.sort((a, b) => a.precio.compareTo(b.precio));
-                  if (_currentFilter == 'precio_desc')
-                    productosFiltrados.sort((a, b) => b.precio.compareTo(a.precio));
-                  if (_currentFilter == 'existencias_asc')
-                    productosFiltrados.sort((a, b) => a.existencias.compareTo(b.existencias));
-                  if (_currentFilter == 'existencias_desc')
-                    productosFiltrados.sort((a, b) => b.existencias.compareTo(a.existencias));
-                  if (_currentFilter == 'nombre_asc')
-                    productosFiltrados
-                        .sort((a, b) => a.productoname.toLowerCase().compareTo(b.productoname.toLowerCase()));
+              
+                  switch (_currentFilter) {
+                    case 'precio_asc':
+                      productosFiltrados.sort((a, b) => a.precio.compareTo(b.precio));
+                      break;
+                    case 'precio_desc':
+                      productosFiltrados.sort((a, b) => b.precio.compareTo(a.precio));
+                      break;
+                    case 'existencias_asc':
+                      productosFiltrados.sort((a, b) => a.existencias.compareTo(b.existencias));
+                      break;
+                    case 'existencias_desc':
+                      productosFiltrados.sort((a, b) => b.existencias.compareTo(a.existencias));
+                      break;
+                    case 'nombre_asc':
+                      productosFiltrados.sort(
+                          (a, b) => a.productoname.toLowerCase().compareTo(b.productoname.toLowerCase()));
+                      break;
+                  }
 
-                  return _ComponentListaProductos(
-                    productos: productosFiltrados,
-                    usuarioId: widget.usuarioId,
-                    username: widget.username,
-                    onUpdate: _actualizar,
-                    esEmpleado: widget.esEmpleado,
+                  return ListView.builder(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    itemCount: productosFiltrados.length,
+                    itemBuilder: (context, index) {
+                      final producto = productosFiltrados[index];
+                      return ProductoCard(
+                        producto: producto,
+                        esEmpleado: isEmpleado,
+                        usuarioId: widget.usuarioId,
+                        username: widget.username,
+                        onUpdate: _actualizar,
+                      );
+                    },
                   );
                 },
               ),
@@ -186,110 +198,82 @@ class _VAlmacenCopiaState extends State<VAlmacenCopia> {
   }
 }
 
-class _ComponentListaProductos extends StatelessWidget {
-  final List<Productos> productos;
+class ProductoCard extends StatelessWidget {
+  final Productos producto;
+  final bool esEmpleado;
   final String usuarioId;
   final String username;
-  final VoidCallback onUpdate;
-  final bool esEmpleado;
+  final Future<void> Function() onUpdate;
 
-  const _ComponentListaProductos({
+  const ProductoCard({
     Key? key,
-    required this.productos,
+    required this.producto,
+    required this.esEmpleado,
     required this.usuarioId,
     required this.username,
     required this.onUpdate,
-    required this.esEmpleado,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    const cardColor = Colors.white;
+    const mainText = Color(0xFF111827);
+    const primaryBlue = Color(0xFF2563EB);
 
-    if (productos.isEmpty) {
-      return Center(
-        child: Text("No hay resultados",
-            style: GoogleFonts.montserrat(fontSize: 18, color: Colors.red)),
-      );
-    }
-
-    return ListView.builder(
-      itemCount: productos.length,
-      itemBuilder: (context, index) {
-        final producto = productos[index];
-        return Dismissible(
-          key: Key(producto.id),
-          direction: DismissDirection.endToStart,
-          confirmDismiss: (direction) async => await DeleteDialog.showDeleteDialog(
-            context: context,
-            item: producto,
-            onDelete: onUpdate,
+    return Dismissible(
+      key: Key(producto.id),
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (direction) async =>
+          await DeleteDialog.showDeleteDialog(context: context, item: producto, onDelete: onUpdate),
+      background: Container(
+        color: Colors.red,
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: Offset(2, 4))],
+        ),
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          title: Text(
+            producto.productoname,
+            style: GoogleFonts.montserrat(fontWeight: FontWeight.bold, fontSize: 18, color: mainText),
           ),
-          background: Container(
-            color: Colors.red,
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.only(right: 20),
-            child: const Icon(Icons.delete, color: Colors.white),
-          ),
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            decoration: BoxDecoration(
-              gradient: producto.existencias < 10
-                  ? LinearGradient(colors: [Colors.red.shade300, Colors.red.shade100])
-                  : LinearGradient(
-                      colors: esEmpleado
-                          ? (isDark
-                              ? [Colors.purple.shade900, Colors.purple.shade800]
-                              : [Colors.purple.shade200, Colors.purple.shade100])
-                          : (isDark
-                              ? [Color(0xFF2C2C2E), Color(0xFF2C2C2E)]
-                              : [Colors.green.shade100, Colors.green.shade50]),
-                    ),
-              borderRadius: BorderRadius.circular(15),
-              boxShadow: [
-                BoxShadow(
-                    color: isDark
-                        ? Colors.black.withOpacity(0.2)
-                        : Colors.grey.withOpacity(0.2),
-                    blurRadius: 6,
-                    offset: const Offset(2, 4))
-              ],
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              "Precio: \$${producto.precio} | Existencias: ${producto.existencias}",
+              style: GoogleFonts.roboto(fontSize: 14, color: mainText.withOpacity(0.7)),
             ),
-            child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              title: Text(producto.productoname,
-                  style: GoogleFonts.montserrat(
-                      fontSize: 20, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87)),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text("Precio: \$${producto.precio} | Existencias: ${producto.existencias}",
-                    style: GoogleFonts.montserrat(fontSize: 16, color: isDark ? Colors.white60 : Colors.black54)),
+          ),
+          trailing: Icon(Icons.edit, color: primaryBlue),
+          onTap: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => esEmpleado
+                    ? VEditarProductoE(
+                        producto: producto,
+                        usuarioId: usuarioId,
+                        username: username,
+                        updateProduct: (_) async => onUpdate(),
+                      )
+                    : VEditarProducto(
+                        producto: producto,
+                        usuarioId: usuarioId,
+                        username: username,
+                        updateProduct: (_) async => onUpdate(),
+                      ),
               ),
-              trailing: Icon(Icons.edit, color: isDark ? Colors.white54 : Colors.grey[700]),
-              onTap: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => esEmpleado
-                        ? VEditarProductoE(
-                            producto: producto,
-                            usuarioId: usuarioId,
-                            username: username,
-                            updateProduct: (p) async => onUpdate(),
-                          )
-                        : VEditarProducto(
-                            producto: producto,
-                            usuarioId: usuarioId,
-                            username: username,
-                            updateProduct: (p) async => onUpdate(),
-                          ),
-                  ),
-                );
-              },
-            ),
-          ),
-        );
-      },
+            );
+          },
+        ),
+      ),
     );
   }
 }

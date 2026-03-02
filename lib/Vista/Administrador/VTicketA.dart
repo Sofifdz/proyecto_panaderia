@@ -10,214 +10,226 @@ class VTicketA extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+   
+    const backgroundColor = Color(0xFFF4F6F8);
+    const appBarColor = Color(0xFF1F2933);
+    const mainText = Color(0xFF111827);
+    const subtleText = Color(0xFF6B7280);
+    const accentGreen = Color(0xFF16A34A);
 
-    DateTime fechaDt;
+   
+    DateTime fecha;
     try {
-      fechaDt = DateTime.parse(venta.fecha);
+      fecha = DateTime.parse(venta.fecha);
     } catch (_) {
-      fechaDt = DateTime.now();
+      fecha = DateTime.now();
     }
-    final fechaFormateada = DateFormat('dd/MM/yyyy hh:mm a').format(fechaDt);
+    final fechaFormateada = DateFormat('dd/MM/yyyy hh:mm a').format(fecha);
 
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        toolbarHeight: 90,
-        backgroundColor: Colors.transparent,
+        backgroundColor: appBarColor,
+        foregroundColor: Colors.white,
+         toolbarHeight: 80,
         elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: isDark
-                  ? [Colors.green.shade900, Colors.green.shade700]
-                  : [Colors.green.shade400, Colors.green.shade300],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(25),
-              bottomRight: Radius.circular(25),
-            ),
-          ),
-        ),
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: isDark ? Colors.white : Colors.black87,
-            size: 30,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
+        centerTitle: true,
         title: Text(
           venta.desdePedido == true
               ? 'Pedido #${venta.pedidoId ?? ''}'
               : 'Venta #${venta.IDventa}',
           style: GoogleFonts.montserrat(
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : Colors.black87,
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+            color: Colors.white,
           ),
         ),
-        centerTitle: true,
       ),
-      body: SafeArea(
-        child: Container(
-          margin: const EdgeInsets.all(16),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: isDark
-                ? const Color(0xFF2C2C2E)
-                : Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: isDark
-                    ? Colors.black.withOpacity(0.3)
-                    : Colors.grey.withOpacity(0.3),
-                blurRadius: 10,
-                offset: const Offset(2, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Text(
-                  'Fecha: $fechaFormateada',
-                  style: GoogleFonts.montserrat(
-                    fontSize: 16,
-                    color: isDark ? Colors.white70 : Colors.grey[700],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // --- Cliente y descripción ---
-              if (venta.desdePedido == true) ...[
-                Text('Cliente: ${venta.cliente ?? '---'}',
-                    style: GoogleFonts.montserrat(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: isDark ? Colors.white : Colors.black87,
-                    )),
-                const SizedBox(height: 6),
-                Text('Descripción: ${venta.descripcion ?? '---'}',
-                    style: GoogleFonts.montserrat(
-                      fontSize: 14,
-                      color: isDark ? Colors.white70 : Colors.black54,
-                    )),
-                const SizedBox(height: 16),
-              ],
-
-              Text(
-                'Detalles de productos',
-                style: GoogleFonts.montserrat(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 30),
-
-           
-              Expanded(
-                child: ListView.separated(
-                  separatorBuilder: (_, __) => Divider(
-                    color: isDark ? Colors.white24 : Colors.black26,
-                    thickness: 1,
-                  ),
-                  itemCount: venta.productos.length,
-                  itemBuilder: (context, index) {
-                    final producto =
-                        venta.productos[index] as Map<String, dynamic>;
-                    final nombre = producto['nombre'] ?? 'Producto';
-                    final cantidad = producto['cantidad'] ?? 1;
-                    final precio = (producto['precio'] ?? 0).toDouble();
-                    final subtotal = cantidad * precio;
-
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            flex: 3,
-                            child: Text(
-                              nombre,
-                              style: GoogleFonts.montserrat(
-                                fontSize: 16,
-                                color: isDark ? Colors.white : Colors.black87,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: Text(
-                              'x$cantidad',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.montserrat(
-                                fontSize: 16,
-                                color:
-                                    isDark ? Colors.white70 : Colors.grey[700],
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: Text(
-                              '\$${subtotal.toStringAsFixed(2)}',
-                              textAlign: TextAlign.end,
-                              style: GoogleFonts.montserrat(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color:
-                                    isDark ? Colors.greenAccent : Colors.green[800],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-
-              const SizedBox(height: 16),
-              Divider(
-                thickness: 1.5,
-                color: isDark ? Colors.white38 : Colors.black26,
-              ),
-              const SizedBox(height: 12),
-
-              // --- Total ---
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Total:',
-                    style: GoogleFonts.montserrat(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : Colors.black87,
-                    ),
-                  ),
-                  Text(
-                    '\$${venta.total.toStringAsFixed(2)}',
-                    style: GoogleFonts.montserrat(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : Colors.black87,
-                    ),
-                  ),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+          
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 12,
+                  )
                 ],
               ),
-            ],
-          ),
+              child: Column(
+                children: [
+                  Text(
+                    "PANADERÍA",
+                    style: GoogleFonts.montserrat(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    fechaFormateada,
+                    style: GoogleFonts.roboto(
+                      color: subtleText,
+                    ),
+                  ),
+                  if (venta.desdePedido) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      "Cliente: ${venta.cliente ?? '---'}",
+                      style: GoogleFonts.roboto(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      "Descripción: ${venta.descripcion ?? '---'}",
+                      style: GoogleFonts.roboto(
+                        color: subtleText,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+          
+            Row(
+              children: List.generate(
+                40,
+                (index) => Expanded(
+                  child: Container(
+                    height: 1,
+                    color: index.isEven ? Colors.grey.shade300 : Colors.transparent,
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+           
+            Expanded(
+              child: ListView.builder(
+                itemCount: venta.productos.length,
+                itemBuilder: (context, index) {
+                  final producto = venta.productos[index] as Map<String, dynamic>;
+                  final nombre = producto['nombre'] ?? 'Producto';
+                  final cantidad = producto['cantidad'] ?? 1;
+                  final precio = (producto['precio'] ?? 0).toDouble();
+                  final subtotal = cantidad * precio;
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Column(
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 4,
+                              child: Text(
+                                nombre,
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: Text(
+                                "x$cantidad",
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.roboto(
+                                  color: subtleText,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                "\$${subtotal.toStringAsFixed(2)}",
+                                textAlign: TextAlign.end,
+                                style: GoogleFonts.roboto(
+                                  fontWeight: FontWeight.w600,
+                                  color: accentGreen,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Divider(
+                          thickness: 0.5,
+                          color: Colors.grey.shade200,
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+           
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 12,
+                  )
+                ],
+              ),
+              child: Column(
+                children: [
+                  _resumenRow("Subtotal", "\$${venta.total.toStringAsFixed(2)}"),
+                  const SizedBox(height: 10),
+                  Divider(),
+                  const SizedBox(height: 10),
+                  _resumenRow("TOTAL", "\$${venta.total.toStringAsFixed(2)}", isTotal: true),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _resumenRow(String label, String value, {bool isTotal = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.montserrat(
+            fontSize: isTotal ? 18 : 15,
+            fontWeight: isTotal ? FontWeight.bold : FontWeight.w500,
+          ),
+        ),
+        Text(
+          value,
+          style: GoogleFonts.montserrat(
+            fontSize: isTotal ? 20 : 15,
+            fontWeight: isTotal ? FontWeight.bold : FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 }

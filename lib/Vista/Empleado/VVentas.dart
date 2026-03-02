@@ -61,303 +61,266 @@ class _VVentasState extends State<VVentas> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    const backgroundColor = Color(0xFFF4F6F8);
+    const appBarColor = Color(0xFF1F2933);
+    const primaryBlue = Color(0xFF2563EB);
+    const mainText = Color(0xFF111827);
 
-    return Shortcuts(
-      shortcuts: <LogicalKeySet, Intent>{
-        LogicalKeySet(LogicalKeyboardKey.f9): const ActivateIntent(),
-      },
-      child: Actions(
-        actions: <Type, Action<Intent>>{
-          ActivateIntent: CallbackAction<ActivateIntent>(
-            onInvoke: (intent) => _mostrarDialogoPago(),
+    return Scaffold(
+      backgroundColor: backgroundColor,
+      drawer: DrawerConfig.empleadoDrawer(
+        context,
+        widget.usuarioId,
+        widget.username,
+      ),
+      appBar: AppBar(
+        toolbarHeight: 80,
+        backgroundColor: appBarColor,
+        elevation: 0,
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu, color: Colors.white),
+            onPressed: () => Scaffold.of(context).openDrawer(),
           ),
-        },
-        child: Focus(
-          autofocus: true,
-          child: Scaffold(
-            backgroundColor: isDark ? const Color(0xFF121212) : Colors.white,
-            appBar: AppBar(
-              toolbarHeight: 90,
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              flexibleSpace: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: isDark
-                        ? [Colors.purple.shade900, Colors.purple.shade700]
-                        : [Colors.purple.shade200, Colors.purple.shade100],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(25),
-                    bottomRight: Radius.circular(25),
-                  ),
-                ),
+        ),
+        title: Text(
+          "Caja - ${widget.username}",
+          style: GoogleFonts.montserrat(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 8,
+                  )
+                ],
               ),
-              leading: Builder(
-                builder: (context) => IconButton(
-                  icon: Icon(Icons.menu, color: Colors.white, size: 30),
-                  onPressed: () => Scaffold.of(context).openDrawer(),
-                ),
-              ),
-              title: Text(
-                "Nueva Venta",
-                style: GoogleFonts.montserrat(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              centerTitle: true,
-              actions: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 12.0),
-                  child: InkWell(
-                    onTap: _mostrarDialogoPago,
-                    borderRadius: BorderRadius.circular(12),
-                    child: Ink(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.purple.shade300,
-                            Colors.purple.shade400
-                          ],
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _controller.codigoController,
+                      focusNode: _controller.focusNode,
+                      onSubmitted: _controller.buscarProducto,
+                      style: GoogleFonts.roboto(color: mainText),
+                      decoration: InputDecoration(
+                        hintText: "Escanear o escribir código",
+                        prefixIcon:
+                            Icon(Icons.qr_code_scanner, color: primaryBlue),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(
+                          vertical: 16,
+                          horizontal: 16,
                         ),
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                              color: Colors.purple.withOpacity(0.4),
-                              offset: const Offset(2, 4),
-                              blurRadius: 6),
-                        ],
-                      ),
-                      child: Text(
-                        "Pagar",
-                        style: GoogleFonts.montserrat(
-                            fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                     ),
                   ),
-                ),
-              ],
+                  IconButton(
+                    onPressed: () {
+                      DialogBusquedaProducto.mostrar(
+                        context: context,
+                        controller: _controller,
+                      );
+                    },
+                    icon: Icon(Icons.search, color: primaryBlue),
+                  ),
+                ],
+              ),
             ),
-            drawer: DrawerConfig.empleadoDrawer(
-              context,
-              widget.usuarioId,
-              widget.username,
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                  )
+                ],
+              ),
+              child: CardsPan(
+                key: _cardsPanKey,
+                codigoController: _controller.codigoController,
+                onAgregar: _controller.agregarProductoDesdeCard,
+                onEliminar: _controller.eliminarProductoDesdeCard,
+              ),
             ),
-            body: SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      height: 200,
-                      child: ListView(
-                        scrollDirection: Axis.vertical,
-                        children: [
-                          CardsPan(
-                            key: _cardsPanKey,
-                            codigoController: _controller.codigoController,
-                            onAgregar: _controller.agregarProductoDesdeCard,
-                            onEliminar: _controller.eliminarProductoDesdeCard,
-                          ),
-                        ],
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                  )
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "TOTAL",
+                        style: GoogleFonts.montserrat(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: mainText,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _controller.codigoController,
-                            focusNode: _controller.focusNode,
-                            onSubmitted: _controller.buscarProducto,
-                            decoration: InputDecoration(
-                              hintText: "Escanear código de barras",
-                              prefixIcon: const Icon(Icons.qr_code_scanner),
-                              filled: true,
-                              fillColor: isDark
-                                  ? const Color(0xFF3A3A3C)
-                                  : Colors.purple.shade50,
-                              contentPadding: const EdgeInsets.symmetric(
-                                  vertical: 10, horizontal: 15),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
-                                borderSide: BorderSide.none,
+                      Text(
+                        "\$${_controller.calcularTotal().toStringAsFixed(2)}",
+                        style: GoogleFonts.montserrat(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: primaryBlue,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _controller.productosEscaneados.length,
+                    itemBuilder: (context, index) {
+                      final pc = _controller.productosEscaneados[index];
+
+                      return Container(
+                        margin: const EdgeInsets.symmetric(vertical: 6),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: backgroundColor,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: Text(
+                                pc.producto.productoname,
+                                style: GoogleFonts.roboto(
+                                  fontWeight: FontWeight.w500,
+                                  color: mainText,
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            DialogBusquedaProducto.mostrar(
-                              context: context,
-                              controller: _controller,
-                            ).then((productoSeleccionado) {
-                              if (productoSeleccionado != null) {
-                                _controller.agregarProductoCompletoDesdeDialogo(
-                                    productoSeleccionado, 1);
+                            IconButton(
+                              icon:
+                                  Icon(Icons.remove_circle, color: primaryBlue),
+                              onPressed: () {
+                                _controller.restarUno(pc.producto.id);
+                                _cardsPanKey.currentState
+                                    ?.restarUnoPorId(pc.producto.id);
                                 setState(() {});
-                              }
-                            });
-                          },
-                          icon: Icon(Icons.search_sharp, size: 30),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    Text("Productos",
-                        style: GoogleFonts.roboto(
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : Colors.black,
-                        )),
-                    const SizedBox(height: 10),
-                    ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxHeight: MediaQuery.of(context).size.height * 0.4,
-                      ),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: _controller.productosEscaneados.map((pc) {
-                            return AnimatedOpacity(
-                              duration: const Duration(milliseconds: 400),
-                              opacity: 1,
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 400),
-                                margin: const EdgeInsets.symmetric(vertical: 6),
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: isDark
-                                        ? [
-                                            Colors.purple.shade700,
-                                            Colors.purple.shade600
-                                          ]
-                                        : [
-                                            Colors.purple.shade50,
-                                            Colors.purple.shade100
-                                          ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  borderRadius: BorderRadius.circular(15),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.purple.withOpacity(0.1),
-                                      blurRadius: 6,
-                                      offset: const Offset(2, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: [
-                                    Text(pc.producto.productoname,
-                                        style: GoogleFonts.roboto(
-                                          fontSize: 15,
-                                          color: Colors.black,
-                                        )),
-                                    Text("Precio: \$${pc.producto.precio}",
-                                        style: GoogleFonts.roboto(
-                                          fontSize: 15,
-                                          color: Colors.black,
-                                        )),
-                                    Row(
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.remove_circle,
-                                              color: Colors.orange),
-                                          onPressed: () {
-                                            _controller
-                                                .restarUno(pc.producto.id);
-                                            _cardsPanKey.currentState
-                                                ?.restarUnoPorId(
-                                                    pc.producto.id);
-                                          },
-                                        ),
-                                        Text(
-                                          pc.cantidad.toString(),
-                                          style: GoogleFonts.roboto(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(Icons.add_circle,
-                                              color: Colors.green),
-                                          onPressed: () {
-                                            _controller
-                                                .sumarUno(pc.producto.id);
-                                            _cardsPanKey.currentState
-                                                ?.sumarUnoPorId(pc.producto.id);
-                                          },
-                                        ),
-                                        
-                                      ],
-                                    ),
-                                    Text(
-                                        "Subtotal: \$${(pc.producto.precio * pc.cantidad).toStringAsFixed(2)}",
-                                        style: GoogleFonts.roboto(
-                                          fontSize: 15,
-                                          color: Colors.black,
-                                        )),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete,
-                                          color: Colors.red),
-                                      onPressed: () {
-                                        setState(() {
-                                          _controller.productosEscaneados
-                                              .remove(pc);
-
-                                          _cardsPanKey.currentState
-                                              ?.resetearCantidadPorId(
-                                                  pc.producto.id);
-                                        });
-                                      },
-                                    ),
-                                  ],
+                              },
+                            ),
+                            Text(
+                              pc.cantidad.toString(),
+                              style: GoogleFonts.roboto(
+                                fontWeight: FontWeight.bold,
+                                color: mainText,
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.add_circle, color: primaryBlue),
+                              onPressed: () {
+                                _controller.sumarUno(pc.producto.id);
+                                _cardsPanKey.currentState
+                                    ?.sumarUnoPorId(pc.producto.id);
+                                setState(() {});
+                              },
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                "\$${(pc.producto.precio * pc.cantidad).toStringAsFixed(2)}",
+                                textAlign: TextAlign.end,
+                                style: GoogleFonts.roboto(
+                                  fontWeight: FontWeight.bold,
+                                  color: mainText,
                                 ),
                               ),
-                            );
-                          }).toList(),
+                            ),
+                               IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                setState(() {
+                                  _controller.productosEscaneados.remove(pc);
+                                });
+                                _cardsPanKey.currentState
+                                    ?.resetearCantidadPorId(pc.producto.id);
+                              },
+                            ),
+                          ],
                         ),
-                      ),
-                    ),
-                    Divider(
-                      thickness: 2,
-                      color: isDark ? Colors.white : Colors.black,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Total:",
-                            style: GoogleFonts.roboto(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : Colors.black,
-                            )),
-                        Text(
-                            "\$${_controller.calcularTotal().toStringAsFixed(2)}",
-                            style: GoogleFonts.roboto(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : Colors.black,
-                            )),
-                      ],
-                    ),
-                  ],
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 40),
+          ],
+        ),
+      ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            top: BorderSide(color: Color(0xFFE5E7EB)),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: double.infinity,
+              height: 60,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryBlue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  elevation: 3,
+                ),
+                onPressed: _controller.productosEscaneados.isEmpty
+                    ? null
+                    : _mostrarDialogoPago,
+                child: Text(
+                  "COBRAR",
+                  style: GoogleFonts.montserrat(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );

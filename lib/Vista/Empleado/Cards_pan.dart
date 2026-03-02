@@ -7,11 +7,9 @@ class CategoriaPan {
   String nombre;
   double precio;
   int cantidad;
-  Color color;
 
   CategoriaPan({
     required this.id,
-    required this.color,
     required this.nombre,
     required this.precio,
     this.cantidad = 0,
@@ -63,7 +61,7 @@ class CardspanState extends State<CardsPan> {
           id: doc['id'],
           nombre: doc['productoname'],
           precio: precio,
-          color: _colorPorPrecio(precio),
+          
         );
       }).toList();
     });
@@ -130,7 +128,7 @@ class CardspanState extends State<CardsPan> {
     return 1;
   }
 
-  Widget buildCardPan(int index, CategoriaPan pan, Color color) {
+  Widget buildCardPan(int index, CategoriaPan pan) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     double screenWidth = MediaQuery.of(context).size.width;
     double cardWidth = screenWidth * 0.34;
@@ -155,10 +153,11 @@ class CardspanState extends State<CardsPan> {
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -172,7 +171,7 @@ class CardspanState extends State<CardsPan> {
                     color: isDark ? Colors.white : Colors.black87,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   "\$${pan.precio.toStringAsFixed(2)}",
                   style: GoogleFonts.roboto(
@@ -184,7 +183,7 @@ class CardspanState extends State<CardsPan> {
               ],
             ),
             Container(
-              margin: const EdgeInsets.symmetric(vertical: 8),
+              margin: const EdgeInsets.symmetric(vertical: 5),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               decoration: BoxDecoration(
                 color: isDark ? Colors.grey[800] : Colors.grey[100],
@@ -259,7 +258,7 @@ class CardspanState extends State<CardsPan> {
             .entries
             .map(
               (entry) =>
-                  buildCardPan(entry.key, entry.value, entry.value.color),
+                  buildCardPan(entry.key, entry.value, ),
             )
             .toList(),
       ),

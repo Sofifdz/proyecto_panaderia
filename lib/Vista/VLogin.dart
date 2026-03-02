@@ -107,185 +107,169 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final size = MediaQuery.of(context).size;
+Widget build(BuildContext context) {
+  final size = MediaQuery.of(context).size;
 
-    // Colores adaptados según el modo
-    final headerGradientColors = isDarkMode
-        ? [Colors.green.shade900, Colors.green.shade700]
-        : [Colors.green.shade400, Colors.green.shade200];
+  const backgroundColor = Color(0xFFF4F6F8);
+  const appBarColor = Color(0xFF1F2933);
+  const primaryBlue = Color(0xFF2563EB);
+  const mainText = Color(0xFF111827);
+  const secondaryText = Color(0xFF6B7280);
 
-    final fieldBackground =
-        isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100;
-    final containerBackground =
-        isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
-    final iconColor = isDarkMode ? Colors.green.shade300 : Colors.green.shade700;
-    final buttonColor =
-        isDarkMode ? Colors.green.shade700 : Colors.green.shade300;
-    final textColor = isDarkMode ? Colors.white : Colors.black87;
-    final secondaryTextColor = isDarkMode ? Colors.white70 : Colors.black54;
-
-    return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        color: isDarkMode ? Colors.black : Colors.grey[50],
-        child: Stack(
-          children: [
-            // Header decorativo con gradiente verde
-            Container(
-              height: size.height * 0.25,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: headerGradientColors,
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(40),
-                  bottomRight: Radius.circular(40),
-                ),
-              ),
+  return Scaffold(
+    backgroundColor: backgroundColor,
+    body: Stack(
+      children: [
+     
+        Container(
+          height: size.height * 0.25,
+          decoration: const BoxDecoration(
+            color: appBarColor,
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(40),
+              bottomRight: Radius.circular(40),
             ),
-            Center(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    SlideTransition(
-                      position: _slideLogo,
-                      child: Container(
-                        margin: const EdgeInsets.only(top: 40),
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: containerBackground,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: isDarkMode
-                                  ? Colors.black54
-                                  : Colors.black26,
-                              blurRadius: 15,
-                              offset: const Offset(0, 8),
-                            )
+          ),
+        ),
+
+        Center(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                SlideTransition(
+                  position: _slideLogo,
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 40),
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 15,
+                          offset: const Offset(0, 8),
+                        )
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.storefront_rounded,
+                      color: primaryBlue,
+                      size: 90,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 30),
+                SlideTransition(
+                  position: _slideFields,
+                  child: FadeTransition(
+                    opacity: _fadeFields,
+                    child: Container(
+                      width: size.width * 0.85,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 40, horizontal: 30),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 25,
+                            offset: const Offset(0, 10),
+                          )
+                        ],
+                      ),
+                      child: Form(
+                        key: formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+
+                            Text(
+                              "Iniciar Sesión",
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.montserrat(
+                                fontSize: 26,
+                                fontWeight: FontWeight.bold,
+                                color: mainText,
+                              ),
+                            ),
+
+                            const SizedBox(height: 10),
+
+                            Text(
+                              "Accede al sistema de ventas",
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.roboto(
+                                fontSize: 15,
+                                color: secondaryText,
+                              ),
+                            ),
+
+                            const SizedBox(height: 35),
+
+                            _buildTextField(
+                              label: "Correo electrónico",
+                              controller: _emailcontroller,
+                              icon: Icons.mail_outline,
+                              fieldBackground: const Color(0xFFF9FAFB),
+                              iconColor: primaryBlue,
+                            ),
+
+                            const SizedBox(height: 20),
+
+                            _buildTextField(
+                              label: "Contraseña",
+                              controller: _passwordcontroller,
+                              icon: Icons.lock_outline,
+                              isPassword: true,
+                              toggleVisible: () {
+                                setState(() {
+                                  isVisible = !isVisible;
+                                });
+                              },
+                              visible: isVisible,
+                              fieldBackground: const Color(0xFFF9FAFB),
+                              iconColor: primaryBlue,
+                            ),
+
+                            const SizedBox(height: 35),
+
+                            SizedBox(
+                              height: 50,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: primaryBlue,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  elevation: 2,
+                                ),
+                                onPressed: _login,
+                                child: Text(
+                                  "INGRESAR",
+                                  style: GoogleFonts.montserrat(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ],
                         ),
-                        child: Icon(
-                          Icons.storefront_rounded,
-                          color: iconColor,
-                          size: 100,
-                        ),
                       ),
                     ),
-                    const SizedBox(height: 25),
-                    SlideTransition(
-                      position: _slideFields,
-                      child: FadeTransition(
-                        opacity: _fadeFields,
-                        child: Container(
-                          width: size.width * 0.85,
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 40, horizontal: 25),
-                          decoration: BoxDecoration(
-                            color: containerBackground,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color:
-                                    isDarkMode ? Colors.black54 : Colors.black12,
-                                blurRadius: 25,
-                                offset: const Offset(0, 10),
-                              )
-                            ],
-                          ),
-                          child: Form(
-                            key: formKey,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Text(
-                                  "Bienvenido",
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.roboto(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                    color: textColor,
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  "Inicia sesión para continuar",
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.roboto(
-                                    fontSize: 16,
-                                    color: secondaryTextColor,
-                                  ),
-                                ),
-                                const SizedBox(height: 30),
-                                _buildTextField(
-                                  label: "Correo",
-                                  controller: _emailcontroller,
-                                  icon: Icons.mail_outline,
-                                  isDarkMode: isDarkMode,
-                                  fieldBackground: fieldBackground,
-                                  iconColor: iconColor,
-                                ),
-                                const SizedBox(height: 20),
-                                _buildTextField(
-                                  label: "Contraseña",
-                                  controller: _passwordcontroller,
-                                  icon: Icons.lock_outline,
-                                  isPassword: true,
-                                  isDarkMode: isDarkMode,
-                                  toggleVisible: () {
-                                    setState(() {
-                                      isVisible = !isVisible;
-                                    });
-                                  },
-                                  visible: isVisible,
-                                  fieldBackground: fieldBackground,
-                                  iconColor: iconColor,
-                                ),
-                                const SizedBox(height: 35),
-                                AnimatedContainer(
-                                  duration:
-                                      const Duration(milliseconds: 200),
-                                  height: 50,
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: buttonColor,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(15),
-                                      ),
-                                      elevation: 5,
-                                    ),
-                                    onPressed: _login,
-                                    child: Text(
-                                      "Ingresar",
-                                      style: GoogleFonts.roboto(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
-    );
-  }
-
+      ],
+    ),
+  );
+}
   Widget _buildTextField({
     required String label,
     required TextEditingController controller,

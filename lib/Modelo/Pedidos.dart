@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Pedidos {
   String NoPedido;
   String cliente;
+  String telefono;      
   String descripcion;
   int precio;
   String fecha;
@@ -13,6 +14,7 @@ class Pedidos {
   Pedidos({
     required this.NoPedido,
     required this.cliente,
+    this.telefono = '',  
     required this.descripcion,
     required this.precio,
     required this.fecha,
@@ -26,6 +28,7 @@ class Pedidos {
     return Pedidos(
       NoPedido: doc.id,
       cliente: data['cliente'] ?? '',
+      telefono: data['telefono'] ?? '',         
       descripcion: data['descripcion'] ?? '',
       precio: (data['precio'] ?? 0).toInt(),
       fecha: data['fecha'] ?? '',
@@ -38,6 +41,7 @@ class Pedidos {
   Map<String, dynamic> toFirestore() {
     return {
       'cliente': cliente,
+      'telefono': telefono,                        // 🔹 Guardar teléfono
       'descripcion': descripcion,
       'precio': precio,
       'fecha': fecha,

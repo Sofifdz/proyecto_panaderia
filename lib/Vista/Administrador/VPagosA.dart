@@ -25,41 +25,31 @@ class _VPagosAState extends State<VPagosA> {
 
   @override
   Widget build(BuildContext context) {
+    const backgroundColor = Color(0xFFF4F6F8);
+    const appBarColor = Color(0xFF1F2933);
+    const primaryBlue = Color(0xFF2563EB);
+    const mainText = Color(0xFF111827);
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        toolbarHeight: 90,
-        backgroundColor: Colors.transparent,
+        toolbarHeight: 80,
+        backgroundColor: appBarColor,
         elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: isDark
-                  ? [Colors.green.shade900, Colors.green.shade700]
-                  : [Colors.green.shade400, Colors.green.shade300],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(25),
-              bottomRight: Radius.circular(25),
-            ),
-          ),
-        ),
         leading: Builder(
           builder: (context) => IconButton(
-            icon: Icon(Icons.menu,
-                color: isDark ? Colors.white : Colors.black87, size: 30),
+            icon: const Icon(Icons.menu, color: Colors.white),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
         title: Text(
           "Pagos",
           style: GoogleFonts.montserrat(
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : Colors.black87,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
           ),
         ),
         centerTitle: true,
@@ -67,31 +57,28 @@ class _VPagosAState extends State<VPagosA> {
           Row(
             children: [
               IconButton(
-                icon: Icon(Icons.arrow_upward,
-                    color: isDark ? Colors.white : Colors.black87),
+                icon: Icon(Icons.arrow_upward, color: Colors.white),
                 onPressed: () => setState(() => ordenDescendente = true),
               ),
               IconButton(
-                icon: Icon(Icons.arrow_downward,
-                    color: isDark ? Colors.white : Colors.black87),
+                icon: Icon(Icons.arrow_downward, color: Colors.white),
                 onPressed: () => setState(() => ordenDescendente = false),
               ),
               IconButton(
-                  icon: Icon(Icons.calendar_today,
-                      color: isDark ? Colors.white : Colors.black87),
-                  onPressed: () async {
-                    final picked = await Component_date.show(
-                        context: context, initialDate: fechaFiltro);
-                    if (picked != null) {
-                      setState(() {
-                        fechaFiltro = picked;
-                      });
-                    }
-                  }),
+                icon: const Icon(Icons.calendar_today, color: Colors.white),
+                onPressed: () async {
+                  final picked =
+                      await Component_date.show(context: context, initialDate: fechaFiltro);
+                  if (picked != null) {
+                    setState(() {
+                      fechaFiltro = picked;
+                    });
+                  }
+                },
+              ),
               if (fechaFiltro != null)
                 IconButton(
-                  icon: Icon(Icons.clear,
-                      color: isDark ? Colors.white : Colors.black87),
+                  icon: const Icon(Icons.clear, color: Colors.white),
                   onPressed: () => setState(() => fechaFiltro = null),
                 ),
             ],
@@ -104,19 +91,18 @@ class _VPagosAState extends State<VPagosA> {
         stream: FirebaseFirestore.instance.collectionGroup('pagos').snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-                child: CircularProgressIndicator(strokeWidth: 2));
+            return const Center(child: CircularProgressIndicator(strokeWidth: 2));
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return Center(
               child: Text(
                 'No se encontraron pagos',
-                style: GoogleFonts.montserrat(
-                    fontSize: 18, color: Colors.redAccent),
+                style: GoogleFonts.montserrat(fontSize: 18, color: Colors.redAccent),
               ),
             );
           }
+
           final pagos = snapshot.data!.docs.map((doc) {
             final data = doc.data() as Map<String, dynamic>;
             DateTime fechaPago;
@@ -143,7 +129,7 @@ class _VPagosAState extends State<VPagosA> {
             };
           }).toList();
 
-
+          // Filtrar por fecha
           if (fechaFiltro != null) {
             pagos.retainWhere((p) =>
                 p['fecha'].year == fechaFiltro!.year &&
@@ -151,34 +137,27 @@ class _VPagosAState extends State<VPagosA> {
                 p['fecha'].day == fechaFiltro!.day);
           }
 
-        
-          pagos.sort((a, b) {
-            if (ordenDescendente) {
-              return b['fecha'].compareTo(a['fecha']);
-            } else {
-              return a['fecha'].compareTo(b['fecha']);
-            }
-          });
+          // Ordenar
+          pagos.sort((a, b) => ordenDescendente
+              ? b['fecha'].compareTo(a['fecha'])
+              : a['fecha'].compareTo(b['fecha']));
 
           if (pagos.isEmpty) {
             return Center(
               child: Text(
                 'No se encontraron pagos',
-                style: GoogleFonts.montserrat(
-                    fontSize: 18, color: Colors.redAccent),
+                style: GoogleFonts.montserrat(fontSize: 18, color: Colors.redAccent),
               ),
             );
           }
 
-     
           double total = pagos.fold(0.0, (sum, p) => sum + p['monto']);
 
           return Column(
             children: [
               Expanded(
                 child: ListView.builder(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   itemCount: pagos.length,
                   itemBuilder: (context, index) {
                     final pago = pagos[index];
@@ -188,27 +167,25 @@ class _VPagosAState extends State<VPagosA> {
                     return Container(
                       margin: const EdgeInsets.only(bottom: 16),
                       decoration: BoxDecoration(
-                        color: isDark ? Colors.grey[850] : Colors.grey[100],
-                        borderRadius: BorderRadius.circular(15),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: isDark
-                                ? Colors.black.withOpacity(0.2)
-                                : Colors.grey.withOpacity(0.2),
-                            blurRadius: 6,
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 8,
                             offset: const Offset(2, 4),
                           ),
                         ],
                       ),
                       child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         title: Text(
                           pago['nombre'],
                           style: GoogleFonts.montserrat(
-                            fontSize: 20,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : Colors.black87,
+                            color: mainText,
                           ),
                         ),
                         subtitle: Padding(
@@ -216,8 +193,8 @@ class _VPagosAState extends State<VPagosA> {
                           child: Text(
                             "${pago['descripcion']}\nMonto: \$${pago['monto'].toStringAsFixed(2)}\nFecha: $fechaFormateada",
                             style: GoogleFonts.montserrat(
-                              fontSize: 16,
-                              color: isDark ? Colors.white60 : Colors.black54,
+                              fontSize: 15,
+                              color: Colors.grey[700],
                             ),
                           ),
                         ),
@@ -229,23 +206,14 @@ class _VPagosAState extends State<VPagosA> {
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: isDark
-                          ? [Colors.green.shade900, Colors.green.shade700]
-                          : [Colors.green.shade400, Colors.green.shade300],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
+                    color: primaryBlue,
+                    borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: isDark
-                            ? Colors.black.withOpacity(0.5)
-                            : Colors.grey.withOpacity(0.4),
-                        blurRadius: 10,
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 8,
                         offset: const Offset(2, 4),
                       ),
                     ],
@@ -254,7 +222,7 @@ class _VPagosAState extends State<VPagosA> {
                     child: Text(
                       "Total pagos: \$${total.toStringAsFixed(2)}",
                       style: GoogleFonts.montserrat(
-                        fontSize: 24,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),

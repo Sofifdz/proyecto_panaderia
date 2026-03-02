@@ -46,104 +46,107 @@ class _ComponentDrawerState extends State<ComponentDrawer> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final String headerText = 'Hola $_username';
+    const backgroundColor = Color(0xFFF4F6F8);
+    const appBarColor = Color(0xFF1F2933);
+    const primaryBlue = Color(0xFF2563EB);
+    const mainText = Color(0xFF111827);
 
-    // Definir gradiente según tipo de usuario
-    Gradient headerGradient;
-    if (widget.typeUser == 'Empleado') {
-      headerGradient = LinearGradient(
-        colors: isDark
-            ? [Colors.purple.shade900, Colors.purple.shade700]
-            : [Colors.purple.shade200, Colors.purple.shade100],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      );
-    } else {
-      // Administrador
-      headerGradient = LinearGradient(
-        colors: isDark
-            ? [Colors.green.shade900, Colors.green.shade700]
-            : [Colors.green.shade400, Colors.green.shade300],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      );
-    }
+    final String headerText = 'Hola $_username';
 
     return Drawer(
       child: Container(
-        color: isDark ? Colors.grey[900] : Colors.grey[50],
+        color: backgroundColor,
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
             SizedBox(
-              height: 180,
-              child: DrawerHeader(
-                decoration: BoxDecoration(
-                  gradient: headerGradient,
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(25),
-                    bottomRight: Radius.circular(25),
-                  ),
-                ),
-                child: Align(
-                  alignment: Alignment.bottomLeft,
-                  child: Center(
-                    child: Text(
-                      headerText,
-                      style: GoogleFonts.montserrat(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.black87,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black26,
-                            blurRadius: 4,
-                            offset: Offset(1, 2),
-                          ),
-                        ],
-                      ),
+                height: 190,
+                child: DrawerHeader(
+                  margin: EdgeInsets.zero,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: const BoxDecoration(
+                    color: appBarColor,
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(28),
+                      bottomRight: Radius.circular(28),
                     ),
                   ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: primaryBlue.withOpacity(0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.person,
+                          size: 34,
+                          color: primaryBlue,
+                        ),
+                      ),
+                      Text(
+                        headerText,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.montserrat(
+                          fontSize: 19,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Text(
+                        widget.typeUser,
+                        style: GoogleFonts.roboto(
+                          fontSize: 12,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+
+            const SizedBox(height: 20),
+
             Column(
               children: [
                 for (int i = 0; i < widget.items.length; i++)
                   Container(
                     margin:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.grey[850] : Colors.white,
-                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: isDark
-                              ? Colors.black.withOpacity(0.2)
-                              : Colors.grey.withOpacity(0.2),
-                          blurRadius: 4,
-                          offset: const Offset(2, 2),
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
                     child: ListTile(
-                      leading: Icon(
-                        widget.iconos[i],
-                        size: 22,
-                        color: isDark
-                            ? Colors.white70
-                            : (widget.typeUser == 'Empleado'
-                                ? Colors.purple
-                                : Colors.green[700]),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 6),
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: primaryBlue.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          widget.iconos[i],
+                          size: 22,
+                          color: primaryBlue,
+                        ),
                       ),
                       title: Text(
                         widget.items[i],
                         style: GoogleFonts.roboto(
-                          fontSize: 18,
-                          color: isDark ? Colors.white : Colors.black87,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w500,
+                          color: mainText,
                         ),
                       ),
                       onTap: widget.onTaps[i],
@@ -151,6 +154,8 @@ class _ComponentDrawerState extends State<ComponentDrawer> {
                   ),
               ],
             ),
+
+            const SizedBox(height: 20),
           ],
         ),
       ),

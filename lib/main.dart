@@ -35,7 +35,7 @@ class _MyAppState extends State<MyApp> {
     final role = await SessionManager.obtenerRole();
     final userId = await SessionManager.obtenerUserId();
     final username = await SessionManager.obtenerUsername();
-  //si se reinicia la app pero no se ha cerrado sesion ingresa a la sesion activa
+  
     setState(() {
       if (role == 'Administrador' && userId != null && username != null) {
         _pantallaInicial = VVentasUsuarios(usuarioId: userId, username: username);

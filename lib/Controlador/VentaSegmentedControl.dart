@@ -14,7 +14,6 @@ class VentaSegmentedControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-   
     const colorBorder = Color.fromARGB(255, 60, 120, 80);
     const colorSelected = Color.fromARGB(255, 60, 120, 80); 
     const colorUnselected = Colors.white;
@@ -32,7 +31,7 @@ class VentaSegmentedControl extends StatelessWidget {
         'pan': _buildChild('Pan', 'pan'),
         'almacen': _buildChild('Almacén', 'almacen'),
         'mixto': _buildChild('Mixto', 'mixto'),
-       
+        'pagos': _buildChild('Pagos', 'pagos'), 
       },
     );
   }
@@ -43,13 +42,11 @@ class VentaSegmentedControl extends StatelessWidget {
       child: Text(
         label,
         style: GoogleFonts.montserrat(
-          fontSize: 12,
+          fontSize: 10,
           fontWeight: FontWeight.w600,
           color: value == selectedValue ? Colors.white : Colors.black87,
         ),
       ),
     );
   }
-
-
 }

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:board_datetime_picker/board_datetime_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:proyecto_panaderia/Controlador/PedidoController.dart';
 
 class VAgregarPedidoE extends StatefulWidget {
   final String usuarioId;
   final String username;
+
   const VAgregarPedidoE({
     super.key,
     required this.usuarioId,
@@ -18,83 +20,215 @@ class VAgregarPedidoE extends StatefulWidget {
 
 class _VAgregarPedidoEState extends State<VAgregarPedidoE> {
   final PedidoController _pedidoController = PedidoController();
+
   final clienteController = TextEditingController();
+  final telefonoController = TextEditingController();
   final descripcionController = TextEditingController();
   final precioController = TextEditingController();
-  final fechaController = BoardDateTimeTextController();
+  final anticipoController = TextEditingController();
+
   DateTime date = DateTime.now();
+  double totalRestante = 0;
+
   final formKey = GlobalKey<FormState>();
+
+  void calcularRestante() {
+    final precio = double.tryParse(precioController.text) ?? 0;
+    final abono = double.tryParse(anticipoController.text) ?? 0;
+
+    setState(() {
+      totalRestante = precio - abono;
+      if (totalRestante < 0) totalRestante = 0;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    const backgroundColor = Color(0xFFF4F6F8);
+    const appBarColor = Color(0xFF1F2933);
+    const primaryBlue = Color(0xFF2563EB);
+    const mainText = Color(0xFF111827);
 
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        toolbarHeight: 90,
-        backgroundColor: Colors.transparent,
+        toolbarHeight: 80,
+        backgroundColor: appBarColor,
         elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: isDark
-                  ? [Colors.purple.shade900, Colors.purple.shade700]
-                  : [Colors.purple.shade200, Colors.purple.shade100],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(25),
-              bottomRight: Radius.circular(25),
-            ),
-          ),
-        ),
+        centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_rounded,
-              color: isDark ? Colors.white : Colors.black87, size: 30),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Agregar Pedido',
+          "Agregar Pedido",
           style: GoogleFonts.montserrat(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white : Colors.black87),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.save,
-                size: 30, color: isDark ? Colors.greenAccent : Colors.green),
-            onPressed: () {
-              _pedidoController.guardarPedido(
-                context: context,
-                cliente: clienteController.text,
-                descripcion: descripcionController.text,
-                precio: precioController.text,
-                fecha: date,
-              );
-            },
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
           ),
-        ],
+        ),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+        padding: const EdgeInsets.all(20),
         child: SingleChildScrollView(
-          child: Form(
-            key: formKey,
-            child: Column(
-              children: [
-                _buildTextField(clienteController, "Cliente", "Cliente es requerido"),
-                const SizedBox(height: 20),
-                _buildTextField(descripcionController, "Descripción", "Descripción es requerida",
-                    isDescription: true),
-                const SizedBox(height: 20),
-                _buildTextField(precioController, "Precio", "Precio es requerido",
-                    isNumber: true),
-                const SizedBox(height: 25),
-                _buildDatePicker(context),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                )
               ],
+            ),
+            child: Form(
+              key: formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildTextField(
+                    controller: clienteController,
+                    label: "Cliente",
+                    errorText: "Cliente es requerido",
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  _buildTextField(
+                    controller: telefonoController,
+                    label: "Teléfono",
+                    errorText: "Teléfono requerido",
+                    maxLines: 1,
+                    keyboardType: TextInputType.number,
+                    textInputAction: TextInputAction.done,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  _buildTextField(
+                    controller: descripcionController,
+                    label: "Descripción",
+                    errorText: "Descripción es requerida",
+                    maxLines: 5,
+                    keyboardType: TextInputType.multiline,
+                    textInputAction: TextInputAction.newline,
+                  ),
+
+                  const SizedBox(height: 20),
+
+             
+                  _buildTextField(
+                    controller: precioController,
+                    label: "Precio Total",
+                    errorText: "Precio es requerido",
+                    keyboardType: TextInputType.number,
+                    onChanged: (_) => calcularRestante(),
+                    textInputAction: TextInputAction.done,
+                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+                  ),
+
+                  const SizedBox(height: 20),
+
+    
+                  _buildTextField(
+                    controller: anticipoController,
+                    label: "Anticipo (Abono)",
+                    errorText: "Anticipo requerido",
+                    keyboardType: TextInputType.number,
+                    onChanged: (_) => calcularRestante(),
+                    textInputAction: TextInputAction.done,
+                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: backgroundColor,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Total restante:",
+                          style: GoogleFonts.montserrat(
+                            fontWeight: FontWeight.w600,
+                            color: mainText,
+                          ),
+                        ),
+                        Text(
+                          "\$${totalRestante.toStringAsFixed(2)}",
+                          style: GoogleFonts.montserrat(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: primaryBlue,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 25),
+
+                 
+                  _buildDatePicker(primaryBlue, mainText),
+
+                  const SizedBox(height: 30),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 55,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryBlue,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        if (!formKey.currentState!.validate()) return;
+
+                        final precio = double.tryParse(precioController.text) ?? 0;
+                        final abono = double.tryParse(anticipoController.text) ?? 0;
+
+                        if (abono > precio) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  "El anticipo no puede ser mayor al total"),
+                            ),
+                          );
+                          return;
+                        }
+
+                        _pedidoController.guardarPedido(
+                          context: context,
+                          cliente: clienteController.text,
+                          telefono: telefonoController.text,
+                          descripcion: descripcionController.text,
+                          precio: precioController.text,
+                          abono: abono,
+                          fecha: date,
+                        );
+                      },
+                      child: Text(
+                        "Guardar Pedido",
+                        style: GoogleFonts.montserrat(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -102,78 +236,78 @@ class _VAgregarPedidoEState extends State<VAgregarPedidoE> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, String errorText,
-      {bool isDescription = false, bool isNumber = false}) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String errorText,
+    int maxLines = 1,
+    TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
+    Function(String)? onChanged,
+    TextInputAction? textInputAction,
+  }) {
+    const primaryBlue = Color(0xFF2563EB);
+    const mainText = Color(0xFF111827);
+
     return TextFormField(
       controller: controller,
-      keyboardType: isNumber
-          ? TextInputType.number
-          : isDescription
-              ? TextInputType.multiline
-              : TextInputType.text,
-      textInputAction: isDescription ? TextInputAction.newline : TextInputAction.done,
-      maxLines: isDescription ? null : 1,
-      style: GoogleFonts.montserrat(color: isDark ? Colors.white : Colors.black87),
+      maxLines: maxLines,
+      keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
+      textInputAction: textInputAction ?? TextInputAction.done,
+      onChanged: onChanged,
+      style: GoogleFonts.roboto(color: mainText),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: GoogleFonts.montserrat(color: isDark ? Colors.white70 : Colors.black54),
+        labelStyle: GoogleFonts.roboto(color: mainText),
         filled: true,
-        fillColor: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        fillColor: const Color(0xFFF4F6F8),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.purple, width: 2),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(
+            color: primaryBlue,
+            width: 1.5,
+          ),
         ),
       ),
       validator: (value) => (value == null || value.isEmpty) ? errorText : null,
     );
   }
 
-  Widget _buildDatePicker(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  Widget _buildDatePicker(Color primaryBlue, Color mainText) {
     return Container(
-      height: 65,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
-        border: Border.all(color: Colors.purple, width: 1.5),
+        color: const Color(0xFFF4F6F8),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
           Text(
-            'Fecha de entrega: ',
-            style: GoogleFonts.montserrat(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white70 : Colors.black87,
+            "Fecha de entrega:",
+            style: GoogleFonts.roboto(
+              fontWeight: FontWeight.w500,
+              color: mainText,
             ),
           ),
+          const Spacer(),
           TextButton(
             onPressed: () async {
-              final isDark = Theme.of(context).brightness == Brightness.dark;
-
               DateTime? selectedDate = await showDatePicker(
                 context: context,
                 initialDate: date,
                 firstDate: DateTime(2000),
                 lastDate: DateTime(2101),
-                builder: (context, child) {
-                  return Theme(
-                    data: isDark ? ThemeData.dark() : ThemeData.light(),
-                    child: child!,
-                  );
-                },
               );
 
-              if (selectedDate != null && selectedDate != date) {
+              if (selectedDate != null) {
                 TimeOfDay? selectedTime = await showTimePicker(
                   context: context,
                   initialTime: TimeOfDay(hour: date.hour, minute: date.minute),
-                  builder: (context, child) {
-                    return Theme(data: isDark ? ThemeData.dark() : ThemeData.light(), child: child!);
-                  },
                 );
 
                 if (selectedTime != null) {
@@ -185,16 +319,15 @@ class _VAgregarPedidoEState extends State<VAgregarPedidoE> {
                       selectedTime.hour,
                       selectedTime.minute,
                     );
-                    fechaController.setDate(date);
                   });
                 }
               }
             },
             child: Text(
-              BoardDateFormat('dd/MM/yyyy HH:mm').format(date),
-              style: GoogleFonts.montserrat(
-                fontSize: 18,
-                color: isDark ? Colors.white : Colors.black87,
+              DateFormat('dd/MM/yyyy HH:mm').format(date),
+              style: GoogleFonts.roboto(
+                fontWeight: FontWeight.w600,
+                color: primaryBlue,
               ),
             ),
           ),

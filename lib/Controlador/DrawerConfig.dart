@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:proyecto_panaderia/Controlador/CajaController.dart';
 import 'package:proyecto_panaderia/Controlador/LoginController.dart';
 import 'package:proyecto_panaderia/Vista/Administrador/VPagosA.dart';
-
 import 'package:proyecto_panaderia/Vista/Administrador/VPedidosA.dart';
 import 'package:proyecto_panaderia/Vista/Administrador/VPersonal.dart';
 import 'package:proyecto_panaderia/Vista/Administrador/VVentasUsuarios.dart';
@@ -15,7 +14,7 @@ import 'package:proyecto_panaderia/Vista/Empleado/VPedidosE.dart';
 import 'package:proyecto_panaderia/Vista/Empleado/VVentaTemp.dart';
 import 'package:proyecto_panaderia/Vista/Empleado/VVentas.dart';
 import 'package:proyecto_panaderia/Vista/Empleado/VVentasporTurno.dart';
-import 'package:proyecto_panaderia/Vista/VLogin.dart';
+
 
 class DrawerConfig {
   static ComponentDrawer administradorDrawer(

@@ -42,46 +42,27 @@ class _VEditarPersonalState extends State<VEditarPersonal> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    const backgroundColor = Color(0xFFF4F6F8);
+    const appBarColor = Color(0xFF1F2933);
+    const primaryBlue = Color(0xFF2563EB);
+    const mainText = Color(0xFF111827);
 
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        toolbarHeight: 90,
-        backgroundColor: Colors.transparent,
+        toolbarHeight: 80,
+        backgroundColor: appBarColor,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_rounded,
-            color: isDark ? Colors.white : Colors.black87,
-            size: 30,
-          ),
+          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Editar Personal',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : Colors.black87,
-          ),
+          style: GoogleFonts.montserrat(
+              fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white),
         ),
         centerTitle: true,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: isDark
-                  ? [Colors.green.shade900, Colors.green.shade700]
-                  : [Colors.green.shade400, Colors.green.shade300],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(25),
-              bottomRight: Radius.circular(25),
-            ),
-          ),
-        ),
         actions: [
           EditarPersonalController.Editar(
             context,
@@ -94,155 +75,135 @@ class _VEditarPersonalState extends State<VEditarPersonal> {
           ),
         ],
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF2C2C2E) : Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: isDark
-                      ? Colors.black.withOpacity(0.3)
-                      : Colors.grey.withOpacity(0.3),
-                  blurRadius: 10,
-                  offset: const Offset(2, 4),
-                ),
-              ],
-            ),
-            child: Form(
-              key: formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Email (disabled)
-                  TextFormField(
-                    controller: emailController,
-                    enabled: false,
-                    decoration: InputDecoration(
-                      labelText: "Email",
-                      labelStyle: TextStyle(
-                        color: isDark ? Colors.white70 : Colors.grey[700],
-                        fontWeight: FontWeight.w500,
-                      ),
-                      filled: true,
-                      fillColor: isDark ? Colors.white12 : Colors.grey.shade200,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      prefixIcon: const Icon(Icons.person),
-                    ),
-                    style: TextStyle(color: isDark ? Colors.white : Colors.black87),
-                  ),
-                  const SizedBox(height: 25),
-
-                  // Username
-                  TextFormField(
-                    controller: usernameController,
-                    decoration: InputDecoration(
-                      labelText: "Username",
-                      labelStyle: TextStyle(
-                        color: isDark ? Colors.white70 : Colors.grey[700],
-                        fontWeight: FontWeight.w500,
-                      ),
-                      filled: true,
-                      fillColor: isDark ? Colors.white12 : Colors.grey.shade200,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      prefixIcon: const Icon(Icons.person),
-                    ),
-                    style: TextStyle(color: isDark ? Colors.white : Colors.black87),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Usuario es requerido";
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 25),
-
-                  // Password
-                  TextFormField(
-                    controller: passwordController,
-                    obscureText: !isVisible,
-                    decoration: InputDecoration(
-                      labelText: "Password",
-                      labelStyle: TextStyle(
-                        color: isDark ? Colors.white70 : Colors.grey[700],
-                        fontWeight: FontWeight.w500,
-                      ),
-                      filled: true,
-                      fillColor: isDark ? Colors.white12 : Colors.grey.shade200,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      prefixIcon: const Icon(Icons.lock),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          isVisible ? Icons.visibility : Icons.visibility_off,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            isVisible = !isVisible;
-                          });
-                        },
-                      ),
-                    ),
-                    style: TextStyle(color: isDark ? Colors.white : Colors.black87),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Password es requerido";
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 25),
-
-                  Container(
-                    width: double.infinity,
-                    height: 60,
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.white12 : Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: DropdownButton<String>(
-                      isExpanded: true,
-                      value: _selectedValue,
-                      underline: const SizedBox(),
-                      items: [
-                        DropdownMenuItem(
-                          value: "Empleado",
-                          child: Center(
-                              child: Text("Empleado",
-                                  style: GoogleFonts.roboto(
-                                      fontSize: 18,
-                                      color: isDark ? Colors.white : Colors.black87))),
-                        ),
-                        DropdownMenuItem(
-                          value: "Administrador",
-                          child: Center(
-                              child: Text("Administrador",
-                                  style: GoogleFonts.roboto(
-                                      fontSize: 18,
-                                      color: isDark ? Colors.white : Colors.black87))),
-                        ),
-                      ],
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _selectedValue = newValue;
-                        });
-                      },
-                    ),
-                  ),
-                ],
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(2, 4),
               ),
+            ],
+          ),
+          child: Form(
+            key: formKey,
+            child: Column(
+              children: [
+              
+                TextFormField(
+                  controller: emailController,
+                  enabled: false,
+                  decoration: InputDecoration(
+                    labelText: "Email",
+                    labelStyle: GoogleFonts.roboto(color: mainText),
+                    filled: true,
+                    fillColor: Colors.grey.shade100,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    prefixIcon: const Icon(Icons.person, color: Color(0xFF2563EB)),
+                  ),
+                  style: GoogleFonts.roboto(color: mainText),
+                ),
+                const SizedBox(height: 20),
+
+               
+                TextFormField(
+                  controller: usernameController,
+                  decoration: InputDecoration(
+                    labelText: "Username",
+                    labelStyle: GoogleFonts.roboto(color: mainText),
+                    filled: true,
+                    fillColor: Colors.grey.shade100,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    prefixIcon: const Icon(Icons.person, color: Color(0xFF2563EB)),
+                  ),
+                  style: GoogleFonts.roboto(color: mainText),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Usuario es requerido";
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+
+               
+                TextFormField(
+                  controller: passwordController,
+                  obscureText: !isVisible,
+                  decoration: InputDecoration(
+                    labelText: "Password",
+                    labelStyle: GoogleFonts.roboto(color: mainText),
+                    filled: true,
+                    fillColor: Colors.grey.shade100,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    prefixIcon: const Icon(Icons.lock, color: Color(0xFF2563EB)),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        isVisible ? Icons.visibility : Icons.visibility_off,
+                        color: primaryBlue,
+                      ),
+                      onPressed: () => setState(() => isVisible = !isVisible),
+                    ),
+                  ),
+                  style: GoogleFonts.roboto(color: mainText),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return "Password es requerido";
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+
+              
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    value: _selectedValue,
+                    underline: const SizedBox(),
+                    items: [
+                      DropdownMenuItem(
+                        value: "Empleado",
+                        child: Center(
+                            child: Text("Empleado",
+                                style: GoogleFonts.roboto(
+                                    fontSize: 16, color: mainText))),
+                      ),
+                      DropdownMenuItem(
+                        value: "Administrador",
+                        child: Center(
+                            child: Text("Administrador",
+                                style: GoogleFonts.roboto(
+                                    fontSize: 16, color: mainText))),
+                      ),
+                    ],
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedValue = newValue;
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(height: 30),
+              ],
             ),
           ),
         ),

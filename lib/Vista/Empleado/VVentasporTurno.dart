@@ -35,10 +35,12 @@ class _VVentasporTurnoState extends State<VVentasporTurno> {
 
   Future<void> _cargarCajaActual() async {
     try {
-      final data = await CajaController().obtenerCajaActual(widget.usuarioId);
+      final data =
+          await CajaController().obtenerCajaActual(widget.usuarioId);
+
       if (!mounted) return;
+
       if (data.isEmpty) {
-       
         setState(() {
           _cajaData = null;
           _cajaId = null;
@@ -54,7 +56,6 @@ class _VVentasporTurnoState extends State<VVentasporTurno> {
       });
     } catch (e) {
       if (!mounted) return;
-      print("Error al cargar caja actual: $e");
       setState(() {
         _cajaData = null;
         _cajaId = null;
@@ -66,92 +67,28 @@ class _VVentasporTurnoState extends State<VVentasporTurno> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
+    const backgroundColor = Color(0xFFF4F6F8);
+    const appBarColor = Color(0xFF1F2933);
+    const primaryBlue = Color(0xFF2563EB);
+    const mainText = Color(0xFF111827);
 
     if (_cargando) {
       return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: isDark
-                    ? [Colors.purple.shade900, Colors.purple.shade700]
-                    : [Colors.purple.shade200, Colors.purple.shade100],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(25),
-                bottomRight: Radius.circular(25),
-              ),
-            ),
-          ),
-          leading: Builder(
-            builder: (context) => IconButton(
-              icon: const Icon(Icons.menu, color: Colors.white, size: 30),
-              onPressed: () => Scaffold.of(context).openDrawer(),
-            ),
-          ),
-          title: Text(
-            "Ventas",
-            style: GoogleFonts.montserrat(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          centerTitle: true,
-        ),
-        body: const Center(child: CircularProgressIndicator()),
+        backgroundColor: backgroundColor,
+        appBar: _appBar(appBarColor),
         drawer: DrawerConfig.empleadoDrawer(
           context,
           widget.usuarioId,
           widget.username,
         ),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
-
     if (_cajaId == null) {
       return Scaffold(
-        appBar: AppBar(
-          toolbarHeight: 90,
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: isDark
-                    ? [Colors.purple.shade900, Colors.purple.shade700]
-                    : [Colors.purple.shade200, Colors.purple.shade100],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(25),
-                bottomRight: Radius.circular(25),
-              ),
-            ),
-          ),
-          leading: Builder(
-            builder: (context) => IconButton(
-              icon: const Icon(Icons.menu, color: Colors.white, size: 30),
-              onPressed: () => Scaffold.of(context).openDrawer(),
-            ),
-          ),
-          title: Text(
-            "Ventas",
-            style: GoogleFonts.montserrat(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          centerTitle: true,
-        ),
+        backgroundColor: backgroundColor,
+        appBar: _appBar(appBarColor),
         drawer: DrawerConfig.empleadoDrawer(
           context,
           widget.usuarioId,
@@ -160,69 +97,61 @@ class _VVentasporTurnoState extends State<VVentasporTurno> {
         body: Center(
           child: Text(
             _error
-                ? "Ocurrió un error al cargar la caja. Intenta de nuevo."
-                : "No hay caja activa o no se encontró la caja para este usuario.",
-            style: GoogleFonts.roboto(fontSize: 18, color: Colors.red),
-            textAlign: TextAlign.center,
+                ? "Ocurrió un error al cargar la caja."
+                : "No hay caja activa.",
+            style: GoogleFonts.roboto(
+              fontSize: 18,
+              color: Colors.red,
+            ),
           ),
         ),
       );
     }
 
-
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF121212) : Colors.white,
-      appBar: AppBar(
-        toolbarHeight: 90,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: isDark
-                  ? [Colors.purple.shade900, Colors.purple.shade700]
-                  : [Colors.purple.shade200, Colors.purple.shade100],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(25),
-              bottomRight: Radius.circular(25),
-            ),
-          ),
+      backgroundColor: backgroundColor,
+      drawer: DrawerConfig.empleadoDrawer(
+        context,
+        widget.usuarioId,
+        widget.username,
+      ),
+      appBar: _appBar(appBarColor),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: _buildContenido(
+          primaryBlue,
+          mainText,
+          backgroundColor,
         ),
-        leading: Builder(
+      ),
+    );
+  }
+
+  AppBar _appBar(Color appBarColor) {
+    return AppBar(
+      toolbarHeight: 80,
+      backgroundColor: appBarColor,
+      elevation: 0,
+      centerTitle: true,
+      leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu, color: Colors.white, size: 30),
+            icon: const Icon(Icons.menu, color: Colors.white),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
-        title: Text(
-          "Ventas",
-          style: GoogleFonts.montserrat(
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+      title: Text(
+        "Ventas - ${widget.username}",
+        style: GoogleFonts.montserrat(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
         ),
-        centerTitle: true,
+      ),
+      
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12.0),
             child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.purple.shade300, Colors.purple.shade400],
-                ),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.purple.withOpacity(0.4),
-                    offset: const Offset(2, 4),
-                    blurRadius: 6,
-                  ),
-                ],
-              ),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Text(
                 'Caja: \$${(_cajaData?['inicioCaja'] ?? 0).toStringAsFixed(2)}',
@@ -235,17 +164,11 @@ class _VVentasporTurnoState extends State<VVentasporTurno> {
             ),
           ),
         ],
-      ),
-      drawer: DrawerConfig.empleadoDrawer(
-        context,
-        widget.usuarioId,
-        widget.username,
-      ),
-      body: _buildCuerpo(context, isDark),
     );
   }
 
-  Widget _buildCuerpo(BuildContext context, bool isDark) {
+  Widget _buildContenido(
+      Color primaryBlue, Color mainText, Color backgroundColor) {
     final IDcaja = _cajaId!;
 
     return StreamBuilder<QuerySnapshot>(
@@ -256,20 +179,10 @@ class _VVentasporTurnoState extends State<VVentasporTurno> {
           .orderBy('fecha')
           .snapshots(),
       builder: (context, ventasSnapshot) {
-        if (ventasSnapshot.connectionState == ConnectionState.waiting) {
+        if (!ventasSnapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (!ventasSnapshot.hasData) {
-          return Center(
-            child: Text(
-              "No hay ventas registradas en este turno.",
-              style: GoogleFonts.roboto(fontSize: 20, color: Colors.red),
-            ),
-          );
-        }
-
-       
         final ventasList = ventasSnapshot.data!.docs
             .map((doc) => Ventas.fromFirestore(doc))
             .toList();
@@ -286,23 +199,19 @@ class _VVentasporTurnoState extends State<VVentasporTurno> {
               .collection('pagos')
               .snapshots(),
           builder: (context, pagosSnapshot) {
-            if (pagosSnapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
             double totalPagos = 0;
-            if (pagosSnapshot.hasData && pagosSnapshot.data!.docs.isNotEmpty) {
+
+            if (pagosSnapshot.hasData) {
               for (var doc in pagosSnapshot.data!.docs) {
                 final data = doc.data() as Map<String, dynamic>;
-           
-                final pagoMonto = (data['monto'] ?? 0);
-                if (pagoMonto is int) {
-                  totalPagos += pagoMonto.toDouble();
-                } else if (pagoMonto is double) {
-                  totalPagos += pagoMonto;
+                final monto = data['monto'] ?? 0;
+
+                if (monto is int) {
+                  totalPagos += monto.toDouble();
+                } else if (monto is double) {
+                  totalPagos += monto;
                 } else {
-     
-                  totalPagos += double.tryParse(pagoMonto.toString()) ?? 0;
+                  totalPagos += double.tryParse(monto.toString()) ?? 0;
                 }
               }
             }
@@ -311,147 +220,119 @@ class _VVentasporTurnoState extends State<VVentasporTurno> {
 
             return Column(
               children: [
+                
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: ventasList.length,
-                    itemBuilder: (context, index) {
-                      final venta = ventasList[index];
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                        )
+                      ],
+                    ),
+                    child: ListView.builder(
+                      itemCount: ventasList.length,
+                      itemBuilder: (context, index) {
+                        final venta = ventasList[index];
 
-                    
-                      DateTime fechaParseada;
-                      try {
-                        fechaParseada = DateTime.parse(venta.fecha);
-                      } catch (_) {
-                      
-                        if (venta.fecha is Timestamp) {
-                          fechaParseada = (venta.fecha as Timestamp).toDate();
-                        } else {
-                          fechaParseada = DateTime.now();
+                        DateTime fecha;
+                        try {
+                          fecha = DateTime.parse(venta.fecha);
+                        } catch (_) {
+                          fecha = DateTime.now();
                         }
-                      }
 
-                      String ff =
-                          DateFormat('dd/MM/yyyy\nhh:mm a').format(fechaParseada);
+                        String fechaFormateada =
+                            DateFormat('dd/MM/yyyy  hh:mm a')
+                                .format(fecha);
 
-                      if (venta.desdePedido == true) {
-                        return Card(
-                          margin: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-                          color: isDark ? const Color(0xFF2C2C2E) : Colors.purple.shade50,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => VTicket(venta: venta),
-                                ),
-                              );
-                            },
-                            child: SizedBox(
-                              height: 100,
-                              child: Center(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      'Pedido ${venta.cliente}',
-                                      style: GoogleFonts.roboto(
-                                        fontSize: 23,
-                                        color: isDark ? Colors.white : Colors.black,
-                                      ),
-                                    ),
-                                    Text(
-                                      '\$${venta.total.toStringAsFixed(2)}',
-                                      style: GoogleFonts.roboto(
-                                        fontSize: 23,
-                                        color: isDark ? Colors.white : Colors.black,
-                                      ),
-                                    ),
-                                    Text(
-                                      ff,
-                                      style: GoogleFonts.roboto(
-                                        fontSize: 15,
-                                        color: isDark ? Colors.white : Colors.black,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      }
-
-                      return Card(
-                        margin: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-                        color: isDark ? const Color(0xFF2C2C2E) : Colors.purple.shade50,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: InkWell(
+                        return GestureDetector(
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => VTicket(venta: venta),
+                                builder: (_) =>
+                                    VTicket(venta: venta),
                               ),
                             );
                           },
-                          child: SizedBox(
-                            height: 100,
-                            child: Center(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    '#${venta.IDventa.toString()}',
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(vertical: 6),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: backgroundColor,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  flex: 2,
+                                  child: Text(
+                                    venta.desdePedido == true
+                                        ? "Pedido ${venta.cliente}"
+                                        : "#${venta.IDventa}",
                                     style: GoogleFonts.roboto(
-                                      fontSize: 23,
-                                      color: isDark ? Colors.white : Colors.black,
+                                      fontWeight: FontWeight.w500,
+                                      color: mainText,
                                     ),
                                   ),
-                                  Text(
-                                    '\$${venta.total.toStringAsFixed(2)}',
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    "\$${venta.total.toStringAsFixed(2)}",
                                     style: GoogleFonts.roboto(
-                                      fontSize: 23,
-                                      color: isDark ? Colors.white : Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                      color: primaryBlue,
                                     ),
                                   ),
-                                  Text(
-                                    ff,
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Text(
+                                    fechaFormateada,
+                                    textAlign: TextAlign.end,
                                     style: GoogleFonts.roboto(
-                                      fontSize: 15,
-                                      color: isDark ? Colors.white : Colors.black,
+                                      color: mainText,
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 ),
-                Divider(
-                  thickness: 2,
-                  color: isDark ? Colors.white : Colors.black54,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+
+                const SizedBox(height: 20),
+
+              
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                      )
+                    ],
+                  ),
                   child: Column(
                     children: [
-                      _filaResumen('Ventas:', totalVentas, context, isDark),
-                      _filaResumen('Pagos:', totalPagos, context, isDark),
-                      Divider(
-                        thickness: 1,
-                        color: isDark ? Colors.white : Colors.black,
-                      ),
-                      _filaResumen('Total:', totalNeto, context, isDark, esTotal: true),
+                      _filaResumen("Ventas:", totalVentas, mainText),
+                      const SizedBox(height: 6),
+                      _filaResumen("Gastos:", totalPagos, Colors.red),
+                      const Divider(),
+                      _filaResumen("Total Neto:", totalNeto,
+                          primaryBlue,
+                          esTotal: true),
                     ],
                   ),
                 ),
@@ -463,31 +344,29 @@ class _VVentasporTurnoState extends State<VVentasporTurno> {
     );
   }
 
-  Widget _filaResumen(String texto, double monto, BuildContext context, bool isDark,
+  Widget _filaResumen(String texto, double monto, Color color,
       {bool esTotal = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            texto,
-            style: GoogleFonts.roboto(
-              fontSize: esTotal ? 25 : 20,
-              fontWeight: esTotal ? FontWeight.bold : FontWeight.normal,
-              color: isDark ? Colors.white : Colors.black,
-            ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          texto,
+          style: GoogleFonts.montserrat(
+            fontSize: esTotal ? 20 : 16,
+            fontWeight:
+                esTotal ? FontWeight.bold : FontWeight.w500,
+            color: color,
           ),
-          Text(
-            "\$${monto.toStringAsFixed(2)}",
-            style: GoogleFonts.roboto(
-              fontSize: esTotal ? 25 : 20,
-              fontWeight: esTotal ? FontWeight.bold : FontWeight.normal,
-              color: isDark ? Colors.white : Colors.black,
-            ),
+        ),
+        Text(
+          "\$${monto.toStringAsFixed(2)}",
+          style: GoogleFonts.montserrat(
+            fontSize: esTotal ? 22 : 16,
+            fontWeight: FontWeight.bold,
+            color: color,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

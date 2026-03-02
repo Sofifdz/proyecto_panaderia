@@ -21,51 +21,35 @@ class VVentasUsuarios extends StatefulWidget {
 class _VVentasUsuariosState extends State<VVentasUsuarios> {
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    const backgroundColor = Color(0xFFF4F6F8);
+    const appBarColor = Color(0xFF1F2933);
+    const primaryBlue = Color(0xFF2563EB);
+    const mainText = Color(0xFF111827);
 
     return Scaffold(
+      backgroundColor: backgroundColor,
+      drawer: DrawerConfig.administradorDrawer(
+          context, widget.usuarioId, widget.username),
       appBar: AppBar(
-        toolbarHeight: 90, // más alto que el default
-        backgroundColor: Colors.transparent,
+        toolbarHeight: 80,
+        backgroundColor: appBarColor,
         elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: isDark
-                  ? [Colors.green.shade900, Colors.green.shade700]
-                  : [Colors.green.shade400, Colors.green.shade300],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(25),
-              bottomRight: Radius.circular(25),
-            ),
-          ),
-        ),
         leading: Builder(
           builder: (context) => IconButton(
-            icon: Icon(
-              Icons.menu,
-              color: isDark ? Colors.white : Colors.black87,
-              size: 30,
-            ),
+            icon: const Icon(Icons.menu, color: Colors.white),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
         title: Text(
           "Ventas por Usuario",
           style: GoogleFonts.montserrat(
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : Colors.black87,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
           ),
         ),
         centerTitle: true,
       ),
-      drawer: DrawerConfig.administradorDrawer(
-          context, widget.usuarioId, widget.username),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('users')
@@ -92,93 +76,89 @@ class _VVentasUsuariosState extends State<VVentasUsuarios> {
 
           final empleados = snapshot.data!.docs;
 
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            itemCount: empleados.length,
-            itemBuilder: (context, index) {
-              final empleado = empleados[index];
-              final empleadoId = empleado.id;
-              final username = empleado['username'];
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: empleados.map((empleado) {
+                final empleadoId = empleado.id;
+                final username = empleado['username'];
 
-              return FutureBuilder<QuerySnapshot>(
-                future: FirebaseFirestore.instance
-                    .collection('cajas')
-                    .where('usuarioId', isEqualTo: empleadoId)
-                    .orderBy('fechaApertura', descending: true)
-                    .limit(1)
-                    .get(),
-                builder: (context, snapshotCorte) {
-                  String total = "Cargando...";
+                return FutureBuilder<QuerySnapshot>(
+                  future: FirebaseFirestore.instance
+                      .collection('cajas')
+                      .where('usuarioId', isEqualTo: empleadoId)
+                      .orderBy('fechaApertura', descending: true)
+                      .limit(1)
+                      .get(),
+                  builder: (context, snapshotCorte) {
+                    String total = "Cargando...";
 
-                  if (snapshotCorte.connectionState == ConnectionState.done &&
-                      snapshotCorte.hasData &&
-                      snapshotCorte.data!.docs.isNotEmpty) {
-                    final corte = snapshotCorte.data!.docs.first.data()
-                        as Map<String, dynamic>;
-                    total = '\$${(corte['cierreCaja'] ?? 0).toStringAsFixed(2)}';
-                  } else if (snapshotCorte.connectionState ==
-                      ConnectionState.done) {
-                    total = "Sin cortes";
-                  }
+                    if (snapshotCorte.connectionState == ConnectionState.done &&
+                        snapshotCorte.hasData &&
+                        snapshotCorte.data!.docs.isNotEmpty) {
+                      final corte = snapshotCorte.data!.docs.first.data()
+                          as Map<String, dynamic>;
+                      total =
+                          '\$${(corte['cierreCaja'] ?? 0).toStringAsFixed(2)}';
+                    } else if (snapshotCorte.connectionState ==
+                        ConnectionState.done) {
+                      total = "Sin cortes";
+                    }
 
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.grey[850] : Colors.grey[100],
-                      borderRadius: BorderRadius.circular(15),
-                      boxShadow: [
-                        BoxShadow(
-                          color: isDark
-                              ? Colors.black.withOpacity(0.2)
-                              : Colors.grey.withOpacity(0.2),
-                          blurRadius: 6,
-                          offset: const Offset(2, 4),
-                        ),
-                      ],
-                    ),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                      title: Text(
-                        "Ventas de $username",
-                        style: GoogleFonts.montserrat(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : Colors.black87,
-                        ),
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      subtitle: Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Text(
-                          "Total del último corte: $total",
+                      child: ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(
+                          "Ventas de $username",
                           style: GoogleFonts.montserrat(
-                            fontSize: 16,
-                            color: isDark ? Colors.white60 : Colors.black54,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: mainText,
                           ),
                         ),
-                      ),
-                      trailing: IconButton(
-                        icon: Icon(
-                          Icons.arrow_forward_ios,
-                          color: isDark ? Colors.white54 : Colors.grey[700],
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => VCortesUsuarios(
-                                userId: empleadoId,
-                                nombreUsuario: username,
-                              ),
+                        subtitle: Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            "Total del último corte: $total",
+                            style: GoogleFonts.roboto(
+                              fontSize: 16,
+                              color: mainText.withOpacity(0.7),
                             ),
-                          );
-                        },
+                          ),
+                        ),
+                        trailing: IconButton(
+                          icon: Icon(Icons.arrow_forward_ios, color: primaryBlue),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => VCortesUsuarios(
+                                  userId: empleadoId,
+                                  nombreUsuario: username,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                  );
-                },
-              );
-            },
+                    );
+                  },
+                );
+              }).toList(),
+            ),
           );
         },
       ),

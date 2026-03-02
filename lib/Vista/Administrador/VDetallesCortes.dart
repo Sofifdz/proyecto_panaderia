@@ -25,13 +25,8 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
     for (var prod in productos) {
       if (prod is Map<String, dynamic>) {
         final nombre = (prod['nombre'] ?? '').toString().toLowerCase().trim();
-
-    
-        if (nombre.contains('pan')) {
-          tienePan = true;
-        } else {
-          tieneAlmacen = true;
-        }
+        if (nombre.contains('pan')) tienePan = true;
+        else tieneAlmacen = true;
       }
     }
 
@@ -42,44 +37,25 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    const backgroundColor = Color(0xFFF4F6F8);
+    const appBarColor = Color(0xFF1F2933);
+    const primaryBlue = Color(0xFF2563EB);
+    const mainText = Color(0xFF111827);
     final format = DateFormat('dd/MM/yyyy hh:mm a');
 
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        toolbarHeight: 90,
-        backgroundColor: Colors.transparent,
+        toolbarHeight: 80,
+        backgroundColor: appBarColor,
         elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: isDark
-                  ? [Colors.green.shade900, Colors.green.shade700]
-                  : [Colors.green.shade400, Colors.green.shade300],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(25),
-              bottomRight: Radius.circular(25),
-            ),
-          ),
-        ),
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: isDark ? Colors.white : Colors.black87,
-            size: 30,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
+        leading: const BackButton(color: Colors.white),
         title: Text(
           'Ventas del corte',
           style: GoogleFonts.montserrat(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : Colors.black87,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
           ),
         ),
         centerTitle: true,
@@ -104,21 +80,19 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
 
           return Column(
             children: [
+             
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: isDark ? Colors.grey[850] : Colors.green.shade100,
-                    borderRadius: BorderRadius.circular(15),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: isDark
-                            ? Colors.black.withOpacity(0.2)
-                            : Colors.grey.withOpacity(0.2),
-                        blurRadius: 6,
-                        offset: const Offset(2, 4),
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
@@ -127,31 +101,29 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
                     children: [
                       Text("Caja: \$${inicio}",
                           style: GoogleFonts.montserrat(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: isDark ? Colors.white : Colors.black87,
-                          )),
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: mainText)),
                       Text("Corte: \$${cierre}",
                           style: GoogleFonts.montserrat(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: isDark ? Colors.white : Colors.black87,
-                          )),
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: mainText)),
                     ],
                   ),
                 ),
               ),
+             
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: VentaSegmentedControl(
                   selectedValue: tipoVentaFiltro,
                   onValueChanged: (value) {
-                    setState(() {
-                      tipoVentaFiltro = value;
-                    });
+                    setState(() => tipoVentaFiltro = value);
                   },
                 ),
               ),
+             
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance
@@ -161,8 +133,7 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
                       .snapshots(),
                   builder: (context, snapshotVentas) {
                     if (snapshotVentas.hasError) {
-                      return Center(
-                          child: Text('Error: ${snapshotVentas.error}'));
+                      return Center(child: Text('Error: ${snapshotVentas.error}'));
                     }
 
                     if (!snapshotVentas.hasData) {
@@ -172,21 +143,15 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
                     final todasVentas = snapshotVentas.data!.docs;
 
                     final ventasFiltradas = todasVentas.where((doc) {
+                      if (tipoVentaFiltro == 'pagos') return false; 
                       final data = doc.data() as Map<String, dynamic>;
-
                       final esPedido = data['desdePedido'] == true;
-                      if (esPedido) {
-                        return tipoVentaFiltro == 'todas' ||
-                            tipoVentaFiltro == 'pan';
-                      }
-
+                      if (esPedido) return tipoVentaFiltro == 'todas' || tipoVentaFiltro == 'pan';
                       final tipo = determinarTipoVenta(data['productos'] ?? []);
-                      return tipoVentaFiltro == 'todas' ||
-                          tipo == tipoVentaFiltro;
+                      return tipoVentaFiltro == 'todas' || tipo == tipoVentaFiltro;
                     }).toList();
 
-                    double totalVentas =
-                        ventasFiltradas.fold(0.0, (suma, venta) {
+                    double totalVentas = ventasFiltradas.fold(0.0, (suma, venta) {
                       final data = venta.data() as Map<String, dynamic>;
                       final monto = (data['total'] ?? 0).toDouble();
                       return suma + monto;
@@ -200,13 +165,11 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
                           .snapshots(),
                       builder: (context, snapshotPagos) {
                         if (snapshotPagos.hasError) {
-                          return Center(
-                              child: Text('Error: ${snapshotPagos.error}'));
+                          return Center(child: Text('Error: ${snapshotPagos.error}'));
                         }
 
                         if (!snapshotPagos.hasData) {
-                          return const Center(
-                              child: CircularProgressIndicator());
+                          return const Center(child: CircularProgressIndicator());
                         }
 
                         final pagos = snapshotPagos.data!.docs;
@@ -216,27 +179,41 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
                           return suma + monto;
                         });
 
-                        final List<Map<String, dynamic>> items = [
-                          if (tipoVentaFiltro == 'todas')
-                            ...pagos.map((doc) {
+                      
+                        final List<Map<String, dynamic>> items;
+                        if (tipoVentaFiltro == 'pagos') {
+                          items = pagos.map((doc) {
+                            final data = doc.data() as Map<String, dynamic>;
+                            return {
+                              'tipo': 'pago',
+                              'monto': (data['monto'] ?? 0).toDouble(),
+                              'fecha': (data['fecha'] as Timestamp).toDate(),
+                              'data': data
+                            };
+                          }).toList();
+                        } else {
+                          items = [
+                            if (tipoVentaFiltro == 'todas')
+                              ...pagos.map((doc) {
+                                final data = doc.data() as Map<String, dynamic>;
+                                return {
+                                  'tipo': 'pago',
+                                  'monto': (data['monto'] ?? 0).toDouble(),
+                                  'fecha': (data['fecha'] as Timestamp).toDate(),
+                                  'data': data
+                                };
+                              }),
+                            ...ventasFiltradas.map((doc) {
                               final data = doc.data() as Map<String, dynamic>;
                               return {
-                                'tipo': 'pago',
-                                'monto': (data['monto'] ?? 0).toDouble(),
+                                'tipo': 'venta',
+                                'monto': (data['total'] ?? 0).toDouble(),
                                 'fecha': (data['fecha'] as Timestamp).toDate(),
                                 'data': data
                               };
                             }),
-                          ...ventasFiltradas.map((doc) {
-                            final data = doc.data() as Map<String, dynamic>;
-                            return {
-                              'tipo': 'venta',
-                              'monto': (data['total'] ?? 0).toDouble(),
-                              'fecha': (data['fecha'] as Timestamp).toDate(),
-                              'data': data
-                            };
-                          }),
-                        ];
+                          ];
+                        }
 
                         items.sort((a, b) => a['fecha'].compareTo(b['fecha']));
 
@@ -245,6 +222,7 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
                             Expanded(
                               child: ListView.builder(
                                 itemCount: items.length,
+                                padding: const EdgeInsets.symmetric(vertical: 8),
                                 itemBuilder: (context, index) {
                                   final item = items[index];
                                   final tipo = item['tipo'];
@@ -257,84 +235,63 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
                                         horizontal: 16, vertical: 6),
                                     child: Container(
                                       height: 90,
+                                      padding: const EdgeInsets.symmetric(horizontal: 12),
                                       decoration: BoxDecoration(
-                                        color: tipo == 'pago'
-                                            ? (isDark
-                                                ? Colors.blueGrey.shade800
-                                                : Colors.blue.shade50)
-                                            : (isDark
-                                                ? Colors.grey[850]
-                                                : Colors.green.shade50),
-                                        borderRadius: BorderRadius.circular(15),
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(12),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: isDark
-                                                ? Colors.black.withOpacity(0.2)
-                                                : Colors.grey.withOpacity(0.2),
-                                            blurRadius: 6,
-                                            offset: const Offset(2, 4),
+                                            color: Colors.black.withOpacity(0.05),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 4),
                                           ),
                                         ],
                                       ),
                                       child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
                                           Flexible(
                                             child: Text(
                                               tipo == 'pago'
                                                   ? 'Pago de\n${data['nombre'] ?? '---'}'
-                                                  : data['desdePedido'] ==
-                                                              true &&
-                                                          data['cliente'] !=
-                                                              null
+                                                  : data['desdePedido'] == true &&
+                                                          data['cliente'] != null
                                                       ? '${data['cliente']}'
                                                       : '#${index + 1}',
                                               style: GoogleFonts.montserrat(
                                                 fontSize: 15,
-                                                color: isDark
-                                                    ? Colors.white70
-                                                    : Colors.black87,
+                                                color: mainText,
                                               ),
                                               maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
-                                              softWrap: true,
                                             ),
                                           ),
                                           Text(
                                             '\$${monto.toStringAsFixed(2)}',
                                             style: GoogleFonts.montserrat(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w600,
-                                              color: isDark
-                                                  ? Colors.white70
-                                                  : Colors.black87,
-                                            ),
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                                color: mainText),
                                           ),
                                           Text(
-                                            DateFormat('dd/MM/yyyy hh:mm a')
-                                                .format(fecha),
+                                            format.format(fecha),
                                             style: GoogleFonts.montserrat(
                                               fontSize: 13,
-                                              color: isDark
-                                                  ? Colors.white60
-                                                  : Colors.black54,
+                                              color: mainText.withOpacity(0.7),
                                             ),
                                           ),
                                           if (tipo == 'venta')
                                             IconButton(
                                               icon: const Icon(Icons.info),
-                                              color: Colors.green[800],
+                                              color: primaryBlue,
                                               onPressed: () {
                                                 final ventaObj =
-                                                    Ventas.fromFirestoreData(
-                                                        data);
+                                                    Ventas.fromFirestoreData(data);
                                                 Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
                                                     builder: (context) =>
-                                                        VTicketA(
-                                                            venta: ventaObj),
+                                                        VTicketA(venta: ventaObj),
                                                   ),
                                                 );
                                               },
@@ -348,8 +305,13 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
                             ),
                             const Divider(thickness: 1),
                             _resumenCaja("Pagos", totalPagos),
-                            _resumenCaja("Total ventas", totalVentas),
-                            _resumenCaja("Total", totalVentas - totalPagos,
+                            if (tipoVentaFiltro != 'pagos')
+                              _resumenCaja("Total ventas", totalVentas),
+                            _resumenCaja(
+                                "Total",
+                                tipoVentaFiltro == 'pagos'
+                                    ? totalPagos
+                                    : totalVentas - totalPagos,
                                 isBold: true),
                           ],
                         );
@@ -366,6 +328,7 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
   }
 
   Widget _resumenCaja(String label, double value, {bool isBold = false}) {
+    const mainText = Color(0xFF111827);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -373,14 +336,14 @@ class _VDetallesCortesState extends State<VDetallesCortes> {
         children: [
           Text(label,
               style: GoogleFonts.montserrat(
-                fontSize: isBold ? 20 : 18,
-                fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
-              )),
+                  fontSize: isBold ? 20 : 18,
+                  fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+                  color: mainText)),
           Text('\$${value.toStringAsFixed(2)}',
               style: GoogleFonts.montserrat(
-                fontSize: isBold ? 20 : 18,
-                fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
-              )),
+                  fontSize: isBold ? 20 : 18,
+                  fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+                  color: mainText)),
         ],
       ),
     );

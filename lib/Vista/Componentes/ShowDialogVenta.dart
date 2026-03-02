@@ -11,6 +11,10 @@ class DialogPago {
     final TextEditingController pagoController = TextEditingController();
     double cambio = 0;
 
+    const primaryBlue = Color(0xFF2563EB);
+    const mainText = Color(0xFF111827);
+    const backgroundColor = Color(0xFFF4F6F8);
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -30,183 +34,159 @@ class DialogPago {
             }
 
             return Dialog(
-              backgroundColor: Colors.transparent,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Container(
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
                   color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.25),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Cabecera con gradiente
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(20),
-                          topRight: Radius.circular(20),
-                        ),
-                        gradient: LinearGradient(
-                          colors: [Colors.purple.shade300, Colors.purple.shade200],
-                        ),
-                      ),
-                      child: Text(
-                        "Confirmar pago",
-                        style: GoogleFonts.montserrat(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                    Text(
+                      "CONFIRMAR PAGO",
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.montserrat(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                        color: mainText,
                       ),
                     ),
-                    const SizedBox(height: 15),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+
+                    const SizedBox(height: 24),
+
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      decoration: BoxDecoration(
+                        color: backgroundColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       child: Column(
                         children: [
-                          TextField(
-                            controller: pagoController,
-                            keyboardType:
-                                const TextInputType.numberWithOptions(decimal: true),
-                            decoration: InputDecoration(
-                              labelText: "Cantidad recibida",
-                              labelStyle: GoogleFonts.montserrat(color: Colors.black54),
-                              prefixIcon: const Icon(Icons.attach_money_outlined),
-                              filled: true,
-                              fillColor: Colors.grey[100],
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide.none,
-                              ),
+                          Text(
+                            "TOTAL A PAGAR",
+                            style: GoogleFonts.montserrat(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[600],
                             ),
-                            style: GoogleFonts.montserrat(fontSize: 16),
-                            onChanged: calcularCambio,
                           ),
-                          const SizedBox(height: 15),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Total a pagar:",
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                              Text(
-                                "\$${total.toStringAsFixed(2)}",
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          if (cambio > 0)
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "Cambio:",
-                                  style: GoogleFonts.montserrat(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.green.shade700,
-                                  ),
-                                ),
-                                Text(
-                                  "\$${cambio.toStringAsFixed(2)}",
-                                  style: GoogleFonts.montserrat(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.green.shade700,
-                                  ),
-                                ),
-                              ],
+                          const SizedBox(height: 6),
+                          Text(
+                            "\$${total.toStringAsFixed(2)}",
+                            style: GoogleFonts.montserrat(
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                              color: mainText,
                             ),
-                          const SizedBox(height: 25),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextButton(
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: Colors.black54,
-                                    padding: const EdgeInsets.symmetric(vertical: 14),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  onPressed: () => Navigator.of(context).pop(),
-                                  child: Text(
-                                    "Cancelar",
-                                    style: GoogleFonts.montserrat(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Container(
-                                  height: 45,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(12),
-                                    gradient: LinearGradient(
-                                      colors: [Colors.purple.shade300, Colors.purple.shade200],
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.2),
-                                        blurRadius: 6,
-                                        offset: const Offset(0, 3),
-                                      )
-                                    ],
-                                  ),
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.transparent,
-                                      shadowColor: Colors.transparent,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                    ),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                      onVentaConfirmada();
-                                    },
-                                    child: Text(
-                                      "Confirmar",
-                                      style: GoogleFonts.montserrat(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 15),
+
+                    const SizedBox(height: 24),
+                    TextField(
+                      controller: pagoController,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      onChanged: calcularCambio,
+                      style: GoogleFonts.roboto(color: mainText),
+                      decoration: InputDecoration(
+                        hintText: "Cantidad recibida",
+                        prefixIcon:
+                            const Icon(Icons.attach_money, color: primaryBlue),
+                        filled: true,
+                        fillColor: backgroundColor,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    if (cambio > 0)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 14, horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "CAMBIO",
+                              style: GoogleFonts.montserrat(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.green[700],
+                              ),
+                            ),
+                            Text(
+                              "\$${cambio.toStringAsFixed(2)}",
+                              style: GoogleFonts.montserrat(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                                color: Colors.green[700],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    const SizedBox(height: 28),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextButton(
+                            onPressed: () =>
+                                Navigator.of(context).pop(),
+                            child: Text(
+                              "CANCELAR",
+                              style: GoogleFonts.montserrat(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: SizedBox(
+                            height: 50,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primaryBlue,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(12),
+                                ),
+                              ),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                onVentaConfirmada();
+                              },
+                              child: Text(
+                                "CONFIRMAR",
+                                style: GoogleFonts.montserrat(
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),

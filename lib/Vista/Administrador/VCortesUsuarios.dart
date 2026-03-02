@@ -33,69 +33,49 @@ class _VCortesUsuariosState extends State<VCortesUsuarios> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    const backgroundColor = Color(0xFFF4F6F8);
+    const appBarColor = Color(0xFF1F2933);
+    const primaryBlue = Color(0xFF2563EB);
+    const mainText = Color(0xFF111827);
 
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        toolbarHeight: 90,
-        backgroundColor: Colors.transparent,
+        toolbarHeight: 80,
+        backgroundColor: appBarColor,
         elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: isDark
-                  ? [Colors.green.shade900, Colors.green.shade700]
-                  : [Colors.green.shade400, Colors.green.shade300],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(25),
-              bottomRight: Radius.circular(25),
-            ),
-          ),
-        ),
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: isDark ? Colors.white : Colors.black87,
-            size: 30,
-          ),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Cortes de ${widget.nombreUsuario}',
           style: GoogleFonts.montserrat(
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : Colors.black87,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
           ),
         ),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.calendar_today,
-                color: isDark ? Colors.white : Colors.black87),
+            icon: const Icon(Icons.calendar_today, color: Colors.white),
             onPressed: () async {
-              final picked =
-                  await Component_date.show(context: context, initialDate: fechaFiltro);
+              final picked = await Component_date.show(
+                  context: context, initialDate: fechaFiltro);
               if (picked != null) {
                 setState(() {
                   fechaFiltro = picked;
-               
-                  mesSeleccionado = DateFormat('MMMM yyyy', 'es_MX').format(picked);
+                  mesSeleccionado =
+                      DateFormat('MMMM yyyy', 'es_MX').format(picked);
                 });
               }
             },
           ),
           if (fechaFiltro != null)
             IconButton(
-              icon: Icon(Icons.clear,
-                  color: isDark ? Colors.white : Colors.black87),
-              onPressed: () => setState(() {
-                fechaFiltro = null;
-              }),
+              icon: const Icon(Icons.clear, color: Colors.white),
+              onPressed: () => setState(() => fechaFiltro = null),
             ),
         ],
       ),
@@ -111,103 +91,94 @@ class _VCortesUsuariosState extends State<VCortesUsuarios> {
           }
 
           final cajas = snapshot.data!.docs;
-
           if (cajas.isEmpty) {
             return Center(
               child: Text(
                 'No hay cajas para este usuario',
-                style: GoogleFonts.montserrat(fontSize: 20, color: Colors.red),
+                style: GoogleFonts.montserrat(
+                    fontSize: 20, color: Colors.redAccent),
               ),
             );
           }
 
-        
           final Set<String> mesesUnicos = cajas.map((doc) {
             final fecha = (doc['fechaApertura'] as Timestamp).toDate();
             return DateFormat('MMMM yyyy', 'es_MX').format(fecha);
           }).toSet();
 
           listaMeses = mesesUnicos.toList()..sort((a, b) => b.compareTo(a));
-          if (!listaMeses.contains(mesSeleccionado)) {
-            mesSeleccionado = null;
-          }
+          if (!listaMeses.contains(mesSeleccionado)) mesSeleccionado = null;
 
-       
+     
           final cajasFiltradas = cajas.where((doc) {
             final fecha = (doc['fechaApertura'] as Timestamp).toDate();
-
             if (fechaFiltro != null) {
               return fecha.year == fechaFiltro!.year &&
-                     fecha.month == fechaFiltro!.month &&
-                     fecha.day == fechaFiltro!.day;
+                  fecha.month == fechaFiltro!.month &&
+                  fecha.day == fechaFiltro!.day;
             }
-
             if (mesSeleccionado != null) {
-              final mesActual = DateFormat('MMMM yyyy', 'es_MX').format(fecha);
+              final mesActual =
+                  DateFormat('MMMM yyyy', 'es_MX').format(fecha);
               return mesActual == mesSeleccionado;
             }
-
             return true;
           }).toList();
 
           return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              
+          
               Container(
                 width: double.infinity,
-                margin: const EdgeInsets.all(16),
+                margin:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.grey[850] : Colors.grey[100],
-                  borderRadius: BorderRadius.circular(15),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: isDark
-                          ? Colors.black.withOpacity(0.3)
-                          : Colors.grey.withOpacity(0.3),
-                      blurRadius: 6,
-                      offset: const Offset(2, 4),
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     isExpanded: true,
-                    dropdownColor: isDark ? Colors.grey[850] : Colors.green[50],
-                    iconEnabledColor: isDark ? Colors.white : Colors.black87,
+                    dropdownColor: Colors.white,
+                    iconEnabledColor: primaryBlue,
                     value: mesSeleccionado,
                     hint: Text(
                       "Selecciona un mes",
                       style: GoogleFonts.montserrat(
-                        color: isDark ? Colors.white70 : Colors.black87,
-                        fontWeight: FontWeight.bold,
-                      ),
+                          color: mainText, fontWeight: FontWeight.w600),
                     ),
                     items: listaMeses.map((mes) {
-                      return DropdownMenuItem<String>(
+                      return DropdownMenuItem(
                         value: mes,
                         child: Text(
                           mes,
                           style: GoogleFonts.montserrat(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontWeight: FontWeight.bold,
-                          ),
+                              color: mainText, fontWeight: FontWeight.w600),
                         ),
                       );
                     }).toList(),
                     onChanged: (valor) {
                       setState(() {
                         mesSeleccionado = valor;
-                        fechaFiltro = null; 
+                        fechaFiltro = null;
                       });
                     },
                   ),
                 ),
               ),
+            
               Expanded(
                 child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                   itemCount: cajasFiltradas.length,
                   itemBuilder: (context, index) {
                     final data =
@@ -231,51 +202,40 @@ class _VCortesUsuariosState extends State<VCortesUsuarios> {
                     return Container(
                       margin: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: esCerrada
-                            ? isDark
-                                ? Colors.grey[850]
-                                : Colors.green.shade400
-                            : isDark
-                                ? Colors.orange.shade800
-                                : Colors.orange.shade100,
-                        borderRadius: BorderRadius.circular(15),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: isDark
-                                ? Colors.black.withOpacity(0.2)
-                                : Colors.grey.withOpacity(0.2),
-                            blurRadius: 6,
-                            offset: const Offset(2, 4),
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
                           ),
                         ],
+                        border: Border.all(
+                            color: esCerrada ? primaryBlue : Colors.orange, width: 1),
                       ),
                       child: ListTile(
                         leading: Icon(
                           esCerrada ? Icons.lock : Icons.lock_open,
-                          color: esCerrada
-                              ? Colors.green[900]
-                              : Colors.orange[900],
+                          color: esCerrada ? primaryBlue : Colors.orange,
                         ),
                         title: Text(
                           esCerrada ? "Caja Cerrada" : "Caja Abierta",
                           style: GoogleFonts.montserrat(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                            color: isDark ? Colors.white : Colors.black87,
-                          ),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 18,
+                              color: mainText),
                         ),
                         subtitle: Text(
                           fechaTexto,
-                          style: GoogleFonts.montserrat(
-                            fontSize: 14,
-                            color: isDark ? Colors.white60 : Colors.black87,
-                          ),
+                          style: GoogleFonts.roboto(
+                              fontSize: 14, color: mainText.withOpacity(0.7)),
                         ),
                         trailing: IconButton(
                           icon: Icon(Icons.arrow_forward_ios,
-                              size: 20,
-                              color: isDark ? Colors.white70 : Colors.black54),
+                              size: 20, color: primaryBlue),
                           onPressed: () {
                             Navigator.push(
                               context,

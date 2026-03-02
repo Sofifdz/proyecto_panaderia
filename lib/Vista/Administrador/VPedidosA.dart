@@ -35,49 +35,35 @@ class _VPedidosAState extends State<VPedidosA> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    const backgroundColor = Color(0xFFF4F6F8);
+    const appBarColor = Color(0xFF1F2933);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    const primaryBlue = Color(0xFF2563EB);
 
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        toolbarHeight: 90,
-        backgroundColor: Colors.transparent,
+        toolbarHeight: 80,
+        backgroundColor: appBarColor,
         elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: isDark
-                  ? [Colors.green.shade900, Colors.green.shade700]
-                  : [Colors.green.shade400, Colors.green.shade300],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(25),
-              bottomRight: Radius.circular(25),
-            ),
-          ),
-        ),
+        centerTitle: true,
         leading: Builder(
           builder: (context) => IconButton(
-            icon: Icon(Icons.menu,
-                color: isDark ? Colors.white : Colors.black87, size: 30),
+            icon: const Icon(Icons.menu, color: Colors.white, size: 30),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
         title: Text(
           "Pedidos",
           style: GoogleFonts.montserrat(
-            fontSize: 26,
+            fontSize: 22,
             fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : Colors.black87,
+            color: Colors.white,
           ),
         ),
-        centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.add_circle_outline_outlined,
-                color: isDark ? Colors.white : Colors.black87, size: 30),
+            icon: Icon(Icons.add_circle, color: primaryBlue, size: 28),
             onPressed: () {
               Navigator.push(
                 context,
@@ -145,10 +131,8 @@ class _VPedidosAState extends State<VPedidosA> {
               final bDate = formatter.parse(b.fecha.split(' ')[0]);
               int cmp = bDate.compareTo(aDate);
               if (cmp != 0) return cmp;
-
               if (!a.isLiquidado && b.isLiquidado) return -1;
               if (a.isLiquidado && !b.isLiquidado) return 1;
-
               return 0;
             } catch (e) {
               return 0;
@@ -158,23 +142,22 @@ class _VPedidosAState extends State<VPedidosA> {
           PedidoController pedidoController = PedidoController();
 
           return Padding(
-            padding: const EdgeInsets.all(10.0),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
                     Text(
                       entregados ? "No Liquidado" : "Todos",
                       style: GoogleFonts.montserrat(
-                        fontSize: 22,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.black,
+                        color: Colors.black87,
                       ),
                     ),
                     const Spacer(),
                     Switch(
-                      activeColor: Colors.green,
+                      activeColor: Colors.blue,
                       value: entregados,
                       onChanged: (bool value) {
                         setState(() {
@@ -183,7 +166,7 @@ class _VPedidosAState extends State<VPedidosA> {
                       },
                     ),
                     IconButton(
-                      icon: const Icon(Icons.calendar_month, size: 30),
+                      icon: const Icon(Icons.calendar_today, size: 28),
                       onPressed: () async {
                         final picked = await Component_date.show(
                           context: context,
@@ -198,19 +181,17 @@ class _VPedidosAState extends State<VPedidosA> {
                     ),
                     if (fechaSeleccionada != null)
                       IconButton(
-                        icon: Icon(Icons.clear,
-                            color: isDark ? Colors.white : Colors.black87),
+                        icon: const Icon(Icons.clear),
                         onPressed: () => setState(() => fechaSeleccionada = null),
                       ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
                 Expanded(
                   child: ListView.builder(
                     itemCount: pedidosFiltrados.length,
                     itemBuilder: (context, index) {
                       final pedido = pedidosFiltrados[index];
-
                       return Dismissible(
                         key: Key(pedido.NoPedido),
                         direction: DismissDirection.endToStart,
@@ -224,6 +205,7 @@ class _VPedidosAState extends State<VPedidosA> {
                         background: Container(
                           color: Colors.red,
                           alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.only(right: 16),
                           child: const Icon(Icons.delete, color: Colors.white),
                         ),
                         child: InkWell(
@@ -243,43 +225,11 @@ class _VPedidosAState extends State<VPedidosA> {
                             margin: const EdgeInsets.only(bottom: 16),
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15),
-                              gradient: pedido.isLiquidado
-                                  ? (pedido.isEntregado
-                                      ? LinearGradient(
-                                          colors: [
-                                            Colors.green.shade300,
-                                            Colors.green.shade100
-                                          ],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                        )
-                                      : LinearGradient(
-                                          colors: isDark
-                                              ? [
-                                                  Color(0xFF3A3A3C),
-                                                  Color(0xFF2C2C2E)
-                                                ]
-                                              : [
-                                                  Colors.grey.shade200,
-                                                  Colors.grey.shade100
-                                                ],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                        ))
-                                  : LinearGradient(
-                                      colors: [
-                                        Colors.red.shade300,
-                                        Colors.red.shade100
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: isDark
-                                      ? Colors.black.withOpacity(0.3)
-                                      : Colors.grey.withOpacity(0.3),
+                                  color: Colors.black.withOpacity(0.05),
                                   blurRadius: 8,
                                   offset: const Offset(2, 4),
                                 ),
@@ -294,16 +244,13 @@ class _VPedidosAState extends State<VPedidosA> {
                                     Text(
                                       pedido.cliente,
                                       style: GoogleFonts.montserrat(
-                                        fontSize: 20,
+                                        fontSize: 18,
                                         fontWeight: FontWeight.bold,
-                                        color: isDark
-                                            ? Colors.white
-                                            : Colors.black87,
+                                        color: Colors.black87,
                                       ),
                                     ),
-                                    const SizedBox(height: 5),
-                                    pedidoController.estadoPedidoWidget(
-                                        pedido, context),
+                                    const SizedBox(height: 4),
+                                    pedidoController.estadoPedidoWidget(pedido, context),
                                   ],
                                 ),
                                 Column(
@@ -312,20 +259,16 @@ class _VPedidosAState extends State<VPedidosA> {
                                     Text(
                                       "Fecha de entrega:",
                                       style: GoogleFonts.montserrat(
-                                        fontSize: 16,
-                                        color: isDark
-                                            ? Colors.white60
-                                            : Colors.black54,
+                                        fontSize: 14,
+                                        color: Colors.black54,
                                       ),
                                     ),
                                     Text(
                                       pedido.fecha,
                                       style: GoogleFonts.montserrat(
-                                        fontSize: 18,
+                                        fontSize: 16,
                                         fontWeight: FontWeight.bold,
-                                        color: isDark
-                                            ? Colors.white
-                                            : Colors.black87,
+                                        color: Colors.black87,
                                       ),
                                     ),
                                   ],

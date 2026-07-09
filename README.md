@@ -1,16 +1,20 @@
-# proyecto_panaderia
+Sistema de Punto de Venta para Panadería
 
-A new Flutter project.
+Este proyecto consiste en el desarrollo de una aplicación móvil de punto de venta (POS) para panaderías, diseñada para facilitar la administración de las operaciones diarias del negocio.
 
-## Getting Started
 
-This project is a starting point for a Flutter application.
+Funcionalidades principales
+•Inicio de sesión para usuarios del sistema.
+•Administración de productos.
+•Control de inventario y existencias.
+•Registro y consulta de ventas.
+•Gestión de pedidos.
+•Registro de abonos y liquidación de pedidos.
+•Apertura y cierre de caja.
+•Consulta del historial de ventas y reportes por turno.
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Tecnologías utilizadas
+•Flutter
+•Dart
+•Firebase Authentication
+•Cloud Firestore
